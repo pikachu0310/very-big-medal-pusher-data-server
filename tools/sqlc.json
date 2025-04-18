@@ -1,0 +1,13 @@
+{
+  "version": "2",
+  "sql": [{
+    "schema": "all_tables_schema.sql",
+    "queries": "query.sql",
+    "engine": "mysql",
+    "gen": {
+      "go": {
+        "out": "db"
+      }
+    }
+  }]
+}

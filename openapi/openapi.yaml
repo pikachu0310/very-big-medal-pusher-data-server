@@ -1,0 +1,1035 @@
+openapi: 3.0.3
+info:
+  title: YOUR_SERVICE_NAME (THIS IS EXAMPLE)
+  version: 1.0.0
+  description: YOUR_SERVICE_DESCRIPTION
+  contact:
+    name: YOUR_CONTACT_NAME
+    url: 'https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME'
+servers:
+  - url: 'http://localhost:8080/api'
+    description: ローカル環境
+  - url: 'https://YOUR_PRODUCTION_URL'
+    description: 本番環境
+tags:
+  - name: games
+    description: ゲームAPI
+  - name: terms
+    description: タームAPI
+  - name: events
+    description: イベントAPI
+  - name: auth
+    description: 認証API
+  - name: users
+    description: ユーザーAPI
+paths:
+  /ping:
+    get:
+      summary: サーバーの生存確認
+      operationId: pingServer
+      responses:
+        '200':
+          description: Pong
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: pong
+  /test:
+    get:
+      summary: テスト用
+      operationId: test
+      responses:
+        '200':
+          description: OK
+
+  /games:
+    get:
+      summary: ゲームのリストを取得 GET /games?termId=X&eventSlug=X&userId=X&includeUnpublished=true
+      operationId: getGames
+      tags:
+        - games
+      parameters:
+        - in: query
+          name: termId
+          schema:
+            type: string
+            format: uuid
+          description: タームID
+        - in: query
+          name: eventSlug
+          schema:
+            type: string
+          description: イベントID
+        - in: query
+          name: userId
+          schema:
+            type: string
+          description: ユーザーID
+        - in: query
+          name: includeUnpublished
+          schema:
+            type: boolean
+          description: 未公開のゲームを含むかどうか。includeに指定できる値は'unpublished'のみで、これが無ければ常にpublishedなGameのみ返す
+      responses:
+        '200':
+          description: 成功 - ゲームリスト取得
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Game'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+    post:
+      summary: ゲームを登録
+      operationId: postGame
+      tags:
+        - games
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostGameRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /games/{gameId}:
+    patch:
+      summary: ゲーム情報を変更
+      operationId: patchGame
+      tags:
+        - games
+      parameters:
+        - $ref: '#/components/parameters/gameIdInPath'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchGameRequest'
+      responses:
+        '204':
+          description: No Content - 変更されました
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+    get:
+      summary: ゲーム情報を取得
+      operationId: getGame
+      tags:
+        - games
+      parameters:
+        - $ref: '#/components/parameters/gameIdInPath'
+      responses:
+        '200':
+          description: 成功 - ゲーム情報取得
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+  /games/{gameId}/icon:
+    get:
+      summary: ゲームのアイコン画像を取得
+      operationId: getGameIcon
+      tags:
+        - games
+      parameters:
+        - $ref: '#/components/parameters/gameIdInPath'
+      responses:
+        '200':
+          description: 成功 - ゲームのアイコン画像を取得
+          content:
+            image/png:
+              schema:
+                $ref: '#/components/schemas/ImageResponse'
+        '404':
+          description: Not Found
+  /games/{gameId}/image:
+    get:
+      summary: ゲームの画像を取得
+      operationId: getGameImage
+      tags:
+        - games
+      parameters:
+        - $ref: '#/components/parameters/gameIdInPath'
+      responses:
+        '200':
+          description: 成功 - ゲームの画像を取得
+          content:
+            image/png:
+              schema:
+                $ref: '#/components/schemas/ImageResponse'
+        '404':
+          description: Not Found
+
+  /terms:
+    get:
+      summary: イベントに登録されているタームのリストを取得
+      operationId: getTerms
+      tags:
+        - terms
+      responses:
+        '200':
+          description: 成功 - 全てのタームのリスト取得
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Term'
+        '404':
+          description: Not Found
+    post:
+      summary: タームを登録
+      operationId: postTerm
+      tags:
+        - terms
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostTermRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Term'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+  /terms/{termId}:
+    get:
+      summary: ターム情報を取得
+      operationId: getTerm
+      tags:
+        - terms
+      parameters:
+        - $ref: '#/components/parameters/termIdInPath'
+      responses:
+        '200':
+          description: 成功 - ターム情報取得
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Term'
+        '404':
+          description: Not Found
+    patch:
+      summary: ターム情報を変更
+      operationId: patchTerm
+      tags:
+        - terms
+      parameters:
+        - $ref: '#/components/parameters/termIdInPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchTermRequest'
+      responses:
+        '204':
+          description: No Content - 変更されました
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+  /terms/{termId}/games:
+    get:
+      summary: タームに登録されているゲームのリストを取得
+      operationId: getTermGames
+      tags:
+        - terms
+      parameters:
+        - $ref: '#/components/parameters/termIdInPath'
+      responses:
+        '200':
+          description: 成功 - タームに登録されているゲームのリスト取得
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Game'
+        '404':
+          description: Not Found
+
+  /events:
+    post:
+      summary: イベントを登録
+      operationId: postEvent
+      tags:
+        - events
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostEventRequest'
+      responses:
+        '201':
+          description: 成功 - イベント登録
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+    get:
+      summary: イベントのリストを取得
+      operationId: getEvents
+      tags:
+        - events
+      responses:
+        '200':
+          description: 成功 - イベントリスト取得
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+        '404':
+          description: Not Found
+  /events/now:
+    get:
+      summary: 開催中のイベントを取得
+      operationId: getCurrentEvent
+      tags:
+        - events
+      responses:
+        '200':
+          description: 成功 - 開催中のイベント取得
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '404':
+          description: Not Found
+  /events/{eventSlug}:
+    patch:
+      summary: イベントの情報を変更
+      operationId: patchEvent
+      tags:
+        - events
+      parameters:
+        - $ref: '#/components/parameters/eventSlugInPath'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchEventRequest'
+      responses:
+        '204':
+          description: No Content - 変更されました
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+    get:
+      summary: イベントの情報を取得
+      operationId: getEvent
+      tags:
+        - events
+      parameters:
+        - $ref: '#/components/parameters/eventSlugInPath'
+      responses:
+        '200':
+          description: 成功 - イベント情報取得
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '404':
+          description: Not Found
+  /events/{eventSlug}/image:
+    get:
+      summary: イベントの画像を取得
+      operationId: getEventImage
+      tags:
+        - events
+      parameters:
+        - $ref: '#/components/parameters/eventSlugInPath'
+      responses:
+        '200':
+          description: 成功 - イベント画像取得
+          content:
+            image/png:
+              schema:
+                $ref: '#/components/schemas/ImageResponse'
+        '404':
+          description: Not Found
+  /events/{eventSlug}/terms:
+    get:
+      summary: イベントに登録されているタームのリストを取得
+      operationId: getEventTerms
+      tags:
+        - events
+        - games
+      parameters:
+        - $ref: '#/components/parameters/eventSlugInPath'
+      responses:
+        '200':
+          description: 成功 - イベントに登録されているタームのリスト取得
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Term'
+        '404':
+          description: Not Found
+  /events/{eventSlug}/games:
+    get:
+      summary: イベントに登録されているゲームのリストを取得
+      operationId: getEventGames
+      tags:
+        - events
+        - games
+      parameters:
+        - $ref: '#/components/parameters/eventSlugInPath'
+      responses:
+        '200':
+          description: 成功 - イベントに登録されているゲームのリスト取得
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Game'
+        '404':
+          description: Not Found
+  /events/{eventSlug}/csv:
+    get:
+      summary: イベントとイベントに登録されているゲームの情報をCSV形式で取得
+      operationId: getEventCsv
+      tags:
+        - events
+      parameters:
+        - $ref: '#/components/parameters/eventSlugInPath'
+      responses:
+        '200':
+          description: 成功 - CSV形式で情報取得
+          content:
+            text/csv:
+              schema:
+                $ref: '#/components/schemas/GetEventCSVResponse'
+        '404':
+          description: Not Found
+
+  /auth/login:
+    get:
+      summary: ログイン
+      operationId: login
+      tags:
+        - auth
+      description: Discord OAuthを使ったログイン。ログイン後にリダイレクトするURLをクエリパラメータで指定。
+      parameters:
+        - in: query
+          name: redirect
+          required: true
+          schema:
+            type: string
+          description: リダイレクト先のURL
+      responses:
+        '302':
+          description: Redirect to Discord OAuth URL
+          headers:
+            Location:
+              schema:
+                type: string
+                description: Discord OAuthのログインURL
+            Set-Cookie:
+              schema:
+                type: string
+                description: セッショントークン
+        '400':
+          description: Bad Request
+  /auth/callback:
+    get:
+      summary: OAuth認証コールバック
+      operationId: oauthCallback
+      tags:
+        - auth
+      parameters:
+        - in: query
+          name: code
+          required: true
+          schema:
+            type: string
+          description: Discordからの認証コード
+      responses:
+        '302':
+          description: Redirect to original URL
+          headers:
+            Location:
+              schema:
+                type: string
+                description: もともと開いていたURL
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+  /auth/logout:
+    post:
+      summary: ログアウト
+      operationId: logout
+      tags:
+        - auth
+      responses:
+        '204':
+          description: No Content - ログアウトしました。
+
+  /users/me:
+    get:
+      summary: 自分のユーザー情報を取得
+      operationId: getMe
+      tags:
+        - users
+      responses:
+        '200':
+          description: 成功 - ユーザー情報取得
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Not Found
+  /users/me/games:
+    get:
+      summary: 自分が登録したゲームのリストを取得
+      operationId: getMeGames
+      tags:
+        - users
+      responses:
+        '200':
+          description: 成功 - 登録ゲームリスト取得
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  games:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Game'
+        '404':
+          description: Not Found
+  /users/{userId}:
+    get:
+      summary: ユーザー情報を取得
+      operationId: getUser
+      tags:
+        - users
+      parameters:
+        - $ref: '#/components/parameters/userIdInPath'
+      responses:
+        '200':
+          description: 成功 - ユーザー情報取得
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Not Found
+  /users/{userId}/games:
+    get:
+      summary: ユーザーが登録したゲームのリストを取得
+      operationId: getUserGames
+      tags:
+        - users
+      parameters:
+        - $ref: '#/components/parameters/userIdInPath'
+      responses:
+        '200':
+          description: 成功 - 登録ゲームリスト取得
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  games:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Game'
+        '404':
+          description: Not Found
+
+components:
+  parameters:
+    gameIdInPath:
+      in: path
+      name: gameId
+      required: true
+      schema:
+        type: string
+        format: uuid
+        description: ゲームID
+    termIdInPath:
+      in: path
+      name: termId
+      required: true
+      schema:
+        type: string
+        format: uuid
+        description: タームID
+    eventSlugInPath:
+      in: path
+      name: eventSlug
+      required: true
+      schema:
+        type: string
+        description: イベントSlug
+    userIdInPath:
+      in: path
+      name: userId
+      required: true
+      schema:
+        type: string
+        description: ユーザーID
+
+  schemas:
+    Game:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ゲームID
+          x-oapi-codegen-extra-tags:
+            db: 'id'
+        termId:
+          type: string
+          format: uuid
+          description: タームID
+          x-oapi-codegen-extra-tags:
+            db: 'term_id'
+        discordUserId:
+          type: string
+          description: DiscordのユーザーID
+          x-oapi-codegen-extra-tags:
+            db: 'discord_user_id'
+        isPublished:
+          type: boolean
+          description: 公開されているかどうか
+          x-oapi-codegen-extra-tags:
+            db: 'is_published'
+        title:
+          type: string
+          description: 展示するゲームタイトル
+          x-oapi-codegen-extra-tags:
+            db: 'title'
+        creatorName:
+          type: string
+          description: ゲーム作成者
+          x-oapi-codegen-extra-tags:
+            db: 'creator_name'
+        creatorPageUrl:
+          type: string
+          description: ゲーム作成者のページのURL
+          x-oapi-codegen-extra-tags:
+            db: 'creator_page_url'
+        gamePageUrl:
+          type: string
+          description: ゲームページのURL
+          x-oapi-codegen-extra-tags:
+            db: 'game_page_url'
+        description:
+          type: string
+          description: ゲームの説明
+          x-oapi-codegen-extra-tags:
+            db: 'description'
+        place:
+          type: string
+          description: 展示場所
+          x-oapi-codegen-extra-tags:
+            db: 'place'
+      required:
+        - id
+        - termId
+        - discordUserId
+        - isPublished
+        - title
+        - creatorName
+        - description
+
+    PostGameRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: 展示するゲームタイトル
+          example: 'ゲームタイトル'
+          x-oapi-codegen-extra-tags:
+            form: 'title'
+        creatorName:
+          type: string
+          description: ゲーム作成
+          x-oapi-codegen-extra-tags:
+            form: 'creatorName'
+        creatorPageUrl:
+          type: string
+          description: ゲーム作成者のページのURL
+          x-oapi-codegen-extra-tags:
+            form: 'creatorPageUrl'
+        gamePageUrl:
+          type: string
+          description: ゲームページのURL
+          x-oapi-codegen-extra-tags:
+            form: 'gamePageUrl'
+        description:
+          type: string
+          description: ゲームの説明
+          x-oapi-codegen-extra-tags:
+            form: 'description'
+        icon:
+          type: string
+          format: binary
+          description: ゲームのアイコン画像
+          x-oapi-codegen-extra-tags:
+            form: 'icon'
+        image:
+          type: string
+          format: binary
+          description: ゲームの画像
+          x-oapi-codegen-extra-tags:
+            form: 'image'
+      required:
+        - title
+        - creatorName
+        - description
+        - icon
+
+    PatchGameRequest:
+      type: object
+      properties:
+        termId:
+          type: string
+          format: uuid
+          description: タームID
+          x-oapi-codegen-extra-tags:
+            form: 'termId'
+        discordUserId:
+          type: string
+          description: discordのユーザーID
+          x-oapi-codegen-extra-tags:
+            form: 'discordUserId'
+        title:
+          type: string
+          description: 展示するゲームタイトル
+          example: 'ゲームタイトル'
+          x-oapi-codegen-extra-tags:
+            form: 'title'
+        isPublished:
+          type: boolean
+          description: 公開されているかどうか
+          x-oapi-codegen-extra-tags:
+            form: 'isPublished'
+        creatorName:
+          type: string
+          description: ゲーム作成者
+          x-oapi-codegen-extra-tags:
+            form: 'creatorName'
+        creatorPageUrl:
+          type: string
+          description: ゲーム作成者のページのURL
+          x-oapi-codegen-extra-tags:
+            form: 'creatorPageUrl'
+        gamePageUrl:
+          type: string
+          description: ゲームページのURL
+          x-oapi-codegen-extra-tags:
+            form: 'gamePageUrl'
+        description:
+          type: string
+          description: ゲームの説明
+          x-oapi-codegen-extra-tags:
+            form: 'description'
+        place:
+          type: string
+          description: 展示場所
+          x-oapi-codegen-extra-tags:
+            form: 'place'
+        icon:
+          type: string
+          format: binary
+          description: ゲームのアイコン画像
+          x-oapi-codegen-extra-tags:
+            form: 'icon'
+        image:
+          type: string
+          format: binary
+          description: ゲームの画像
+          x-oapi-codegen-extra-tags:
+            form: 'image'
+
+    Term:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: タームのID
+          x-oapi-codegen-extra-tags:
+            db: 'id'
+        eventSlug:
+          type: string
+          description: イベントのslug
+          x-oapi-codegen-extra-tags:
+            db: 'event_slug'
+        isDefault:
+          type: boolean
+          description: ゲーム登録時に割り当てられるTermならばTrue
+          x-oapi-codegen-extra-tags:
+            db: 'is_default'
+        startAt:
+          type: string
+          format: date-time
+          description: タームが始まる時間
+          x-oapi-codegen-extra-tags:
+            db: 'start_at'
+        endAt:
+          type: string
+          format: date-time
+          description: タームが終わる時間
+          x-oapi-codegen-extra-tags:
+            db: 'end_at'
+      required:
+        - id
+        - eventSlug
+        - isDefault
+        - startAt
+        - endAt
+
+    PostTermRequest:
+      type: object
+      properties:
+        eventSlug:
+          type: string
+          description: イベントのslug
+        startAt:
+          type: string
+          format: date-time
+          description: タームが始まる時間
+        endAt:
+          type: string
+          format: date-time
+          description: タームが終わる時間
+      required:
+        - eventSlug
+        - startAt
+        - endAt
+
+    PatchTermRequest:
+      type: object
+      properties:
+        eventSlug:
+          type: string
+          description: イベントのslug
+        isDefault:
+          type: boolean
+          description: ゲーム登録時に割り当てられるTermならばTrue
+        startAt:
+          type: string
+          format: date-time
+          description: タームが始まる時間
+        endAt:
+          type: string
+          format: date-time
+          description: タームが終わる時間
+
+    Event:
+      type: object
+      properties:
+        slug:
+          type: string
+          description: イベントslug (イベントのID的な立ち位置)
+          x-oapi-codegen-extra-tags:
+            db: 'slug'
+        title:
+          type: string
+          description: 'イベントのタイトル (例: 第18回)'
+          x-oapi-codegen-extra-tags:
+            db: 'title'
+        date:
+          type: string
+          format: date-time
+          description: イベント開催日
+          x-oapi-codegen-extra-tags:
+            db: 'date'
+        gameSubmissionPeriodStart:
+          type: string
+          format: date-time
+          description: ゲーム展示の募集開始期間
+          x-oapi-codegen-extra-tags:
+            db: 'game_submission_period_start'
+        gameSubmissionPeriodEnd:
+          type: string
+          format: date-time
+          description: ゲーム展示の募集終了期間
+          x-oapi-codegen-extra-tags:
+            db: 'game_submission_period_end'
+      required:
+        - slug
+        - title
+        - date
+        - gameSubmissionPeriodStart
+        - gameSubmissionPeriodEnd
+
+    PostEventRequest:
+      type: object
+      properties:
+        slug:
+          type: string
+          description: 'slug (URL内で使用, unique) 18th等'
+          x-oapi-codegen-extra-tags:
+            form: 'slug'
+        title:
+          type: string
+          description: '第18回'
+          x-oapi-codegen-extra-tags:
+            form: 'title'
+        date:
+          type: string
+          format: date-time
+          description: イベント開催日
+          x-oapi-codegen-extra-tags:
+            form: 'date'
+        gameSubmissionPeriodStart:
+          type: string
+          description: ゲーム展示の募集期間
+          format: date-time
+          x-oapi-codegen-extra-tags:
+            form: 'gameSubmissionPeriodStart'
+        gameSubmissionPeriodEnd:
+          type: string
+          description: ゲーム展示の募集期間
+          format: date-time
+          x-oapi-codegen-extra-tags:
+            form: 'gameSubmissionPeriodEnd'
+        image:
+          type: string
+          format: binary
+          description: パンフレット用画像
+          x-oapi-codegen-extra-tags:
+            form: 'image'
+      required:
+        - slug
+        - title
+        - date
+        - gameSubmissionPeriodStart
+        - gameSubmissionPeriodEnd
+
+    PatchEventRequest:
+      type: object
+      properties:
+        slug:
+          type: string
+          description: 'slug (URL内で使用, unique) 18th等'
+          x-oapi-codegen-extra-tags:
+            form: 'slug'
+        title:
+          type: string
+          description: '第18回'
+          x-oapi-codegen-extra-tags:
+            form: 'title'
+        date:
+          type: string
+          format: date-time
+          description: イベント開催日
+          x-oapi-codegen-extra-tags:
+            form: 'date'
+        gameSubmissionPeriodStart:
+          type: string
+          description: ゲーム展示の募集期間
+          format: date-time
+          x-oapi-codegen-extra-tags:
+            form: 'gameSubmissionPeriodStart'
+        gameSubmissionPeriodEnd:
+          type: string
+          description: ゲーム展示の募集期間
+          format: date-time
+          x-oapi-codegen-extra-tags:
+            form: 'gameSubmissionPeriodEnd'
+        image:
+          type: string
+          format: binary
+          description: パンフレット用画像
+          x-oapi-codegen-extra-tags:
+            form: 'image'
+
+    GetEventCSVResponse:
+      type: string
+
+    ImageResponse:
+      type: string
+      format: binary
+
+    User:
+      type: object
+      properties:
+        userId:
+          type: string
+        username:
+          type: string
+        role:
+          type: string
+          enum:
+            - guest
+            - user
+            - admin
+        profileImageUrl:
+          type: string
+
+      required:
+        - userId
+        - username
+        - role
+        - profileImageUrl

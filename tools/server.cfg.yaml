@@ -1,0 +1,8 @@
+package: openapi
+generate:
+  echo-server: true
+  embedded-spec: true
+additional-imports:
+  - package: github.com/pikachu0310/go-backend-template/openapi/models # replace with your own module name
+    alias: .
+output: ../openapi/server.gen.go
