@@ -1,10 +1,10 @@
 package integration
 
 import (
-	"github.com/pikachu0310/go-backend-template/internal/handler"
-	"github.com/pikachu0310/go-backend-template/internal/migration"
-	"github.com/pikachu0310/go-backend-template/internal/pkg/config"
-	"github.com/pikachu0310/go-backend-template/internal/repository"
+	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/handler"
+	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/migration"
+	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/pkg/config"
+	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/repository"
 	"log"
 	"net/http/httptest"
 	"strings"

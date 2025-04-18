@@ -9,7 +9,7 @@
 
 以下の様に、何もしなくても正常に動きます(MariaDBも自動で環境変数を見て繋がります)。
 
-![image](https://github.com/pikachu0310/go-backend-template/assets/17543997/dee159b2-598c-40ed-807a-9b5680f465a8)
+![image](https://github.com/pikachu0310/very-big-medal-pusher-data-server/assets/17543997/dee159b2-598c-40ed-807a-9b5680f465a8)
 
 
 ## このテンプレートについて
@@ -22,7 +22,7 @@
 GitHubの `Use this template` ボタンからレポジトリを作成するか、以下の`gonew`コマンドで作成できます。
 
 ```sh
-go run golang.org/x/tools/cmd/gonew@latest github.com/pikachu0310/go-backend-template {{ project_name }}
+go run golang.org/x/tools/cmd/gonew@latest github.com/pikachu0310/very-big-medal-pusher-data-server {{ project_name }}
 ```
 
 ※ GitHub Templateから作成した場合は別途モジュール名を変更することを推奨します。

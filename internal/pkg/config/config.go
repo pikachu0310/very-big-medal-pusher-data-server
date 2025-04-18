@@ -14,6 +14,10 @@ func getEnv(key, defaultValue string) string {
 	return defaultValue
 }
 
+func GetSecretKey() string {
+	return getEnv("SECRET_KEY", "secret-medal-pusher")
+}
+
 func AppAddr() string {
 	return getEnv("APP_ADDR", ":8080")
 }

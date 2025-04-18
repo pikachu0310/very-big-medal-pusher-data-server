@@ -1,4 +1,4 @@
-module github.com/pikachu0310/go-backend-template // replace with your own module name
+module github.com/pikachu0310/very-big-medal-pusher-data-server // replace with your own module name
 
 go 1.22
 

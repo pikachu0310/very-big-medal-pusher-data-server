@@ -5,12 +5,11 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	oapimiddleware "github.com/oapi-codegen/echo-middleware"
-	"github.com/pikachu0310/go-backend-template/internal/handler"
-	"github.com/pikachu0310/go-backend-template/internal/migration"
-	"github.com/pikachu0310/go-backend-template/internal/pkg/config"
-	"github.com/pikachu0310/go-backend-template/internal/repository"
-	"github.com/pikachu0310/go-backend-template/openapi"
+	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/handler"
+	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/migration"
+	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/pkg/config"
+	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/repository"
+	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi"
 )
 
 func main() {
@@ -27,7 +26,7 @@ func main() {
 	// middlewares
 	e.Use(middleware.Recover())
 	e.Use(middleware.Logger())
-	e.Use(oapimiddleware.OapiRequestValidator(swagger))
+	//e.Use(oapimiddleware.OapiRequestValidator(swagger))
 
 	// connect to database
 	db, err := sqlx.Connect("mysql", config.MySQL().FormatDSN())
@@ -47,6 +46,7 @@ func main() {
 	// setup routes
 	h := handler.New(repo)
 	openapi.RegisterHandlersWithBaseURL(e, h, baseURL)
+	handler.GlobalSecret = config.GetSecretKey()
 
 	e.Logger.Fatal(e.Start(config.AppAddr()))
 }

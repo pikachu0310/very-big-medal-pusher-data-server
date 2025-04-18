@@ -7,43 +7,42 @@ import (
 	"github.com/google/uuid"
 )
 
-type (
-	// users table
-	User struct {
-		ID    uuid.UUID `db:"id"`
-		Name  string    `db:"name"`
-		Email string    `db:"email"`
-	}
-
-	CreateUserParams struct {
-		Name  string
-		Email string
-	}
-)
-
-func (r *Repository) GetUsers(ctx context.Context) ([]*User, error) {
-	users := []*User{}
-	if err := r.db.SelectContext(ctx, &users, "SELECT * FROM users"); err != nil {
-		return nil, fmt.Errorf("select users: %w", err)
-	}
-
-	return users, nil
+type GameData struct {
+	ID           uuid.UUID `db:"id"`
+	UserID       string    `db:"user_id"`
+	Version      string    `db:"version"`
+	InMedal      int       `db:"in_medal"`
+	OutMedal     int       `db:"out_medal"`
+	SlotHit      int       `db:"slot_hit"`
+	GetShirbe    int       `db:"get_shirbe"`
+	StartSlot    int       `db:"start_slot"`
+	ShirbeBuy300 int       `db:"shirbe_buy300"`
+	Medal1       int       `db:"medal_1"`
+	Medal2       int       `db:"medal_2"`
+	Medal3       int       `db:"medal_3"`
+	Medal4       int       `db:"medal_4"`
+	Medal5       int       `db:"medal_5"`
+	RMedal       int       `db:"R_medal"`
+	Second       float32   `db:"second"`
+	Minute       int       `db:"minute"`
+	Hour         int       `db:"hour"`
 }
 
-func (r *Repository) CreateUser(ctx context.Context, params CreateUserParams) (uuid.UUID, error) {
-	userID := uuid.New()
-	if _, err := r.db.ExecContext(ctx, "INSERT INTO users (id, name, email) VALUES (?, ?, ?)", userID, params.Name, params.Email); err != nil {
-		return uuid.Nil, fmt.Errorf("insert user: %w", err)
+func (r *Repository) InsertGameData(ctx context.Context, data GameData) error {
+	_, err := r.db.ExecContext(ctx, `
+	INSERT INTO game_data (
+		id, user_id, version, in_medal, out_medal, slot_hit,
+		get_shirbe, start_slot, shirbe_buy300, medal_1, medal_2,
+		medal_3, medal_4, medal_5, R_medal, second, minute, hour
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`,
+		data.ID, data.UserID, data.Version, data.InMedal, data.OutMedal, data.SlotHit,
+		data.GetShirbe, data.StartSlot, data.ShirbeBuy300, data.Medal1, data.Medal2,
+		data.Medal3, data.Medal4, data.Medal5, data.RMedal, data.Second, data.Minute, data.Hour,
+	)
+
+	if err != nil {
+		return fmt.Errorf("insert game data: %w", err)
 	}
-
-	return userID, nil
-}
-
-func (r *Repository) GetUser(ctx context.Context, userID uuid.UUID) (*User, error) {
-	user := &User{}
-	if err := r.db.GetContext(ctx, user, "SELECT * FROM users WHERE id = ?", userID); err != nil {
-		return nil, fmt.Errorf("select user: %w", err)
-	}
-
-	return user, nil
+	return nil
 }
