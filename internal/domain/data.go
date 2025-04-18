@@ -20,6 +20,8 @@ func GetDataParamsToGameData(params models.GetDataParams) models.GameData {
 		Medal4:       &params.Medal4,
 		Medal5:       &params.Medal5,
 		RMedal:       &params.RMedal,
+		Second:       &params.Second,
+		Minute:       &params.Minute,
 		Hour:         &params.Hour,
 		Fever:        &params.Fever,
 	}
