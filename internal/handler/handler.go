@@ -4,13 +4,13 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/domain"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/repository"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
 )
@@ -27,45 +27,52 @@ func New(repo *repository.Repository) *Handler {
 	}
 }
 
-func (h *Handler) GetData(ctx echo.Context, params models.GetDataParams) error {
-	// ユーザーごとの秘密鍵を生成
-	userSecret := generateUserSecret(params.UserId)
+func (h *Handler) GetPing(ctx echo.Context) error {
+	return ctx.String(http.StatusOK, "pong")
+}
 
-	// クエリパラメータを署名用に整列
+func (h *Handler) GetData(ctx echo.Context, params models.GetDataParams) error {
+	userSecret := generateUserSecret(params.UserId)
 	paramStr := createSortedParamString(params)
 
-	// 署名の検証
 	if !verifySignature(paramStr, params.Sig, userSecret) {
 		return ctx.JSON(http.StatusBadRequest, "invalid signature")
 	}
 
-	// DBにデータを保存
-	data := repository.GameData{
-		ID:           uuid.New(),
-		UserID:       params.UserId,
-		Version:      params.V,
-		InMedal:      params.InMedal,
-		OutMedal:     params.OutMedal,
-		SlotHit:      params.SlotHit,
-		GetShirbe:    params.GetShirbe,
-		StartSlot:    params.StartSlot,
-		ShirbeBuy300: params.ShirbeBuy300,
-		Medal1:       params.Medal1,
-		Medal2:       params.Medal2,
-		Medal3:       params.Medal3,
-		Medal4:       params.Medal4,
-		Medal5:       params.Medal5,
-		RMedal:       params.RMedal,
-		Second:       params.Second,
-		Minute:       params.Minute,
-		Hour:         params.Hour,
-	}
+	data := domain.GetDataParamsToGameData(params)
 
 	if err := h.repo.InsertGameData(ctx.Request().Context(), data); err != nil {
 		return ctx.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	return ctx.JSON(http.StatusOK, "success")
+}
+
+func (h *Handler) GetUsersUserIdData(ctx echo.Context, userId string) error {
+	data, err := h.repo.GetUserGameData(ctx.Request().Context(), userId)
+	if err != nil {
+		return ctx.JSON(http.StatusNotFound, err.Error())
+	}
+	return ctx.JSON(http.StatusOK, data)
+}
+
+func (h *Handler) GetRankings(ctx echo.Context, params models.GetRankingsParams) error {
+	sortBy := "have_medal"
+	if params.Sort != nil {
+		sortBy = string(*params.Sort)
+	}
+
+	limit := 50
+	if params.Limit != nil {
+		limit = *params.Limit
+	}
+
+	rankings, err := h.repo.GetRankings(ctx.Request().Context(), sortBy, limit)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return ctx.JSON(http.StatusOK, rankings)
 }
 
 func generateUserSecret(userID string) []byte {
@@ -76,23 +83,25 @@ func generateUserSecret(userID string) []byte {
 
 func createSortedParamString(params models.GetDataParams) string {
 	paramMap := map[string]string{
-		"v":             params.V,
+		"version":       params.Version,
 		"user_id":       params.UserId,
-		"in_medal":      fmt.Sprintf("%d", params.InMedal),
-		"out_medal":     fmt.Sprintf("%d", params.OutMedal),
-		"slot_hit":      fmt.Sprintf("%d", params.SlotHit),
-		"get_shirbe":    fmt.Sprintf("%d", params.GetShirbe),
-		"start_slot":    fmt.Sprintf("%d", params.StartSlot),
-		"shirbe_buy300": fmt.Sprintf("%d", params.ShirbeBuy300),
-		"medal_1":       fmt.Sprintf("%d", params.Medal1),
-		"medal_2":       fmt.Sprintf("%d", params.Medal2),
-		"medal_3":       fmt.Sprintf("%d", params.Medal3),
-		"medal_4":       fmt.Sprintf("%d", params.Medal4),
-		"medal_5":       fmt.Sprintf("%d", params.Medal5),
-		"R_medal":       fmt.Sprintf("%d", params.RMedal),
-		"second":        fmt.Sprintf("%.2f", params.Second),
-		"minute":        fmt.Sprintf("%d", params.Minute),
-		"hour":          fmt.Sprintf("%d", params.Hour),
+		"have_medal":    strconv.Itoa(params.HaveMedal),
+		"in_medal":      strconv.Itoa(params.InMedal),
+		"out_medal":     strconv.Itoa(params.OutMedal),
+		"slot_hit":      strconv.Itoa(params.SlotHit),
+		"get_shirbe":    strconv.Itoa(params.GetShirbe),
+		"start_slot":    strconv.Itoa(params.StartSlot),
+		"shirbe_buy300": strconv.Itoa(params.ShirbeBuy300),
+		"medal_1":       strconv.Itoa(params.Medal1),
+		"medal_2":       strconv.Itoa(params.Medal2),
+		"medal_3":       strconv.Itoa(params.Medal3),
+		"medal_4":       strconv.Itoa(params.Medal4),
+		"medal_5":       strconv.Itoa(params.Medal5),
+		"R_medal":       strconv.Itoa(params.RMedal),
+		"second":        strconv.Itoa(params.Second),
+		"minute":        strconv.Itoa(params.Minute),
+		"hour":          strconv.Itoa(params.Hour),
+		"fever":         strconv.Itoa(params.Fever),
 	}
 
 	keys := make([]string, 0, len(paramMap))
