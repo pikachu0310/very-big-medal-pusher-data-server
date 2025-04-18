@@ -20,7 +20,7 @@ func main() {
 		e.Logger.Fatal("Error loading swagger spec\n: %s", err)
 	}
 
-	baseURL := "/api"
+	baseURL := ""
 	swagger.Servers = openapi3.Servers{&openapi3.Server{URL: baseURL}}
 
 	// middlewares
