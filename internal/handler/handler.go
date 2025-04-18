@@ -4,6 +4,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
+	"log"
 	"net/http"
 	"sort"
 	"strconv"
@@ -32,7 +33,7 @@ func (h *Handler) GetPing(ctx echo.Context) error {
 }
 
 func (h *Handler) GetData(ctx echo.Context, params models.GetDataParams) error {
-	ctx.Logger().Infof("Received params: %+v", params)
+	log.Printf("Received params: %+v", params)
 
 	userSecret := generateUserSecret(params.UserId)
 	paramStr := createSortedParamString(params)
@@ -42,7 +43,7 @@ func (h *Handler) GetData(ctx echo.Context, params models.GetDataParams) error {
 	}
 
 	data := domain.GetDataParamsToGameData(params)
-	ctx.Logger().Infof("Received data: %+v", data)
+	log.Printf("Received data: %+v", data)
 
 	if err := h.repo.InsertGameData(ctx.Request().Context(), data); err != nil {
 		return ctx.JSON(http.StatusInternalServerError, err.Error())
