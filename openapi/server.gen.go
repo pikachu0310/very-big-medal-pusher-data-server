@@ -24,6 +24,15 @@ type ServerInterface interface {
 	// ゲームデータを送信
 	// (GET /data)
 	GetData(ctx echo.Context, params GetDataParams) error
+	// ヘルスチェック
+	// (GET /ping)
+	GetPing(ctx echo.Context) error
+	// ランキングを取得
+	// (GET /rankings)
+	GetRankings(ctx echo.Context, params GetRankingsParams) error
+	// ユーザーごとのゲームデータを取得
+	// (GET /users/{user_id}/data)
+	GetUsersUserIdData(ctx echo.Context, userId string) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -37,11 +46,11 @@ func (w *ServerInterfaceWrapper) GetData(ctx echo.Context) error {
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetDataParams
-	// ------------- Required query parameter "v" -------------
+	// ------------- Required query parameter "version" -------------
 
-	err = runtime.BindQueryParameter("form", true, true, "v", ctx.QueryParams(), &params.V)
+	err = runtime.BindQueryParameter("form", true, true, "version", ctx.QueryParams(), &params.Version)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter v: %s", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter version: %s", err))
 	}
 
 	// ------------- Required query parameter "user_id" -------------
@@ -49,6 +58,13 @@ func (w *ServerInterfaceWrapper) GetData(ctx echo.Context) error {
 	err = runtime.BindQueryParameter("form", true, true, "user_id", ctx.QueryParams(), &params.UserId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter user_id: %s", err))
+	}
+
+	// ------------- Required query parameter "have_medal" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "have_medal", ctx.QueryParams(), &params.HaveMedal)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter have_medal: %s", err))
 	}
 
 	// ------------- Required query parameter "in_medal" -------------
@@ -156,6 +172,13 @@ func (w *ServerInterfaceWrapper) GetData(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter hour: %s", err))
 	}
 
+	// ------------- Required query parameter "fever" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "fever", ctx.QueryParams(), &params.Fever)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter fever: %s", err))
+	}
+
 	// ------------- Required query parameter "sig" -------------
 
 	err = runtime.BindQueryParameter("form", true, true, "sig", ctx.QueryParams(), &params.Sig)
@@ -165,6 +188,56 @@ func (w *ServerInterfaceWrapper) GetData(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.GetData(ctx, params)
+	return err
+}
+
+// GetPing converts echo context to params.
+func (w *ServerInterfaceWrapper) GetPing(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetPing(ctx)
+	return err
+}
+
+// GetRankings converts echo context to params.
+func (w *ServerInterfaceWrapper) GetRankings(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetRankingsParams
+	// ------------- Optional query parameter "sort" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "sort", ctx.QueryParams(), &params.Sort)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sort: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetRankings(ctx, params)
+	return err
+}
+
+// GetUsersUserIdData converts echo context to params.
+func (w *ServerInterfaceWrapper) GetUsersUserIdData(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "user_id" -------------
+	var userId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "user_id", ctx.Param("user_id"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter user_id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetUsersUserIdData(ctx, userId)
 	return err
 }
 
@@ -197,24 +270,35 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	}
 
 	router.GET(baseURL+"/data", wrapper.GetData)
+	router.GET(baseURL+"/ping", wrapper.GetPing)
+	router.GET(baseURL+"/rankings", wrapper.GetRankings)
+	router.GET(baseURL+"/users/:user_id/data", wrapper.GetUsersUserIdData)
 
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
