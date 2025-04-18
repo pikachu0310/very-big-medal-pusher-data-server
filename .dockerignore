@@ -1,0 +1,6 @@
+*
+!integration/
+!internal/
+!go.mod
+!go.sum
+!main.go
