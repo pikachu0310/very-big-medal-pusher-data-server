@@ -88,7 +88,7 @@ func generateUserSecret(userID string) []byte {
 
 func createSortedParamString(params models.GetDataParams) string {
 	paramMap := map[string]string{
-		"version":         params.Version,
+		"version":         strconv.Itoa(params.Version),
 		"user_id":         params.UserId,
 		"have_medal":      strconv.Itoa(params.HaveMedal),
 		"in_medal":        strconv.Itoa(params.InMedal),

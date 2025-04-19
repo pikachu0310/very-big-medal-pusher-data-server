@@ -35,12 +35,12 @@ type GameData struct {
 	StartSlot     *int       `db:"start_slot" json:"start_slot,omitempty"`
 	TotalPlayTime *int       `db:"total_play_time" json:"total_play_time,omitempty"`
 	UserId        *string    `db:"user_id" json:"user_id,omitempty"`
-	Version       *string    `json:"version,omitempty"`
+	Version       *int       `json:"version,omitempty"`
 }
 
 // GetDataParams defines parameters for GetData.
 type GetDataParams struct {
-	Version       string `form:"version" json:"version"`
+	Version       int    `form:"version" json:"version"`
 	UserId        string `form:"user_id" json:"user_id"`
 	HaveMedal     int    `form:"have_medal" json:"have_medal"`
 	InMedal       int    `form:"in_medal" json:"in_medal"`

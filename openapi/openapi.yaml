@@ -18,7 +18,7 @@ paths:
           in: query
           required: true
           schema:
-            type: string
+            type: integer
         - name: user_id
           in: query
           required: true
@@ -172,7 +172,7 @@ components:
       type: object
       properties:
         version:
-          type: string
+          type: integer
         id:
           type: string
         user_id:
