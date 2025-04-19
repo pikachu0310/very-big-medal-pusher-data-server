@@ -13,7 +13,7 @@ const (
 
 // GameData defines model for GameData.
 type GameData struct {
-	RMedal       *int    `db:"r_medal" json:"R_medal,omitempty"`
+	RMedal       *int    `db:"R_medal" json:"R_medal,omitempty"`
 	Fever        *int    `json:"fever,omitempty"`
 	GetShirbe    *int    `db:"get_shirbe" json:"get_shirbe,omitempty"`
 	HaveMedal    *int    `db:"have_medal" json:"have_medal,omitempty"`
