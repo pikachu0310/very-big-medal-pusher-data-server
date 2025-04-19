@@ -113,7 +113,10 @@ func createSortedParamString(params models.GetDataParams) string {
 	for k := range paramMap {
 		keys = append(keys, k)
 	}
-	sort.Strings(keys)
+
+	sort.Slice(keys, func(i, j int) bool {
+		return strings.ToLower(keys[i]) < strings.ToLower(keys[j])
+	})
 
 	var sb strings.Builder
 	for i, k := range keys {
