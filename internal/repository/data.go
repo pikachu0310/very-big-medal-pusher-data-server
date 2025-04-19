@@ -8,15 +8,14 @@ import (
 
 func (r *Repository) InsertGameData(ctx context.Context, data models.GameData) error {
 	_, err := r.db.ExecContext(ctx, `
-	INSERT INTO game_data (
-		user_id, version, have_medal, in_medal, out_medal, slot_hit,
-		get_shirbe, start_slot, shirbe_buy300, medal_1, medal_2,
-		medal_3, medal_4, medal_5, R_medal, second, minute, hour, fever
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`,
+    INSERT INTO game_data (
+        user_id, version, have_medal, in_medal, out_medal, slot_hit,
+        get_shirbe, start_slot, shirbe_buy300, medal_1, medal_2,
+        medal_3, medal_4, medal_5, R_medal, total_play_time, fever
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		data.UserId, data.Version, data.HaveMedal, data.InMedal, data.OutMedal, data.SlotHit,
 		data.GetShirbe, data.StartSlot, data.ShirbeBuy300, data.Medal1, data.Medal2,
-		data.Medal3, data.Medal4, data.Medal5, data.RMedal, data.Second, data.Minute, data.Hour, data.Fever,
+		data.Medal3, data.Medal4, data.Medal5, data.RMedal, data.TotalPlayTime, data.Fever, // 修正済
 	)
 
 	if err != nil {

@@ -88,25 +88,23 @@ func generateUserSecret(userID string) []byte {
 
 func createSortedParamString(params models.GetDataParams) string {
 	paramMap := map[string]string{
-		"version":       params.Version,
-		"user_id":       params.UserId,
-		"have_medal":    strconv.Itoa(params.HaveMedal),
-		"in_medal":      strconv.Itoa(params.InMedal),
-		"out_medal":     strconv.Itoa(params.OutMedal),
-		"slot_hit":      strconv.Itoa(params.SlotHit),
-		"get_shirbe":    strconv.Itoa(params.GetShirbe),
-		"start_slot":    strconv.Itoa(params.StartSlot),
-		"shirbe_buy300": strconv.Itoa(params.ShirbeBuy300),
-		"medal_1":       strconv.Itoa(params.Medal1),
-		"medal_2":       strconv.Itoa(params.Medal2),
-		"medal_3":       strconv.Itoa(params.Medal3),
-		"medal_4":       strconv.Itoa(params.Medal4),
-		"medal_5":       strconv.Itoa(params.Medal5),
-		"R_medal":       strconv.Itoa(params.RMedal),
-		"second":        strconv.Itoa(params.Second),
-		"minute":        strconv.Itoa(params.Minute),
-		"hour":          strconv.Itoa(params.Hour),
-		"fever":         strconv.Itoa(params.Fever),
+		"version":         params.Version,
+		"user_id":         params.UserId,
+		"have_medal":      strconv.Itoa(params.HaveMedal),
+		"in_medal":        strconv.Itoa(params.InMedal),
+		"out_medal":       strconv.Itoa(params.OutMedal),
+		"slot_hit":        strconv.Itoa(params.SlotHit),
+		"get_shirbe":      strconv.Itoa(params.GetShirbe),
+		"start_slot":      strconv.Itoa(params.StartSlot),
+		"shirbe_buy300":   strconv.Itoa(params.ShirbeBuy300),
+		"medal_1":         strconv.Itoa(params.Medal1),
+		"medal_2":         strconv.Itoa(params.Medal2),
+		"medal_3":         strconv.Itoa(params.Medal3),
+		"medal_4":         strconv.Itoa(params.Medal4),
+		"medal_5":         strconv.Itoa(params.Medal5),
+		"R_medal":         strconv.Itoa(params.RMedal),
+		"total_play_time": strconv.Itoa(params.TotalPlayTime), // 修正済
+		"fever":           strconv.Itoa(params.Fever),
 	}
 
 	keys := make([]string, 0, len(paramMap))

@@ -89,17 +89,7 @@ paths:
           required: true
           schema:
             type: integer
-        - name: second
-          in: query
-          required: true
-          schema:
-            type: integer
-        - name: minute
-          in: query
-          required: true
-          schema:
-            type: integer
-        - name: hour
+        - name: total_play_time
           in: query
           required: true
           schema:
@@ -241,12 +231,10 @@ components:
           type: integer
           x-oapi-codegen-extra-tags:
             db: 'R_medal'
-        second:
+        total_play_time:
           type: integer
-        minute:
-          type: integer
-        hour:
-          type: integer
+          x-oapi-codegen-extra-tags:
+            db: 'total_play_time'
         fever:
           type: integer
         created_at:
