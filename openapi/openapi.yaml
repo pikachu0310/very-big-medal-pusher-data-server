@@ -240,7 +240,7 @@ components:
         R_medal:
           type: integer
           x-oapi-codegen-extra-tags:
-            db: 'r_medal'
+            db: 'R_medal'
         second:
           type: integer
         minute:
