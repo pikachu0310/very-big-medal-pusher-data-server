@@ -158,7 +158,7 @@ paths:
           required: false
           schema:
             type: string
-            enum: [have_medal, fever, in_medal, out_medal]
+            enum: [ have_medal, fever, in_medal, out_medal ]
             default: have_medal
         - name: limit
           in: query
@@ -249,3 +249,8 @@ components:
           type: integer
         fever:
           type: integer
+        created_at:
+          type: string
+          format: date-time
+          x-oapi-codegen-extra-tags:
+            db: 'created_at'
