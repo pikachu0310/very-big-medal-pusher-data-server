@@ -183,6 +183,8 @@ components:
       properties:
         version:
           type: string
+        id:
+          type: string
         user_id:
           type: string
           x-oapi-codegen-extra-tags:

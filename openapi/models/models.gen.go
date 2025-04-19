@@ -18,6 +18,7 @@ type GameData struct {
 	GetShirbe    *int    `db:"get_shirbe" json:"get_shirbe,omitempty"`
 	HaveMedal    *int    `db:"have_medal" json:"have_medal,omitempty"`
 	Hour         *int    `json:"hour,omitempty"`
+	Id           *string `json:"id,omitempty"`
 	InMedal      *int    `db:"in_medal" json:"in_medal,omitempty"`
 	Medal1       *int    `db:"medal_1" json:"medal_1,omitempty"`
 	Medal2       *int    `db:"medal_2" json:"medal_2,omitempty"`
