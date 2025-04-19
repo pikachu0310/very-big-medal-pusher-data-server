@@ -37,6 +37,7 @@ func (h *Handler) GetData(ctx echo.Context, params models.GetDataParams) error {
 
 	userSecret := generateUserSecret(params.UserId)
 	paramStr := createSortedParamString(params)
+	log.Printf("Generated param string: %s", paramStr)
 
 	if !verifySignature(paramStr, params.Sig, userSecret) {
 		return ctx.JSON(http.StatusBadRequest, "invalid signature")
