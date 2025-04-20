@@ -25,16 +25,46 @@ func (r *Repository) InsertGameData(ctx context.Context, data models.GameData) e
 }
 
 func (r *Repository) GetRankings(ctx context.Context, sortBy string, limit int) ([]models.GameData, error) {
+	// カラムのホワイトリスト（SQLインジェクション防止）
+	validSortColumns := map[string]bool{
+		"have_medal":    true,
+		"in_medal":      true,
+		"out_medal":     true,
+		"slot_hit":      true,
+		"get_shirbe":    true,
+		"start_slot":    true,
+		"shirbe_buy300": true,
+		"medal_1":       true,
+		"medal_2":       true,
+		"medal_3":       true,
+		"medal_4":       true,
+		"medal_5":       true,
+		"R_medal":       true,
+		"second":        true,
+		"minute":        true,
+		"hour":          true,
+		"fever":         true,
+	}
+
+	if !validSortColumns[sortBy] {
+		return nil, fmt.Errorf("invalid sort column: %s", sortBy)
+	}
+
 	var rankings []models.GameData
 	query := fmt.Sprintf(`
-		SELECT DISTINCT ON (user_id) * 
-		FROM game_data 
-		ORDER BY %s DESC 
+		SELECT * FROM (
+			SELECT *,
+				ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY %[1]s DESC) AS rn
+			FROM game_data
+		) AS ranked
+		WHERE rn = 1
+		ORDER BY %[1]s DESC
 		LIMIT ?`, sortBy)
+
 	if err := r.db.SelectContext(ctx, &rankings, query, limit); err != nil {
 		return nil, fmt.Errorf("get rankings: %w", err)
 	}
-	
+
 	return rankings, nil
 }
 
