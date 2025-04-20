@@ -26,10 +26,11 @@ func (r *Repository) InsertGameData(ctx context.Context, data models.GameData) e
 
 func (r *Repository) GetRankings(ctx context.Context, sortBy string, limit int) ([]models.GameData, error) {
 	var rankings []models.GameData
-	query := fmt.Sprintf(`SELECT * FROM game_data ORDER BY %s DESC LIMIT ?`, sortBy)
+	query := fmt.Sprintf(`SELECT * FROM game_data WHERE user_id IN (SELECT DISTINCT user_id FROM game_data) ORDER BY %s DESC LIMIT ?`, sortBy)
 	if err := r.db.SelectContext(ctx, &rankings, query, limit); err != nil {
 		return nil, fmt.Errorf("get rankings: %w", err)
 	}
+
 	return rankings, nil
 }
 
