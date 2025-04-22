@@ -9,39 +9,33 @@ import (
 
 // Defines values for GetRankingsParamsSort.
 const (
-	Fever           GetRankingsParamsSort = "fever"
-	HaveMedal       GetRankingsParamsSort = "have_medal"
-	InMedal         GetRankingsParamsSort = "in_medal"
-	MaxChainItem    GetRankingsParamsSort = "max_chain_item"
-	MaxChainOrange  GetRankingsParamsSort = "max_chain_orange"
-	MaxChainRainbow GetRankingsParamsSort = "max_chain_rainbow"
-	OutMedal        GetRankingsParamsSort = "out_medal"
+	Fever     GetRankingsParamsSort = "fever"
+	HaveMedal GetRankingsParamsSort = "have_medal"
+	InMedal   GetRankingsParamsSort = "in_medal"
+	OutMedal  GetRankingsParamsSort = "out_medal"
 )
 
 // GameData defines model for GameData.
 type GameData struct {
-	RMedal          *int       `db:"R_medal" json:"R_medal,omitempty"`
-	CreatedAt       *time.Time `db:"created_at" json:"created_at,omitempty"`
-	Fever           *int       `json:"fever,omitempty"`
-	GetShirbe       *int       `db:"get_shirbe" json:"get_shirbe,omitempty"`
-	HaveMedal       *int       `db:"have_medal" json:"have_medal,omitempty"`
-	Id              *string    `json:"id,omitempty"`
-	InMedal         *int       `db:"in_medal" json:"in_medal,omitempty"`
-	MaxChainItem    *int       `db:"max_chain_item" json:"max_chain_item,omitempty"`
-	MaxChainOrange  *int       `db:"max_chain_orange" json:"max_chain_orange,omitempty"`
-	MaxChainRainbow *int       `db:"max_chain_rainbow" json:"max_chain_rainbow,omitempty"`
-	Medal1          *int       `db:"medal_1" json:"medal_1,omitempty"`
-	Medal2          *int       `db:"medal_2" json:"medal_2,omitempty"`
-	Medal3          *int       `db:"medal_3" json:"medal_3,omitempty"`
-	Medal4          *int       `db:"medal_4" json:"medal_4,omitempty"`
-	Medal5          *int       `db:"medal_5" json:"medal_5,omitempty"`
-	OutMedal        *int       `db:"out_medal" json:"out_medal,omitempty"`
-	ShirbeBuy300    *int       `db:"shirbe_buy300" json:"shirbe_buy300,omitempty"`
-	SlotHit         *int       `db:"slot_hit" json:"slot_hit,omitempty"`
-	StartSlot       *int       `db:"start_slot" json:"start_slot,omitempty"`
-	TotalPlayTime   *int       `db:"total_play_time" json:"total_play_time,omitempty"`
-	UserId          *string    `db:"user_id" json:"user_id,omitempty"`
-	Version         *int       `json:"version,omitempty"`
+	RMedal        *int       `db:"R_medal" json:"R_medal,omitempty"`
+	CreatedAt     *time.Time `db:"created_at" json:"created_at,omitempty"`
+	Fever         *int       `json:"fever,omitempty"`
+	GetShirbe     *int       `db:"get_shirbe" json:"get_shirbe,omitempty"`
+	HaveMedal     *int       `db:"have_medal" json:"have_medal,omitempty"`
+	Id            *string    `json:"id,omitempty"`
+	InMedal       *int       `db:"in_medal" json:"in_medal,omitempty"`
+	Medal1        *int       `db:"medal_1" json:"medal_1,omitempty"`
+	Medal2        *int       `db:"medal_2" json:"medal_2,omitempty"`
+	Medal3        *int       `db:"medal_3" json:"medal_3,omitempty"`
+	Medal4        *int       `db:"medal_4" json:"medal_4,omitempty"`
+	Medal5        *int       `db:"medal_5" json:"medal_5,omitempty"`
+	OutMedal      *int       `db:"out_medal" json:"out_medal,omitempty"`
+	ShirbeBuy300  *int       `db:"shirbe_buy300" json:"shirbe_buy300,omitempty"`
+	SlotHit       *int       `db:"slot_hit" json:"slot_hit,omitempty"`
+	StartSlot     *int       `db:"start_slot" json:"start_slot,omitempty"`
+	TotalPlayTime *int       `db:"total_play_time" json:"total_play_time,omitempty"`
+	UserId        *string    `db:"user_id" json:"user_id,omitempty"`
+	Version       *int       `json:"version,omitempty"`
 }
 
 // GetDataParams defines parameters for GetData.
@@ -65,10 +59,7 @@ type GetDataParams struct {
 	Fever         int    `form:"fever" json:"fever"`
 
 	// Sig HMAC-SHA256署名（順序固定・user_id込みで生成）
-	Sig             string `form:"sig" json:"sig"`
-	MaxChainItem    *int   `form:"max_chain_item,omitempty" json:"max_chain_item,omitempty"`
-	MaxChainOrange  *int   `form:"max_chain_orange,omitempty" json:"max_chain_orange,omitempty"`
-	MaxChainRainbow *int   `form:"max_chain_rainbow,omitempty" json:"max_chain_rainbow,omitempty"`
+	Sig string `form:"sig" json:"sig"`
 }
 
 // GetRankingsParams defines parameters for GetRankings.

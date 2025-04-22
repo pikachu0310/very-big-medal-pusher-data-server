@@ -26,26 +26,23 @@ func (r *Repository) InsertGameData(ctx context.Context, data models.GameData) e
 
 func (r *Repository) GetRankings(ctx context.Context, sortBy string, limit int) ([]models.GameData, error) {
 	validSortColumns := map[string]bool{
-		"have_medal":        true,
-		"in_medal":          true,
-		"out_medal":         true,
-		"slot_hit":          true,
-		"get_shirbe":        true,
-		"start_slot":        true,
-		"shirbe_buy300":     true,
-		"medal_1":           true,
-		"medal_2":           true,
-		"medal_3":           true,
-		"medal_4":           true,
-		"medal_5":           true,
-		"R_medal":           true,
-		"second":            true,
-		"minute":            true,
-		"hour":              true,
-		"fever":             true,
-		"max_chain_item":    true,
-		"max_chain_orange":  true,
-		"max_chain_rainbow": true,
+		"have_medal":    true,
+		"in_medal":      true,
+		"out_medal":     true,
+		"slot_hit":      true,
+		"get_shirbe":    true,
+		"start_slot":    true,
+		"shirbe_buy300": true,
+		"medal_1":       true,
+		"medal_2":       true,
+		"medal_3":       true,
+		"medal_4":       true,
+		"medal_5":       true,
+		"R_medal":       true,
+		"second":        true,
+		"minute":        true,
+		"hour":          true,
+		"fever":         true,
 	}
 
 	if !validSortColumns[sortBy] {
@@ -53,17 +50,16 @@ func (r *Repository) GetRankings(ctx context.Context, sortBy string, limit int) 
 	}
 
 	query := fmt.Sprintf(`
-        SELECT gd.*
-        FROM game_data gd
-        WHERE gd.id = (
-            SELECT id
-            FROM game_data
-            WHERE user_id = gd.user_id
-            ORDER BY gd.%[1]s DESC, id DESC
-            LIMIT 1
-        )
-        ORDER BY gd.%[1]s DESC
-        LIMIT ?`, sortBy)
+		SELECT gd.*
+		FROM game_data gd
+		INNER JOIN (
+			SELECT user_id, MAX(%[1]s) AS max_value
+			FROM game_data
+			GROUP BY user_id
+		) AS top_users
+		ON gd.user_id = top_users.user_id AND gd.%[1]s = top_users.max_value
+		ORDER BY gd.%[1]s DESC
+		LIMIT ?`, sortBy)
 
 	var rankings []models.GameData
 	if err := r.db.SelectContext(ctx, &rankings, query, limit); err != nil {
@@ -79,19 +75,4 @@ func (r *Repository) GetUserGameData(ctx context.Context, userId string) (*model
 		return nil, fmt.Errorf("get user game data: %w", err)
 	}
 	return &data, nil
-}
-
-// ExistsSameGameData returns true if there is already a game_data row
-// with the given userId and totalPlayTime.
-func (r *Repository) ExistsSameGameData(ctx context.Context, userId string, totalPlayTime int) (bool, error) {
-	var count int64
-	err := r.db.GetContext(ctx, &count, `
-        SELECT COUNT(*) 
-        FROM game_data 
-        WHERE user_id = ? AND total_play_time = ?
-    `, userId, totalPlayTime)
-	if err != nil {
-		return false, fmt.Errorf("check existing game data: %w", err)
-	}
-	return count > 0, nil
 }

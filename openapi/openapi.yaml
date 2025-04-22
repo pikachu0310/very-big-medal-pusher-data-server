@@ -105,21 +105,6 @@ paths:
           description: HMAC-SHA256署名（順序固定・user_id込みで生成）
           schema:
             type: string
-        - name: max_chain_item
-          in: query
-          required: false
-          schema:
-            type: integer
-        - name: max_chain_orange
-          in: query
-          required: false
-          schema:
-            type: integer
-        - name: max_chain_rainbow
-          in: query
-          required: false
-          schema:
-            type: integer
       responses:
         '200':
           description: 正常に保存されました
@@ -163,7 +148,7 @@ paths:
           required: false
           schema:
             type: string
-            enum: [ have_medal, fever, in_medal, out_medal, max_chain_item, max_chain_orange, max_chain_rainbow ]
+            enum: [ have_medal, fever, in_medal, out_medal ]
             default: have_medal
         - name: limit
           in: query
@@ -257,16 +242,3 @@ components:
           format: date-time
           x-oapi-codegen-extra-tags:
             db: 'created_at'
-        max_chain_item:
-          type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'max_chain_item'
-        max_chain_orange:
-          type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'max_chain_orange'
-        max_chain_rainbow:
-          type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'max_chain_rainbow'
-
