@@ -120,6 +120,21 @@ paths:
           required: false
           schema:
             type: integer
+        - name: sugoroku_steps
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: jackpots
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: max_jackpot_win
+          in: query
+          required: false
+          schema:
+            type: integer
       responses:
         '200':
           description: 正常に保存されました
@@ -269,4 +284,15 @@ components:
           type: integer
           x-oapi-codegen-extra-tags:
             db: 'max_chain_rainbow'
-
+        sugoroku_steps:
+          type: integer
+          x-oapi-codegen-extra-tags:
+            db: 'sugoroku_steps'
+        jackpots:
+          type: integer
+          x-oapi-codegen-extra-tags:
+            db: 'jackpots'
+        max_jackpot_win:
+          type: integer
+          x-oapi-codegen-extra-tags:
+            db: 'max_jackpot_win'

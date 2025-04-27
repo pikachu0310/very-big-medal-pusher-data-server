@@ -27,9 +27,11 @@ type GameData struct {
 	HaveMedal       *int       `db:"have_medal" json:"have_medal,omitempty"`
 	Id              *string    `json:"id,omitempty"`
 	InMedal         *int       `db:"in_medal" json:"in_medal,omitempty"`
+	Jackpots        *int       `db:"jackpots" json:"jackpots,omitempty"`
 	MaxChainItem    *int       `db:"max_chain_item" json:"max_chain_item,omitempty"`
 	MaxChainOrange  *int       `db:"max_chain_orange" json:"max_chain_orange,omitempty"`
 	MaxChainRainbow *int       `db:"max_chain_rainbow" json:"max_chain_rainbow,omitempty"`
+	MaxJackpotWin   *int       `db:"max_jackpot_win" json:"max_jackpot_win,omitempty"`
 	Medal1          *int       `db:"medal_1" json:"medal_1,omitempty"`
 	Medal2          *int       `db:"medal_2" json:"medal_2,omitempty"`
 	Medal3          *int       `db:"medal_3" json:"medal_3,omitempty"`
@@ -39,6 +41,7 @@ type GameData struct {
 	ShirbeBuy300    *int       `db:"shirbe_buy300" json:"shirbe_buy300,omitempty"`
 	SlotHit         *int       `db:"slot_hit" json:"slot_hit,omitempty"`
 	StartSlot       *int       `db:"start_slot" json:"start_slot,omitempty"`
+	SugorokuSteps   *int       `db:"sugoroku_steps" json:"sugoroku_steps,omitempty"`
 	TotalPlayTime   *int       `db:"total_play_time" json:"total_play_time,omitempty"`
 	UserId          *string    `db:"user_id" json:"user_id,omitempty"`
 	Version         *int       `json:"version,omitempty"`
@@ -69,6 +72,9 @@ type GetDataParams struct {
 	MaxChainItem    *int   `form:"max_chain_item,omitempty" json:"max_chain_item,omitempty"`
 	MaxChainOrange  *int   `form:"max_chain_orange,omitempty" json:"max_chain_orange,omitempty"`
 	MaxChainRainbow *int   `form:"max_chain_rainbow,omitempty" json:"max_chain_rainbow,omitempty"`
+	SugorokuSteps   *int   `form:"sugoroku_steps,omitempty" json:"sugoroku_steps,omitempty"`
+	Jackpots        *int   `form:"jackpots,omitempty" json:"jackpots,omitempty"`
+	MaxJackpotWin   *int   `form:"max_jackpot_win,omitempty" json:"max_jackpot_win,omitempty"`
 }
 
 // GetRankingsParams defines parameters for GetRankings.
