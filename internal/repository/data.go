@@ -15,9 +15,10 @@ func (r *Repository) InsertGameData(ctx context.Context, data models.GameData) e
         get_shirbe, start_slot, shirbe_buy300,
         medal_1, medal_2, medal_3, medal_4, medal_5,
         R_medal, total_play_time, fever,
-        max_chain_item, max_chain_orange, max_chain_rainbow
+        max_chain_item, max_chain_orange, max_chain_rainbow,
+        sugoroku_steps, jackpots, max_jackpot_win
     ) VALUES (
-        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
     )`,
 		data.UserId, data.Version,
 		data.HaveMedal, data.InMedal, data.OutMedal, data.SlotHit,
@@ -25,6 +26,7 @@ func (r *Repository) InsertGameData(ctx context.Context, data models.GameData) e
 		data.Medal1, data.Medal2, data.Medal3, data.Medal4, data.Medal5,
 		data.RMedal, data.TotalPlayTime, data.Fever,
 		data.MaxChainItem, data.MaxChainOrange, data.MaxChainRainbow,
+		data.SugorokuSteps, data.Jackpots, data.MaxJackpotWin,
 	)
 	if err != nil {
 		return fmt.Errorf("insert game data: %w", err)
@@ -52,6 +54,9 @@ func (r *Repository) GetRankings(ctx context.Context, sortBy string, limit int) 
 		"max_chain_item":    true,
 		"max_chain_orange":  true,
 		"max_chain_rainbow": true,
+		"sugoroku_steps":    true,
+		"max_jackpot_win":   true,
+		"jackpots":          true,
 	}
 
 	if !validSortColumns[sortBy] {

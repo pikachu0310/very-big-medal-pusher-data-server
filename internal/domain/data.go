@@ -25,6 +25,9 @@ func GetDataParamsToGameData(params models.GetDataParams) models.GameData {
 		MaxChainItem:    params.MaxChainItem,
 		MaxChainOrange:  params.MaxChainOrange,
 		MaxChainRainbow: params.MaxChainRainbow,
+		MaxJackpotWin:   params.MaxJackpotWin,
+		Jackpots:        params.Jackpots,
+		SugorokuSteps:   params.SugorokuSteps,
 	}
 }
 
