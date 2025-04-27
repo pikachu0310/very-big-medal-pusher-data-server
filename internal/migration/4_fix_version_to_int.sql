@@ -26,3 +26,4 @@ CREATE TABLE game_data
 
 -- +goose Down
 DROP TABLE IF EXISTS game_data;
+
