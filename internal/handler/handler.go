@@ -40,7 +40,7 @@ func (h *Handler) GetData(ctx echo.Context, params models.GetDataParams) error {
 	log.Printf("Generated param string: %s", paramStr)
 
 	if !verifySignature(paramStr, params.Sig, userSecret) {
-		return ctx.JSON(http.StatusBadRequest, "invalid signature")
+		return ctx.String(http.StatusBadRequest, "invalid signature")
 	}
 
 	exist, err := h.repo.ExistsSameGameData(ctx.Request().Context(), params.UserId, params.TotalPlayTime)
@@ -48,14 +48,14 @@ func (h *Handler) GetData(ctx echo.Context, params models.GetDataParams) error {
 		return ctx.JSON(http.StatusInternalServerError, err.Error())
 	}
 	if exist {
-		return ctx.JSON(http.StatusBadRequest, "Same data already exists! (You need to replace new Save URL)")
+		return ctx.String(http.StatusConflict, "Same data already exists! (You need to replace new Save URL)")
 	}
 
 	nullifyNullValues(&params)
 	data := domain.GetDataParamsToGameData(params)
 
 	if err := h.repo.InsertGameData(ctx.Request().Context(), data); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, err.Error())
+		return ctx.String(http.StatusInternalServerError, err.Error())
 	}
 
 	return ctx.JSON(http.StatusOK, "success")
