@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
+	"log"
 )
 
 func (r *Repository) InsertGameData(ctx context.Context, data models.GameData) error {
@@ -46,9 +47,7 @@ func (r *Repository) GetRankings(ctx context.Context, sortBy string, limit int) 
 		"medal_4":           true,
 		"medal_5":           true,
 		"R_medal":           true,
-		"second":            true,
-		"minute":            true,
-		"hour":              true,
+		"total_play_time":   true,
 		"fever":             true,
 		"max_chain_item":    true,
 		"max_chain_orange":  true,
@@ -60,23 +59,29 @@ func (r *Repository) GetRankings(ctx context.Context, sortBy string, limit int) 
 	}
 
 	query := fmt.Sprintf(`
-        SELECT gd.*
-        FROM game_data gd
-        WHERE gd.id = (
-            SELECT id
-            FROM game_data
-            WHERE user_id = gd.user_id
-            ORDER BY gd.%[1]s DESC, id DESC
-            LIMIT 1
-        )
-        ORDER BY gd.%[1]s DESC
+        SELECT
+            gd.*
+        FROM
+            game_data AS gd
+        INNER JOIN (
+            SELECT
+                user_id,
+                MAX(created_at) AS max_created_at
+            FROM
+                game_data
+            GROUP BY
+                user_id
+        ) AS latest
+          ON gd.user_id = latest.user_id
+         AND gd.created_at = latest.max_created_at
+        ORDER BY
+            gd.%[1]s DESC
         LIMIT ?`, sortBy)
 
 	var rankings []models.GameData
 	if err := r.db.SelectContext(ctx, &rankings, query, limit); err != nil {
 		return nil, fmt.Errorf("get rankings: %w", err)
 	}
-
 	return rankings, nil
 }
 
@@ -88,17 +93,23 @@ func (r *Repository) GetUserGameData(ctx context.Context, userId string) (*model
 	return &data, nil
 }
 
-// ExistsSameGameData returns true if there is already a game_data row
-// with the given userId and totalPlayTime.
 func (r *Repository) ExistsSameGameData(ctx context.Context, userId string, totalPlayTime int) (bool, error) {
-	var count int64
-	err := r.db.GetContext(ctx, &count, `
-        SELECT COUNT(*) 
-        FROM game_data 
+	// デバッグ用ログ
+	log.Printf("ExistsSameGameData: userId=%q, totalPlayTime=%d", userId, totalPlayTime)
+
+	// MySQL の EXISTS は 0 or 1 を返します
+	const q = `
+      SELECT EXISTS(
+        SELECT 1
+        FROM game_data
         WHERE user_id = ? AND total_play_time = ?
-    `, userId, totalPlayTime)
+      )
+    `
+
+	var existsInt int
+	err := r.db.QueryRowContext(ctx, q, userId, totalPlayTime).Scan(&existsInt)
 	if err != nil {
 		return false, fmt.Errorf("check existing game data: %w", err)
 	}
-	return count > 0, nil
+	return existsInt == 1, nil
 }
