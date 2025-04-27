@@ -1,11 +1,11 @@
 -- +goose Up
 ALTER TABLE game_data
-    ADD COLUMN max_chain_item   INT NOT NULL DEFAULT 0,
-    ADD COLUMN max_chain_orange INT NOT NULL DEFAULT 0,
-    ADD COLUMN max_chain_rainbow INT NOT NULL DEFAULT 0;
+    ADD COLUMN maxChainItem   INT NOT NULL DEFAULT 0,
+    ADD COLUMN maxChainOrange INT NOT NULL DEFAULT 0,
+    ADD COLUMN maxChainRainbow INT NOT NULL DEFAULT 0;
 
 -- +goose Down
 ALTER TABLE game_data
-    DROP COLUMN max_chain_item,
-    DROP COLUMN max_chain_orange,
-    DROP COLUMN max_chain_rainbow;
+    DROP COLUMN maxChainItem,
+    DROP COLUMN maxChainOrange,
+    DROP COLUMN maxChainRainbow;
