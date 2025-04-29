@@ -10,6 +10,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/domain"
@@ -19,8 +21,18 @@ import (
 
 var GlobalSecret = "your_global_secret_here"
 
+// キャッシュ用エントリ数・TTL は必要に応じて調整
+const rankingsCacheTTL = time.Minute
+
 type Handler struct {
 	repo *repository.Repository
+
+	// キャッシュ本体と更新時刻
+	cacheMu                sync.RWMutex
+	cacheMaxChainOrange    []models.GameData
+	cacheMaxChainOrangeAt  time.Time
+	cacheMaxChainRainbow   []models.GameData
+	cacheMaxChainRainbowAt time.Time
 }
 
 func New(repo *repository.Repository) *Handler {
@@ -97,15 +109,53 @@ func (h *Handler) GetRankings(ctx echo.Context, params models.GetRankingsParams)
 	if params.Sort != nil {
 		sortBy = string(*params.Sort)
 	}
-
 	limit := 50
 	if params.Limit != nil {
 		limit = *params.Limit
 	}
 
+	// --- キャッシュ対象の判定 ---
+	isOrange := sortBy == "max_chain_orange" && limit == 200
+	isRainbow := sortBy == "max_chain_rainbow" && limit == 200
+
+	// キャッシュが有効なら返却
+	if isOrange {
+		h.cacheMu.RLock()
+		if time.Since(h.cacheMaxChainOrangeAt) < rankingsCacheTTL {
+			data := h.cacheMaxChainOrange
+			h.cacheMu.RUnlock()
+			return ctx.JSON(http.StatusOK, data)
+		}
+		h.cacheMu.RUnlock()
+	}
+	if isRainbow {
+		h.cacheMu.RLock()
+		if time.Since(h.cacheMaxChainRainbowAt) < rankingsCacheTTL {
+			data := h.cacheMaxChainRainbow
+			h.cacheMu.RUnlock()
+			return ctx.JSON(http.StatusOK, data)
+		}
+		h.cacheMu.RUnlock()
+	}
+
+	// キャッシュ外なら DB から取得
 	rankings, err := h.repo.GetRankings(ctx.Request().Context(), sortBy, limit)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	// 取得できたらキャッシュを更新
+	if isOrange {
+		h.cacheMu.Lock()
+		h.cacheMaxChainOrange = rankings
+		h.cacheMaxChainOrangeAt = time.Now()
+		h.cacheMu.Unlock()
+	}
+	if isRainbow {
+		h.cacheMu.Lock()
+		h.cacheMaxChainRainbow = rankings
+		h.cacheMaxChainRainbowAt = time.Now()
+		h.cacheMu.Unlock()
 	}
 
 	return ctx.JSON(http.StatusOK, rankings)
