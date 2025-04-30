@@ -27,18 +27,24 @@ const rankingsCacheTTL = time.Minute
 type Handler struct {
 	repo *repository.Repository
 
-	// キャッシュ本体と更新時刻
-	cacheMu                sync.RWMutex
-	cacheMaxChainOrange    []models.GameData
-	cacheMaxChainOrangeAt  time.Time
-	cacheMaxChainRainbow   []models.GameData
-	cacheMaxChainRainbowAt time.Time
+	// キャッシュ用ミューテックス
+	cacheMu sync.RWMutex
+
+	// 200件キャッシュ
+	cacheMaxChainOrange200    []models.GameData
+	cacheMaxChainOrange200At  time.Time
+	cacheMaxChainRainbow200   []models.GameData
+	cacheMaxChainRainbow200At time.Time
+
+	// 500件キャッシュ
+	cacheMaxChainOrange500    []models.GameData
+	cacheMaxChainOrange500At  time.Time
+	cacheMaxChainRainbow500   []models.GameData
+	cacheMaxChainRainbow500At time.Time
 }
 
 func New(repo *repository.Repository) *Handler {
-	return &Handler{
-		repo: repo,
-	}
+	return &Handler{repo: repo}
 }
 
 func (h *Handler) GetPing(ctx echo.Context) error {
@@ -114,47 +120,81 @@ func (h *Handler) GetRankings(ctx echo.Context, params models.GetRankingsParams)
 		limit = *params.Limit
 	}
 
-	// --- キャッシュ対象の判定 ---
-	isOrange := sortBy == "max_chain_orange" && limit == 200
-	isRainbow := sortBy == "max_chain_rainbow" && limit == 200
+	// キャッシュ判定
+	isOrange200 := sortBy == "max_chain_orange" && limit == 200
+	isOrange500 := sortBy == "max_chain_orange" && limit == 500
+	isRainbow200 := sortBy == "max_chain_rainbow" && limit == 200
+	isRainbow500 := sortBy == "max_chain_rainbow" && limit == 500
 
-	// キャッシュが有効なら返却
-	if isOrange {
+	// 200件キャッシュ応答
+	if isOrange200 {
 		h.cacheMu.RLock()
-		if time.Since(h.cacheMaxChainOrangeAt) < rankingsCacheTTL {
-			data := h.cacheMaxChainOrange
+		if time.Since(h.cacheMaxChainOrange200At) < rankingsCacheTTL {
+			data := h.cacheMaxChainOrange200
 			h.cacheMu.RUnlock()
 			return ctx.JSON(http.StatusOK, data)
 		}
 		h.cacheMu.RUnlock()
 	}
-	if isRainbow {
+	if isRainbow200 {
 		h.cacheMu.RLock()
-		if time.Since(h.cacheMaxChainRainbowAt) < rankingsCacheTTL {
-			data := h.cacheMaxChainRainbow
+		if time.Since(h.cacheMaxChainRainbow200At) < rankingsCacheTTL {
+			data := h.cacheMaxChainRainbow200
 			h.cacheMu.RUnlock()
 			return ctx.JSON(http.StatusOK, data)
 		}
 		h.cacheMu.RUnlock()
 	}
 
-	// キャッシュ外なら DB から取得
+	// 500件キャッシュ応答
+	if isOrange500 {
+		h.cacheMu.RLock()
+		if time.Since(h.cacheMaxChainOrange500At) < rankingsCacheTTL {
+			data := h.cacheMaxChainOrange500
+			h.cacheMu.RUnlock()
+			return ctx.JSON(http.StatusOK, data)
+		}
+		h.cacheMu.RUnlock()
+	}
+	if isRainbow500 {
+		h.cacheMu.RLock()
+		if time.Since(h.cacheMaxChainRainbow500At) < rankingsCacheTTL {
+			data := h.cacheMaxChainRainbow500
+			h.cacheMu.RUnlock()
+			return ctx.JSON(http.StatusOK, data)
+		}
+		h.cacheMu.RUnlock()
+	}
+
+	// DB取得
 	rankings, err := h.repo.GetRankings(ctx.Request().Context(), sortBy, limit)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	// 取得できたらキャッシュを更新
-	if isOrange {
+	// キャッシュ更新
+	if isOrange200 {
 		h.cacheMu.Lock()
-		h.cacheMaxChainOrange = rankings
-		h.cacheMaxChainOrangeAt = time.Now()
+		h.cacheMaxChainOrange200 = rankings
+		h.cacheMaxChainOrange200At = time.Now()
 		h.cacheMu.Unlock()
 	}
-	if isRainbow {
+	if isRainbow200 {
 		h.cacheMu.Lock()
-		h.cacheMaxChainRainbow = rankings
-		h.cacheMaxChainRainbowAt = time.Now()
+		h.cacheMaxChainRainbow200 = rankings
+		h.cacheMaxChainRainbow200At = time.Now()
+		h.cacheMu.Unlock()
+	}
+	if isOrange500 {
+		h.cacheMu.Lock()
+		h.cacheMaxChainOrange500 = rankings
+		h.cacheMaxChainOrange500At = time.Now()
+		h.cacheMu.Unlock()
+	}
+	if isRainbow500 {
+		h.cacheMu.Lock()
+		h.cacheMaxChainRainbow500 = rankings
+		h.cacheMaxChainRainbow500At = time.Now()
 		h.cacheMu.Unlock()
 	}
 
