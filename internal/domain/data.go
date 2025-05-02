@@ -1,6 +1,9 @@
 package domain
 
-import "github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
+import (
+	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
+	"time"
+)
 
 // GetDataParams から GameData を生成する
 func GetDataParamsToGameData(params models.GetDataParams) models.GameData {
@@ -28,6 +31,52 @@ func GetDataParamsToGameData(params models.GetDataParams) models.GameData {
 		MaxJackpotWin:   params.MaxJackpotWin,
 		Jackpots:        params.Jackpots,
 		SugorokuSteps:   params.SugorokuSteps,
+	}
+}
+
+type RankingResponseMaxChainOrange struct {
+	CreatedAt      *time.Time `db:"created_at" json:"created_at,omitempty"`
+	MaxChainOrange *int       `db:"max_chain_orange" json:"max_chain_orange,omitempty"`
+}
+
+type RankingResponseMaxChainRainbow struct {
+	CreatedAt       *time.Time `db:"created_at" json:"created_at,omitempty"`
+	MaxChainRainbow *int       `db:"max_chain_rainbow" json:"max_chain_rainbow,omitempty"`
+}
+
+func GetDatasToRankingResponseMaxChainOrange(data []models.GameData) []RankingResponseMaxChainOrange {
+	var response []RankingResponseMaxChainOrange
+	for _, d := range data {
+		response = append(response, RankingResponseMaxChainOrange{
+			CreatedAt:      d.CreatedAt,
+			MaxChainOrange: d.MaxChainOrange,
+		})
+	}
+	return response
+}
+
+func GetDataToRankingResponseMaxChainOrange(data models.GameData) RankingResponseMaxChainOrange {
+	return RankingResponseMaxChainOrange{
+		CreatedAt:      data.CreatedAt,
+		MaxChainOrange: data.MaxChainOrange,
+	}
+}
+
+func GetDatasToRankingResponseMaxChainRainbow(data []models.GameData) []RankingResponseMaxChainRainbow {
+	var response []RankingResponseMaxChainRainbow
+	for _, d := range data {
+		response = append(response, RankingResponseMaxChainRainbow{
+			CreatedAt:       d.CreatedAt,
+			MaxChainRainbow: d.MaxChainRainbow,
+		})
+	}
+	return response
+}
+
+func GetDataToRankingResponseMaxChainRainbow(data models.GameData) RankingResponseMaxChainRainbow {
+	return RankingResponseMaxChainRainbow{
+		CreatedAt:       data.CreatedAt,
+		MaxChainRainbow: data.MaxChainRainbow,
 	}
 }
 

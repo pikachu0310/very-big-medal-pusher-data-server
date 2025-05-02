@@ -31,15 +31,15 @@ type Handler struct {
 	cacheMu sync.RWMutex
 
 	// 200件キャッシュ
-	cacheMaxChainOrange200    []models.GameData
+	cacheMaxChainOrange200    []domain.RankingResponseMaxChainOrange
 	cacheMaxChainOrange200At  time.Time
-	cacheMaxChainRainbow200   []models.GameData
+	cacheMaxChainRainbow200   []domain.RankingResponseMaxChainRainbow
 	cacheMaxChainRainbow200At time.Time
 
 	// 500件キャッシュ
-	cacheMaxChainOrange500    []models.GameData
+	cacheMaxChainOrange500    []domain.RankingResponseMaxChainOrange
 	cacheMaxChainOrange500At  time.Time
-	cacheMaxChainRainbow500   []models.GameData
+	cacheMaxChainRainbow500   []domain.RankingResponseMaxChainRainbow
 	cacheMaxChainRainbow500At time.Time
 
 	// ← ここにメダル総量キャッシュ用フィールドを追加
@@ -114,6 +114,8 @@ func (h *Handler) GetUsersUserIdData(ctx echo.Context, userId string) error {
 	return ctx.JSON(http.StatusOK, data)
 }
 
+// GetRankings は max_chain_{orange,rainbow} 用のキャッシュを利用し、
+// 要件に合わせた JSON レスポンスを返します。
 func (h *Handler) GetRankings(ctx echo.Context, params models.GetRankingsParams) error {
 	sortBy := "have_medal"
 	if params.Sort != nil {
@@ -130,79 +132,65 @@ func (h *Handler) GetRankings(ctx echo.Context, params models.GetRankingsParams)
 	isRainbow200 := sortBy == "max_chain_rainbow" && limit == 200
 	isRainbow500 := sortBy == "max_chain_rainbow" && limit == 500
 
-	// 200件キャッシュ応答
-	if isOrange200 {
-		h.cacheMu.RLock()
-		if time.Since(h.cacheMaxChainOrange200At) < rankingsCacheTTL {
-			data := h.cacheMaxChainOrange200
-			h.cacheMu.RUnlock()
-			return ctx.JSON(http.StatusOK, data)
-		}
+	// キャッシュ応答
+	h.cacheMu.RLock()
+	switch {
+	case isOrange200 && time.Since(h.cacheMaxChainOrange200At) < rankingsCacheTTL:
+		resp := h.cacheMaxChainOrange200
 		h.cacheMu.RUnlock()
-	}
-	if isRainbow200 {
-		h.cacheMu.RLock()
-		if time.Since(h.cacheMaxChainRainbow200At) < rankingsCacheTTL {
-			data := h.cacheMaxChainRainbow200
-			h.cacheMu.RUnlock()
-			return ctx.JSON(http.StatusOK, data)
-		}
+		return ctx.JSON(http.StatusOK, resp)
+	case isOrange500 && time.Since(h.cacheMaxChainOrange500At) < rankingsCacheTTL:
+		resp := h.cacheMaxChainOrange500
 		h.cacheMu.RUnlock()
+		return ctx.JSON(http.StatusOK, resp)
+	case isRainbow200 && time.Since(h.cacheMaxChainRainbow200At) < rankingsCacheTTL:
+		resp := h.cacheMaxChainRainbow200
+		h.cacheMu.RUnlock()
+		return ctx.JSON(http.StatusOK, resp)
+	case isRainbow500 && time.Since(h.cacheMaxChainRainbow500At) < rankingsCacheTTL:
+		resp := h.cacheMaxChainRainbow500
+		h.cacheMu.RUnlock()
+		return ctx.JSON(http.StatusOK, resp)
 	}
+	h.cacheMu.RUnlock()
 
-	// 500件キャッシュ応答
-	if isOrange500 {
-		h.cacheMu.RLock()
-		if time.Since(h.cacheMaxChainOrange500At) < rankingsCacheTTL {
-			data := h.cacheMaxChainOrange500
-			h.cacheMu.RUnlock()
-			return ctx.JSON(http.StatusOK, data)
-		}
-		h.cacheMu.RUnlock()
-	}
-	if isRainbow500 {
-		h.cacheMu.RLock()
-		if time.Since(h.cacheMaxChainRainbow500At) < rankingsCacheTTL {
-			data := h.cacheMaxChainRainbow500
-			h.cacheMu.RUnlock()
-			return ctx.JSON(http.StatusOK, data)
-		}
-		h.cacheMu.RUnlock()
-	}
-
-	// DB取得
-	rankings, err := h.repo.GetRankings(ctx.Request().Context(), sortBy, limit)
+	// DB取得 + キャッシュ更新
+	raw, err := h.repo.GetRankings(ctx.Request().Context(), sortBy, limit)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	// キャッシュ更新
-	if isOrange200 {
-		h.cacheMu.Lock()
-		h.cacheMaxChainOrange200 = rankings
+	h.cacheMu.Lock()
+	defer h.cacheMu.Unlock()
+
+	switch {
+	case isOrange200:
+		resp := domain.GetDatasToRankingResponseMaxChainOrange(raw)
+		h.cacheMaxChainOrange200 = resp
 		h.cacheMaxChainOrange200At = time.Now()
-		h.cacheMu.Unlock()
-	}
-	if isRainbow200 {
-		h.cacheMu.Lock()
-		h.cacheMaxChainRainbow200 = rankings
-		h.cacheMaxChainRainbow200At = time.Now()
-		h.cacheMu.Unlock()
-	}
-	if isOrange500 {
-		h.cacheMu.Lock()
-		h.cacheMaxChainOrange500 = rankings
+		return ctx.JSON(http.StatusOK, resp)
+
+	case isOrange500:
+		resp := domain.GetDatasToRankingResponseMaxChainOrange(raw)
+		h.cacheMaxChainOrange500 = resp
 		h.cacheMaxChainOrange500At = time.Now()
-		h.cacheMu.Unlock()
-	}
-	if isRainbow500 {
-		h.cacheMu.Lock()
-		h.cacheMaxChainRainbow500 = rankings
+		return ctx.JSON(http.StatusOK, resp)
+
+	case isRainbow200:
+		resp := domain.GetDatasToRankingResponseMaxChainRainbow(raw)
+		h.cacheMaxChainRainbow200 = resp
+		h.cacheMaxChainRainbow200At = time.Now()
+		return ctx.JSON(http.StatusOK, resp)
+
+	case isRainbow500:
+		resp := domain.GetDatasToRankingResponseMaxChainRainbow(raw)
+		h.cacheMaxChainRainbow500 = resp
 		h.cacheMaxChainRainbow500At = time.Now()
-		h.cacheMu.Unlock()
+		return ctx.JSON(http.StatusOK, resp)
 	}
 
-	return ctx.JSON(http.StatusOK, rankings)
+	// その他のソートは生の models.GameData を返す
+	return ctx.JSON(http.StatusOK, raw)
 }
 
 // GetTotalMedals は全ユーザーの最新 have_medal 合計を返すエンドポイント
