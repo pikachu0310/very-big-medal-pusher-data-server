@@ -41,6 +41,10 @@ type Handler struct {
 	cacheMaxChainOrange500At  time.Time
 	cacheMaxChainRainbow500   []models.GameData
 	cacheMaxChainRainbow500At time.Time
+
+	// ← ここにメダル総量キャッシュ用フィールドを追加
+	cacheTotalMedals   int
+	cacheTotalMedalsAt time.Time
 }
 
 func New(repo *repository.Repository) *Handler {
@@ -199,6 +203,32 @@ func (h *Handler) GetRankings(ctx echo.Context, params models.GetRankingsParams)
 	}
 
 	return ctx.JSON(http.StatusOK, rankings)
+}
+
+// GetTotalMedals は全ユーザーの最新 have_medal 合計を返すエンドポイント
+func (h *Handler) GetTotalMedals(ctx echo.Context) error {
+	// キャッシュ判定
+	h.cacheMu.RLock()
+	if time.Since(h.cacheTotalMedalsAt) < rankingsCacheTTL {
+		total := h.cacheTotalMedals
+		h.cacheMu.RUnlock()
+		return ctx.JSON(http.StatusOK, map[string]int{"total_medals": total})
+	}
+	h.cacheMu.RUnlock()
+
+	// キャッシュ切れ or 未初期化
+	total, err := h.repo.GetTotalMedals(ctx.Request().Context())
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	// キャッシュ更新
+	h.cacheMu.Lock()
+	h.cacheTotalMedals = total
+	h.cacheTotalMedalsAt = time.Now()
+	h.cacheMu.Unlock()
+
+	return ctx.JSON(http.StatusOK, map[string]int{"total_medals": total})
 }
 
 func generateUserSecret(userID string) []byte {

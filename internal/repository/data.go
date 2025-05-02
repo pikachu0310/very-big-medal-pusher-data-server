@@ -118,3 +118,22 @@ func (r *Repository) ExistsSameGameData(ctx context.Context, userId string, tota
 	}
 	return existsInt == 1, nil
 }
+
+func (r *Repository) GetTotalMedals(ctx context.Context) (int, error) {
+	const q = `
+        SELECT IFNULL(SUM(gd.have_medal), 0)
+        FROM game_data AS gd
+        INNER JOIN (
+            SELECT user_id, MAX(created_at) AS max_created_at
+            FROM game_data
+            GROUP BY user_id
+        ) AS latest
+          ON gd.user_id = latest.user_id
+         AND gd.created_at = latest.max_created_at
+    `
+	var total int
+	if err := r.db.QueryRowContext(ctx, q).Scan(&total); err != nil {
+		return 0, fmt.Errorf("get total medals: %w", err)
+	}
+	return total, nil
+}

@@ -196,6 +196,24 @@ paths:
                 items:
                   $ref: '#/components/schemas/GameData'
 
+  /total_medals:
+    get:
+      summary: 全ユーザーのメダル総量を取得
+      description: 全ユーザーの最新データにおける `have_medal` の合計を返します
+      responses:
+        '200':
+          description: メダル総量を返します
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_medals:
+                    type: integer
+                    description: 全ユーザーの `have_medal` 合計値
+        '500':
+          description: サーバー内部エラー
+
 components:
   schemas:
     GameData:
