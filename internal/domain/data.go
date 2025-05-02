@@ -35,11 +35,13 @@ func GetDataParamsToGameData(params models.GetDataParams) models.GameData {
 }
 
 type RankingResponseMaxChainOrange struct {
+	UserId         *string    `db:"user_id" json:"user_id,omitempty"`
 	CreatedAt      *time.Time `db:"created_at" json:"created_at,omitempty"`
 	MaxChainOrange *int       `db:"max_chain_orange" json:"max_chain_orange,omitempty"`
 }
 
 type RankingResponseMaxChainRainbow struct {
+	UserId          *string    `db:"user_id" json:"user_id,omitempty"`
 	CreatedAt       *time.Time `db:"created_at" json:"created_at,omitempty"`
 	MaxChainRainbow *int       `db:"max_chain_rainbow" json:"max_chain_rainbow,omitempty"`
 }
@@ -48,6 +50,7 @@ func GetDatasToRankingResponseMaxChainOrange(data []models.GameData) []RankingRe
 	var response []RankingResponseMaxChainOrange
 	for _, d := range data {
 		response = append(response, RankingResponseMaxChainOrange{
+			UserId:         d.UserId,
 			CreatedAt:      d.CreatedAt,
 			MaxChainOrange: d.MaxChainOrange,
 		})
@@ -57,6 +60,7 @@ func GetDatasToRankingResponseMaxChainOrange(data []models.GameData) []RankingRe
 
 func GetDataToRankingResponseMaxChainOrange(data models.GameData) RankingResponseMaxChainOrange {
 	return RankingResponseMaxChainOrange{
+		UserId:         data.UserId,
 		CreatedAt:      data.CreatedAt,
 		MaxChainOrange: data.MaxChainOrange,
 	}
@@ -66,6 +70,7 @@ func GetDatasToRankingResponseMaxChainRainbow(data []models.GameData) []RankingR
 	var response []RankingResponseMaxChainRainbow
 	for _, d := range data {
 		response = append(response, RankingResponseMaxChainRainbow{
+			UserId:          d.UserId,
 			CreatedAt:       d.CreatedAt,
 			MaxChainRainbow: d.MaxChainRainbow,
 		})
@@ -75,6 +80,7 @@ func GetDatasToRankingResponseMaxChainRainbow(data []models.GameData) []RankingR
 
 func GetDataToRankingResponseMaxChainRainbow(data models.GameData) RankingResponseMaxChainRainbow {
 	return RankingResponseMaxChainRainbow{
+		UserId:          data.UserId,
 		CreatedAt:       data.CreatedAt,
 		MaxChainRainbow: data.MaxChainRainbow,
 	}
