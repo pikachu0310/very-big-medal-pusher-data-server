@@ -41,6 +41,8 @@ type Handler struct {
 	cacheMaxChainOrange500At  time.Time
 	cacheMaxChainRainbow500   []domain.RankingResponseMaxChainRainbow
 	cacheMaxChainRainbow500At time.Time
+	cacheMaxTotalJackpot500   []domain.RankingResponseMaxTotalJackpot
+	cacheMaxTotalJackpot500At time.Time
 
 	// ← ここにメダル総量キャッシュ用フィールドを追加
 	cacheTotalMedals   int
@@ -127,6 +129,7 @@ func (h *Handler) GetRankings(ctx echo.Context, params models.GetRankingsParams)
 	isOrange500 := sortBy == "max_chain_orange" && limit == 500
 	isRainbow200 := sortBy == "max_chain_rainbow" && limit == 200
 	isRainbow500 := sortBy == "max_chain_rainbow" && limit == 500
+	isTotalJackpot500 := sortBy == "max_total_jackpot" && limit == 500
 
 	// キャッシュ応答
 	h.cacheMu.RLock()
@@ -145,6 +148,10 @@ func (h *Handler) GetRankings(ctx echo.Context, params models.GetRankingsParams)
 		return ctx.JSON(http.StatusOK, resp)
 	case isRainbow500 && time.Since(h.cacheMaxChainRainbow500At) < rankingsCacheTTL:
 		resp := h.cacheMaxChainRainbow500
+		h.cacheMu.RUnlock()
+		return ctx.JSON(http.StatusOK, resp)
+	case isTotalJackpot500 && time.Since(h.cacheMaxTotalJackpot500At) < rankingsCacheTTL:
+		resp := h.cacheMaxTotalJackpot500
 		h.cacheMu.RUnlock()
 		return ctx.JSON(http.StatusOK, resp)
 	}
@@ -182,6 +189,12 @@ func (h *Handler) GetRankings(ctx echo.Context, params models.GetRankingsParams)
 		resp := domain.GetDatasToRankingResponseMaxChainRainbow(raw)
 		h.cacheMaxChainRainbow500 = resp
 		h.cacheMaxChainRainbow500At = time.Now()
+		return ctx.JSON(http.StatusOK, resp)
+
+	case isTotalJackpot500:
+		resp := domain.GetDatasToRankingResponseMaxTotalJackpot(raw)
+		h.cacheMaxTotalJackpot500 = resp
+		h.cacheMaxTotalJackpot500At = time.Now()
 		return ctx.JSON(http.StatusOK, resp)
 	}
 

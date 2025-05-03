@@ -48,6 +48,12 @@ type RankingResponseMaxChainRainbow struct {
 	MaxChainRainbow *int       `db:"max_chain_rainbow" json:"max_chain_rainbow,omitempty"`
 }
 
+type RankingResponseMaxTotalJackpot struct {
+	UserId          *string    `db:"user_id" json:"user_id,omitempty"`
+	CreatedAt       *time.Time `db:"created_at" json:"created_at,omitempty"`
+	MaxTotalJackpot *int       `db:"max_total_jackpot" json:"max_total_jackpot,omitempty"`
+}
+
 func GetDatasToRankingResponseMaxChainOrange(data []models.GameData) []RankingResponseMaxChainOrange {
 	var response []RankingResponseMaxChainOrange
 	for _, d := range data {
@@ -85,6 +91,26 @@ func GetDataToRankingResponseMaxChainRainbow(data models.GameData) RankingRespon
 		UserId:          data.UserId,
 		CreatedAt:       data.CreatedAt,
 		MaxChainRainbow: data.MaxChainRainbow,
+	}
+}
+
+func GetDatasToRankingResponseMaxTotalJackpot(data []models.GameData) []RankingResponseMaxTotalJackpot {
+	var response []RankingResponseMaxTotalJackpot
+	for _, d := range data {
+		response = append(response, RankingResponseMaxTotalJackpot{
+			UserId:          d.UserId,
+			CreatedAt:       d.CreatedAt,
+			MaxTotalJackpot: d.MaxTotalJackpot,
+		})
+	}
+	return response
+}
+
+func GetDataToRankingResponseMaxTotalJackpot(data models.GameData) RankingResponseMaxTotalJackpot {
+	return RankingResponseMaxTotalJackpot{
+		UserId:          data.UserId,
+		CreatedAt:       data.CreatedAt,
+		MaxTotalJackpot: data.MaxTotalJackpot,
 	}
 }
 
