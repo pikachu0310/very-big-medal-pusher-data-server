@@ -20,31 +20,33 @@ const (
 
 // GameData defines model for GameData.
 type GameData struct {
-	RMedal          *int       `db:"R_medal" json:"R_medal,omitempty"`
-	CreatedAt       *time.Time `db:"created_at" json:"created_at,omitempty"`
-	Fever           *int       `json:"fever,omitempty"`
-	GetShirbe       *int       `db:"get_shirbe" json:"get_shirbe,omitempty"`
-	HaveMedal       *int       `db:"have_medal" json:"have_medal,omitempty"`
-	Id              *string    `json:"id,omitempty"`
-	InMedal         *int       `db:"in_medal" json:"in_medal,omitempty"`
-	Jackpots        *int       `db:"jackpots" json:"jackpots,omitempty"`
-	MaxChainItem    *int       `db:"max_chain_item" json:"max_chain_item,omitempty"`
-	MaxChainOrange  *int       `db:"max_chain_orange" json:"max_chain_orange,omitempty"`
-	MaxChainRainbow *int       `db:"max_chain_rainbow" json:"max_chain_rainbow,omitempty"`
-	MaxJackpotWin   *int       `db:"max_jackpot_win" json:"max_jackpot_win,omitempty"`
-	Medal1          *int       `db:"medal_1" json:"medal_1,omitempty"`
-	Medal2          *int       `db:"medal_2" json:"medal_2,omitempty"`
-	Medal3          *int       `db:"medal_3" json:"medal_3,omitempty"`
-	Medal4          *int       `db:"medal_4" json:"medal_4,omitempty"`
-	Medal5          *int       `db:"medal_5" json:"medal_5,omitempty"`
-	OutMedal        *int       `db:"out_medal" json:"out_medal,omitempty"`
-	ShirbeBuy300    *int       `db:"shirbe_buy300" json:"shirbe_buy300,omitempty"`
-	SlotHit         *int       `db:"slot_hit" json:"slot_hit,omitempty"`
-	StartSlot       *int       `db:"start_slot" json:"start_slot,omitempty"`
-	SugorokuSteps   *int       `db:"sugoroku_steps" json:"sugoroku_steps,omitempty"`
-	TotalPlayTime   *int       `db:"total_play_time" json:"total_play_time,omitempty"`
-	UserId          *string    `db:"user_id" json:"user_id,omitempty"`
-	Version         *int       `json:"version,omitempty"`
+	RMedal           *int       `db:"R_medal" json:"R_medal,omitempty"`
+	CreatedAt        *time.Time `db:"created_at" json:"created_at,omitempty"`
+	Fever            *int       `json:"fever,omitempty"`
+	GetShirbe        *int       `db:"get_shirbe" json:"get_shirbe,omitempty"`
+	HaveMedal        *int       `db:"have_medal" json:"have_medal,omitempty"`
+	Id               *string    `json:"id,omitempty"`
+	InMedal          *int       `db:"in_medal" json:"in_medal,omitempty"`
+	Jackpots         *int       `db:"jackpots" json:"jackpots,omitempty"`
+	MaxChainItem     *int       `db:"max_chain_item" json:"max_chain_item,omitempty"`
+	MaxChainOrange   *int       `db:"max_chain_orange" json:"max_chain_orange,omitempty"`
+	MaxChainRainbow  *int       `db:"max_chain_rainbow" json:"max_chain_rainbow,omitempty"`
+	MaxJackpotWin    *int       `db:"max_jackpot_win" json:"max_jackpot_win,omitempty"`
+	MaxTotalJackpot  *int       `db:"max_total_jackpot" json:"max_total_jackpot,omitempty"`
+	MaxTotalUltimate *int       `db:"max_total_ultimate" json:"max_total_ultimate,omitempty"`
+	Medal1           *int       `db:"medal_1" json:"medal_1,omitempty"`
+	Medal2           *int       `db:"medal_2" json:"medal_2,omitempty"`
+	Medal3           *int       `db:"medal_3" json:"medal_3,omitempty"`
+	Medal4           *int       `db:"medal_4" json:"medal_4,omitempty"`
+	Medal5           *int       `db:"medal_5" json:"medal_5,omitempty"`
+	OutMedal         *int       `db:"out_medal" json:"out_medal,omitempty"`
+	ShirbeBuy300     *int       `db:"shirbe_buy300" json:"shirbe_buy300,omitempty"`
+	SlotHit          *int       `db:"slot_hit" json:"slot_hit,omitempty"`
+	StartSlot        *int       `db:"start_slot" json:"start_slot,omitempty"`
+	SugorokuSteps    *int       `db:"sugoroku_steps" json:"sugoroku_steps,omitempty"`
+	TotalPlayTime    *int       `db:"total_play_time" json:"total_play_time,omitempty"`
+	UserId           *string    `db:"user_id" json:"user_id,omitempty"`
+	Version          *int       `json:"version,omitempty"`
 }
 
 // GetDataParams defines parameters for GetData.
@@ -68,13 +70,15 @@ type GetDataParams struct {
 	Fever         int    `form:"fever" json:"fever"`
 
 	// Sig HMAC-SHA256署名（順序固定・user_id込みで生成）
-	Sig             string `form:"sig" json:"sig"`
-	MaxChainItem    *int   `form:"max_chain_item,omitempty" json:"max_chain_item,omitempty"`
-	MaxChainOrange  *int   `form:"max_chain_orange,omitempty" json:"max_chain_orange,omitempty"`
-	MaxChainRainbow *int   `form:"max_chain_rainbow,omitempty" json:"max_chain_rainbow,omitempty"`
-	SugorokuSteps   *int   `form:"sugoroku_steps,omitempty" json:"sugoroku_steps,omitempty"`
-	Jackpots        *int   `form:"jackpots,omitempty" json:"jackpots,omitempty"`
-	MaxJackpotWin   *int   `form:"max_jackpot_win,omitempty" json:"max_jackpot_win,omitempty"`
+	Sig              string `form:"sig" json:"sig"`
+	MaxChainItem     *int   `form:"max_chain_item,omitempty" json:"max_chain_item,omitempty"`
+	MaxChainOrange   *int   `form:"max_chain_orange,omitempty" json:"max_chain_orange,omitempty"`
+	MaxChainRainbow  *int   `form:"max_chain_rainbow,omitempty" json:"max_chain_rainbow,omitempty"`
+	SugorokuSteps    *int   `form:"sugoroku_steps,omitempty" json:"sugoroku_steps,omitempty"`
+	Jackpots         *int   `form:"jackpots,omitempty" json:"jackpots,omitempty"`
+	MaxJackpotWin    *int   `form:"max_jackpot_win,omitempty" json:"max_jackpot_win,omitempty"`
+	MaxTotalJackpot  *int   `form:"max_total_jackpot,omitempty" json:"max_total_jackpot,omitempty"`
+	MaxTotalUltimate *int   `form:"max_total_ultimate,omitempty" json:"max_total_ultimate,omitempty"`
 }
 
 // GetRankingsParams defines parameters for GetRankings.

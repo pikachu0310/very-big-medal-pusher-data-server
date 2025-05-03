@@ -16,9 +16,10 @@ func (r *Repository) InsertGameData(ctx context.Context, data models.GameData) e
         medal_1, medal_2, medal_3, medal_4, medal_5,
         R_medal, total_play_time, fever,
         max_chain_item, max_chain_orange, max_chain_rainbow,
-        sugoroku_steps, jackpots, max_jackpot_win
+        sugoroku_steps, jackpots, max_jackpot_win, 
+        max_total_jackpot, max_total_ultimate
     ) VALUES (
-        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
     )`,
 		data.UserId, data.Version,
 		data.HaveMedal, data.InMedal, data.OutMedal, data.SlotHit,
@@ -27,6 +28,7 @@ func (r *Repository) InsertGameData(ctx context.Context, data models.GameData) e
 		data.RMedal, data.TotalPlayTime, data.Fever,
 		data.MaxChainItem, data.MaxChainOrange, data.MaxChainRainbow,
 		data.SugorokuSteps, data.Jackpots, data.MaxJackpotWin,
+		data.MaxTotalJackpot, data.MaxTotalUltimate,
 	)
 	if err != nil {
 		return fmt.Errorf("insert game data: %w", err)
@@ -36,27 +38,29 @@ func (r *Repository) InsertGameData(ctx context.Context, data models.GameData) e
 
 func (r *Repository) GetRankings(ctx context.Context, sortBy string, limit int) ([]models.GameData, error) {
 	validSortColumns := map[string]bool{
-		"have_medal":        true,
-		"in_medal":          true,
-		"out_medal":         true,
-		"slot_hit":          true,
-		"get_shirbe":        true,
-		"start_slot":        true,
-		"shirbe_buy300":     true,
-		"medal_1":           true,
-		"medal_2":           true,
-		"medal_3":           true,
-		"medal_4":           true,
-		"medal_5":           true,
-		"R_medal":           true,
-		"total_play_time":   true,
-		"fever":             true,
-		"max_chain_item":    true,
-		"max_chain_orange":  true,
-		"max_chain_rainbow": true,
-		"sugoroku_steps":    true,
-		"max_jackpot_win":   true,
-		"jackpots":          true,
+		"have_medal":         true,
+		"in_medal":           true,
+		"out_medal":          true,
+		"slot_hit":           true,
+		"get_shirbe":         true,
+		"start_slot":         true,
+		"shirbe_buy300":      true,
+		"medal_1":            true,
+		"medal_2":            true,
+		"medal_3":            true,
+		"medal_4":            true,
+		"medal_5":            true,
+		"R_medal":            true,
+		"total_play_time":    true,
+		"fever":              true,
+		"max_chain_item":     true,
+		"max_chain_orange":   true,
+		"max_chain_rainbow":  true,
+		"sugoroku_steps":     true,
+		"max_jackpot_win":    true,
+		"jackpots":           true,
+		"max_total_jackpot":  true,
+		"max_total_ultimate": true,
 	}
 
 	if !validSortColumns[sortBy] {
