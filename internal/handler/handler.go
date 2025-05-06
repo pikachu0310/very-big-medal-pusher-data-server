@@ -1,19 +1,21 @@
 package handler
 
 import (
+	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"log"
 	"net/http"
 	"reflect"
 	"sort"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/motoki317/sc"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/domain"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/repository"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
@@ -25,40 +27,43 @@ var GlobalSecret = "your_global_secret_here"
 const rankingsCacheTTL = time.Minute
 
 type Handler struct {
-	repo *repository.Repository
-
-	// キャッシュ用ミューテックス
-	cacheMu sync.RWMutex
-
-	// 200件キャッシュ
-	cacheMaxChainOrange200    []domain.RankingResponseMaxChainOrange
-	cacheMaxChainOrange200At  time.Time
-	cacheMaxChainRainbow200   []domain.RankingResponseMaxChainRainbow
-	cacheMaxChainRainbow200At time.Time
-
-	// 500件キャッシュ
-	cacheMaxChainOrange500    []domain.RankingResponseMaxChainOrange
-	cacheMaxChainOrange500At  time.Time
-	cacheMaxChainRainbow500   []domain.RankingResponseMaxChainRainbow
-	cacheMaxChainRainbow500At time.Time
-	cacheMaxTotalJackpot500   []domain.RankingResponseMaxTotalJackpot
-	cacheMaxTotalJackpot500At time.Time
-
-	// 1000件キャッシュ
-	cacheMaxChainOrange1000    []domain.RankingResponseMaxChainOrange
-	cacheMaxChainOrange1000At  time.Time
-	cacheMaxChainRainbow1000   []domain.RankingResponseMaxChainRainbow
-	cacheMaxChainRainbow1000At time.Time
-	cacheMaxTotalJackpot1000   []domain.RankingResponseMaxTotalJackpot
-	cacheMaxTotalJackpot1000At time.Time
-
-	// ← ここにメダル総量キャッシュ用フィールドを追加
-	cacheTotalMedals   int
-	cacheTotalMedalsAt time.Time
+	repo             *repository.Repository
+	rankingCache     *sc.Cache[string, []models.GameData]
+	totalMedalsCache *sc.Cache[string, int]
 }
 
 func New(repo *repository.Repository) *Handler {
-	return &Handler{repo: repo}
+	h := &Handler{repo: repo}
+
+	// ランキング全般キャッシュ (キー: "sortBy:limit")
+	rankCache, err := sc.New(
+		func(ctx context.Context, key string) ([]models.GameData, error) {
+			parts := strings.Split(key, ":")
+			sortBy := parts[0]
+			limit, _ := strconv.Atoi(parts[1])
+			return h.repo.GetRankings(ctx, sortBy, limit)
+		},
+		rankingsCacheTTL, rankingsCacheTTL,
+		sc.WithLRUBackend(500),
+	)
+	if err != nil {
+		log.Fatalf("failed to create ranking cache: %v", err)
+	}
+	h.rankingCache = rankCache
+
+	// 全ユーザーのメダル合計キャッシュ (固定キー)
+	medalCache, err := sc.New(
+		func(ctx context.Context, _ string) (int, error) {
+			return h.repo.GetTotalMedals(ctx)
+		},
+		rankingsCacheTTL, rankingsCacheTTL,
+	)
+	if err != nil {
+		log.Fatalf("failed to create total medals cache: %v", err)
+	}
+	h.totalMedalsCache = medalCache
+
+	return h
 }
 
 func (h *Handler) GetData(ctx echo.Context, params models.GetDataParams) error {
@@ -68,7 +73,7 @@ func (h *Handler) GetData(ctx echo.Context, params models.GetDataParams) error {
 	log.Printf("Generated param string: %s", paramStr)
 
 	if !verifySignature(paramStr, params.Sig, userSecret) {
-		return ctx.String(http.StatusBadRequest, "invalid signature")
+		return ctx.String(http.StatusUnauthorized, "invalid signature")
 	}
 
 	exist, err := h.repo.ExistsSameGameData(ctx.Request().Context(), params.UserId, params.TotalPlayTime)
@@ -98,14 +103,7 @@ func nullifyNullValues(params *models.GetDataParams) {
 
 	for i := 0; i < t.NumField(); i++ {
 		fv := v.Field(i)
-
-		// ポインタ型かつ要素型が int で、かつ現在 nil なら…
-		if fv.Kind() == reflect.Ptr &&
-			fv.Type().Elem().Kind() == reflect.Int &&
-			fv.IsNil() {
-
-			// reflect.New(要素の型) で *int の Value を作り、
-			// そのアドレスはすべて 0 初期化されている
+		if fv.Kind() == reflect.Ptr && fv.Elem().Kind() == reflect.Int && fv.IsNil() {
 			newPtr := reflect.New(fv.Type().Elem())
 			fv.Set(newPtr)
 		}
@@ -120,8 +118,6 @@ func (h *Handler) GetUsersUserIdData(ctx echo.Context, userId string) error {
 	return ctx.JSON(http.StatusOK, data)
 }
 
-// GetRankings は max_chain_{orange,rainbow} 用のキャッシュを利用し、
-// 要件に合わせた JSON レスポンスを返します。
 func (h *Handler) GetRankings(ctx echo.Context, params models.GetRankingsParams) error {
 	sortBy := "have_medal"
 	if params.Sort != nil {
@@ -132,140 +128,36 @@ func (h *Handler) GetRankings(ctx echo.Context, params models.GetRankingsParams)
 		limit = *params.Limit
 	}
 
-	// キャッシュ判定
-	isOrange200 := sortBy == "max_chain_orange" && limit == 200
-	isOrange500 := sortBy == "max_chain_orange" && limit == 500
-	isOrange1000 := sortBy == "max_chain_orange" && limit == 1000
-	isRainbow200 := sortBy == "max_chain_rainbow" && limit == 200
-	isRainbow500 := sortBy == "max_chain_rainbow" && limit == 500
-	isRainbow1000 := sortBy == "max_chain_rainbow" && limit == 1000
-	isTotalJackpot500 := sortBy == "max_total_jackpot" && limit == 500
-	isTotalJackpot1000 := sortBy == "max_total_jackpot" && limit == 1000
-
-	// キャッシュ応答
-	h.cacheMu.RLock()
-	switch {
-	case isOrange200 && time.Since(h.cacheMaxChainOrange200At) < rankingsCacheTTL:
-		resp := h.cacheMaxChainOrange200
-		h.cacheMu.RUnlock()
-		return ctx.JSON(http.StatusOK, resp)
-	case isOrange500 && time.Since(h.cacheMaxChainOrange500At) < rankingsCacheTTL:
-		resp := h.cacheMaxChainOrange500
-		h.cacheMu.RUnlock()
-		return ctx.JSON(http.StatusOK, resp)
-	case isOrange1000 && time.Since(h.cacheMaxChainOrange1000At) < rankingsCacheTTL:
-		resp := h.cacheMaxChainOrange1000
-		h.cacheMu.RUnlock()
-		return ctx.JSON(http.StatusOK, resp)
-	case isRainbow200 && time.Since(h.cacheMaxChainRainbow200At) < rankingsCacheTTL:
-		resp := h.cacheMaxChainRainbow200
-		h.cacheMu.RUnlock()
-		return ctx.JSON(http.StatusOK, resp)
-	case isRainbow500 && time.Since(h.cacheMaxChainRainbow500At) < rankingsCacheTTL:
-		resp := h.cacheMaxChainRainbow500
-		h.cacheMu.RUnlock()
-		return ctx.JSON(http.StatusOK, resp)
-	case isRainbow1000 && time.Since(h.cacheMaxChainRainbow1000At) < rankingsCacheTTL:
-		resp := h.cacheMaxChainRainbow1000
-		h.cacheMu.RUnlock()
-		return ctx.JSON(http.StatusOK, resp)
-	case isTotalJackpot500 && time.Since(h.cacheMaxTotalJackpot500At) < rankingsCacheTTL:
-		resp := h.cacheMaxTotalJackpot500
-		h.cacheMu.RUnlock()
-		return ctx.JSON(http.StatusOK, resp)
-	case isTotalJackpot1000 && time.Since(h.cacheMaxTotalJackpot1000At) < rankingsCacheTTL:
-		resp := h.cacheMaxTotalJackpot1000
-		h.cacheMu.RUnlock()
-		return ctx.JSON(http.StatusOK, resp)
-	}
-	h.cacheMu.RUnlock()
-
-	// DB取得 + キャッシュ更新
-	raw, err := h.repo.GetRankings(ctx.Request().Context(), sortBy, limit)
+	// キャッシュキーを生成
+	key := fmt.Sprintf("%s:%d", sortBy, limit)
+	raw, err := h.rankingCache.Get(ctx.Request().Context(), key)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	h.cacheMu.Lock()
-	defer h.cacheMu.Unlock()
-
-	switch {
-	case isOrange200:
+	// ソート種別に応じて変換
+	switch sortBy {
+	case "max_chain_orange":
 		resp := domain.GetDatasToRankingResponseMaxChainOrange(raw)
-		h.cacheMaxChainOrange200 = resp
-		h.cacheMaxChainOrange200At = time.Now()
 		return ctx.JSON(http.StatusOK, resp)
-
-	case isOrange500:
-		resp := domain.GetDatasToRankingResponseMaxChainOrange(raw)
-		h.cacheMaxChainOrange500 = resp
-		h.cacheMaxChainOrange500At = time.Now()
-		return ctx.JSON(http.StatusOK, resp)
-
-	case isOrange1000:
-		resp := domain.GetDatasToRankingResponseMaxChainOrange(raw)
-		h.cacheMaxChainOrange1000 = resp
-		h.cacheMaxChainOrange1000At = time.Now()
-		return ctx.JSON(http.StatusOK, resp)
-
-	case isRainbow200:
+	case "max_chain_rainbow":
 		resp := domain.GetDatasToRankingResponseMaxChainRainbow(raw)
-		h.cacheMaxChainRainbow200 = resp
-		h.cacheMaxChainRainbow200At = time.Now()
 		return ctx.JSON(http.StatusOK, resp)
-
-	case isRainbow500:
-		resp := domain.GetDatasToRankingResponseMaxChainRainbow(raw)
-		h.cacheMaxChainRainbow500 = resp
-		h.cacheMaxChainRainbow500At = time.Now()
-		return ctx.JSON(http.StatusOK, resp)
-
-	case isRainbow1000:
-		resp := domain.GetDatasToRankingResponseMaxChainRainbow(raw)
-		h.cacheMaxChainRainbow1000 = resp
-		h.cacheMaxChainRainbow1000At = time.Now()
-		return ctx.JSON(http.StatusOK, resp)
-
-	case isTotalJackpot500:
+	case "max_total_jackpot":
 		resp := domain.GetDatasToRankingResponseMaxTotalJackpot(raw)
-		h.cacheMaxTotalJackpot500 = resp
-		h.cacheMaxTotalJackpot500At = time.Now()
 		return ctx.JSON(http.StatusOK, resp)
-
-	case isTotalJackpot1000:
-		resp := domain.GetDatasToRankingResponseMaxTotalJackpot(raw)
-		h.cacheMaxTotalJackpot1000 = resp
-		h.cacheMaxTotalJackpot1000At = time.Now()
-		return ctx.JSON(http.StatusOK, resp)
+	default:
+		// その他は生の GameData
+		return ctx.JSON(http.StatusOK, raw)
 	}
-
-	// その他のソートは生の models.GameData を返す
-	return ctx.JSON(http.StatusOK, raw)
 }
 
 // GetTotalMedals は全ユーザーの最新 have_medal 合計を返すエンドポイント
 func (h *Handler) GetTotalMedals(ctx echo.Context) error {
-	// キャッシュ判定
-	h.cacheMu.RLock()
-	if time.Since(h.cacheTotalMedalsAt) < rankingsCacheTTL {
-		total := h.cacheTotalMedals
-		h.cacheMu.RUnlock()
-		return ctx.JSON(http.StatusOK, map[string]int{"total_medals": total})
-	}
-	h.cacheMu.RUnlock()
-
-	// キャッシュ切れ or 未初期化
-	total, err := h.repo.GetTotalMedals(ctx.Request().Context())
+	total, err := h.totalMedalsCache.Get(ctx.Request().Context(), "total")
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, err.Error())
 	}
-
-	// キャッシュ更新
-	h.cacheMu.Lock()
-	h.cacheTotalMedals = total
-	h.cacheTotalMedalsAt = time.Now()
-	h.cacheMu.Unlock()
-
 	return ctx.JSON(http.StatusOK, map[string]int{"total_medals": total})
 }
 
@@ -283,7 +175,6 @@ func createSortedParamString(params models.GetDataParams) string {
 
 	// form タグ名 → 値 のマップ
 	paramMap := make(map[string]string, t.NumField())
-
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 		// form タグを取得し、",omitempty" 等を取り除く
@@ -296,7 +187,6 @@ func createSortedParamString(params models.GetDataParams) string {
 			// signature は含めない
 			continue
 		}
-
 		fv := v.Field(i)
 		// ポインタは nil チェックして、中身を取り出す
 		if fv.Kind() == reflect.Ptr {
@@ -305,7 +195,6 @@ func createSortedParamString(params models.GetDataParams) string {
 			}
 			fv = fv.Elem()
 		}
-
 		var strVal string
 		switch fv.Kind() {
 		case reflect.String:
@@ -313,10 +202,8 @@ func createSortedParamString(params models.GetDataParams) string {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			strVal = strconv.FormatInt(fv.Int(), 10)
 		default:
-			// ここで必要な型を追加
 			continue
 		}
-
 		paramMap[key] = strVal
 	}
 
@@ -325,7 +212,6 @@ func createSortedParamString(params models.GetDataParams) string {
 	for k := range paramMap {
 		keys = append(keys, k)
 	}
-
 	sort.Slice(keys, func(i, j int) bool {
 		return strings.ToLower(keys[i]) < strings.ToLower(keys[j])
 	})
@@ -344,10 +230,8 @@ func createSortedParamString(params models.GetDataParams) string {
 }
 
 func verifySignature(data, sig string, secret []byte) bool {
-	//return sig == "test"
-
 	mac := hmac.New(sha256.New, secret)
 	mac.Write([]byte(data))
-	expectedMAC := hex.EncodeToString(mac.Sum(nil))
-	return hmac.Equal([]byte(expectedMAC), []byte(sig))
+	expected := hex.EncodeToString(mac.Sum(nil))
+	return hmac.Equal([]byte(expected), []byte(sig))
 }
