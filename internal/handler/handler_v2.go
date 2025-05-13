@@ -40,13 +40,17 @@ func (h *Handler) GetV2Data(ctx echo.Context, params models.GetV2DataParams) err
 }
 
 func (h *Handler) GetV2UsersUserIdData(ctx echo.Context, userId string) error {
-	// 最新のセーブデータを取得
+	// 1. 最新のセーブデータを取得
 	sd, err := h.repo.GetLatestSave(ctx.Request().Context(), userId)
 	if err != nil {
 		return ctx.String(http.StatusNotFound, err.Error())
 	}
-	// モデルそのまま返却
-	return ctx.JSON(http.StatusOK, sd)
+
+	// 2. domain→OpenAPIモデルに変換
+	model := sd.ToModel()
+
+	// 3. JSONで返却
+	return ctx.JSON(http.StatusOK, model)
 }
 
 func (h *Handler) GetV2Statistics(ctx echo.Context) error {
