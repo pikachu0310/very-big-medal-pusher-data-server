@@ -66,6 +66,10 @@ func New(repo *repository.Repository) *Handler {
 	return h
 }
 
+func (h *Handler) GetPing(ctx echo.Context) error {
+	return ctx.String(http.StatusOK, "pong")
+}
+
 func (h *Handler) GetData(ctx echo.Context, params models.GetDataParams) error {
 	log.Printf("Received params: %+v", params)
 	userSecret := generateUserSecret(params.UserId)
