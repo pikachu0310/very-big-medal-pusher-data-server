@@ -207,7 +207,7 @@ JOIN latest_chain AS lc
  AND lc.value = mpu.max_value
 GROUP BY mpu.user_id, mpu.max_value
 ORDER BY mpu.max_value DESC, created_at ASC
-LIMIT 50;
+LIMIT 500;
 `
 		rows, err := r.db.QueryxContext(ctx, q)
 		if err != nil {
@@ -255,7 +255,7 @@ JOIN latest_chain AS lc
  AND lc.value = mpu.max_value
 GROUP BY mpu.user_id, mpu.max_value
 ORDER BY mpu.max_value DESC, created_at ASC
-LIMIT 50;
+LIMIT 500;
 `
 		rows, err := r.db.QueryxContext(ctx, q)
 		if err != nil {
@@ -292,7 +292,7 @@ JOIN save_data_v2 AS sd
  AND sd.jack_totalmax = mj.value
 GROUP BY mj.user_id, mj.value
 ORDER BY mj.value DESC, created_at ASC
-LIMIT 50;
+LIMIT 500;
 `
 		rows, err := r.db.QueryxContext(ctx, q)
 		if err != nil {
