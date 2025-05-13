@@ -49,6 +49,54 @@ type GameData struct {
 	Version          *int       `json:"version,omitempty"`
 }
 
+// RankingEntry defines model for RankingEntry.
+type RankingEntry struct {
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+	UserId    *string    `json:"user_id,omitempty"`
+	Value     *int       `json:"value,omitempty"`
+}
+
+// SaveDataV2 defines model for SaveDataV2.
+type SaveDataV2 struct {
+	BallChain    *int            `db:"ball_chain" json:"ball_chain,omitempty"`
+	BallGet      *int            `db:"ball_get" json:"ball_get,omitempty"`
+	BuyShbi      *int            `db:"buy_shbi" json:"buy_shbi,omitempty"`
+	Credit       *int64          `db:"credit" json:"credit,omitempty"`
+	CreditAll    *int64          `db:"credit_all" json:"credit_all,omitempty"`
+	DcBallChain  *map[string]int `json:"dc_ball_chain,omitempty" table:"save_data_v2_ball_chain"`
+	DcBallGet    *map[string]int `json:"dc_ball_get,omitempty" table:"save_data_v2_ball_get"`
+	DcMedalGet   *map[string]int `json:"dc_medal_get,omitempty" table:"save_data_v2_medal_get"`
+	Firstboot    *string         `json:"firstboot,omitempty"`
+	JackGet      *int            `db:"jack_get" json:"jack_get,omitempty"`
+	JackStartmax *int            `db:"jack_startmax" json:"jack_startmax,omitempty"`
+	JackTotalmax *int            `db:"jack_totalmax" json:"jack_totalmax,omitempty"`
+	LAchieve     *[]string       `json:"l_achieve,omitempty" table:"save_data_v2_achievements"`
+	Lastsave     *string         `json:"lastsave,omitempty"`
+	Legacy       *int            `db:"legacy" json:"legacy,omitempty"`
+	MedalGet     *int            `db:"medal_get" json:"medal_get,omitempty"`
+	MedalIn      *int            `db:"medal_in" json:"medal_in,omitempty"`
+	Playtime     *int64          `json:"playtime,omitempty"`
+	RmshbiGet    *int            `db:"rmshbi_get" json:"rmshbi_get,omitempty"`
+	SlotGetfev   *int            `db:"slot_getfev" json:"slot_getfev,omitempty"`
+	SlotHit      *int            `db:"slot_hit" json:"slot_hit,omitempty"`
+	SlotStart    *int            `db:"slot_start" json:"slot_start,omitempty"`
+	SlotStartfev *int            `db:"slot_startfev" json:"slot_startfev,omitempty"`
+	SqrGet       *int            `db:"sqr_get" json:"sqr_get,omitempty"`
+	SqrStep      *int            `db:"sqr_step" json:"sqr_step,omitempty"`
+	UltCombomax  *int            `db:"ult_combomax" json:"ult_combomax,omitempty"`
+	UltGet       *int            `db:"ult_get" json:"ult_get,omitempty"`
+	UltTotalmax  *int            `db:"ult_totalmax" json:"ult_totalmax,omitempty"`
+	Version      *int            `db:"version" json:"version,omitempty"`
+}
+
+// StatisticsV2 defines model for StatisticsV2.
+type StatisticsV2 struct {
+	MaxChainOrange  *[]RankingEntry `json:"max_chain_orange,omitempty"`
+	MaxChainRainbow *[]RankingEntry `json:"max_chain_rainbow,omitempty"`
+	MaxTotalJackpot *[]RankingEntry `json:"max_total_jackpot,omitempty"`
+	TotalMedals     *int            `json:"total_medals,omitempty"`
+}
+
 // GetDataParams defines parameters for GetData.
 type GetDataParams struct {
 	Version       int    `form:"version" json:"version"`
@@ -89,3 +137,11 @@ type GetRankingsParams struct {
 
 // GetRankingsParamsSort defines parameters for GetRankings.
 type GetRankingsParamsSort string
+
+// GetV2DataParams defines parameters for GetV2Data.
+type GetV2DataParams struct {
+	// Data URL エンコード済み JSON セーブデータ
+	Data   string `form:"data" json:"data"`
+	UserId string `form:"user_id" json:"user_id"`
+	Sig    string `form:"sig" json:"sig"`
+}
