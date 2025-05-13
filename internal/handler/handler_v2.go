@@ -5,22 +5,31 @@ import (
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/domain"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
 	"net/http"
-	"net/url"
+	"strings"
 )
 
 func (h *Handler) GetV2Data(ctx echo.Context, params models.GetV2DataParams) error {
-	// 1. パラメータ文字列を復元 (data と user_id)
-	raw := params.Data
-	userID := params.UserId
-	sig := params.Sig
-	// 2. 署名検証
-	// ソートされたクエリ文字列: data=...&user_id=...
-	paramStr := "data=" + raw + "&user_id=" + url.QueryEscape(userID)
-	if !verifySignature(paramStr, sig, generateUserSecret(userID)) {
+	// grab the raw query string, e.g. "data=%7B...%7D&user_id=pikachu0310&sig=..."
+	rawQS := ctx.Request().URL.RawQuery
+
+	// split off the signature portion
+	parts := strings.SplitN(rawQS, "&sig=", 2)
+	if len(parts) != 2 {
+		return ctx.String(http.StatusBadRequest, "missing sig")
+	}
+	queryStr := parts[0] // exactly "data=<encodedJson>&user_id=<rawPlayerId>"
+	sig := params.Sig    // echo already bound the decoded sig
+
+	// verify
+	if !verifySignature(queryStr, sig, generateUserSecret(params.UserId)) {
 		return ctx.String(http.StatusUnauthorized, "invalid signature")
 	}
+
+	// 1. パラメータ文字列を復元 (data と user_id)
+	userID := params.UserId
+
 	// 3. 重複チェック (playtime)
-	sd, err := domain.ParseSaveData(raw)
+	sd, err := domain.ParseSaveData(params.Data)
 	if err != nil {
 		return ctx.String(http.StatusBadRequest, err.Error())
 	}
