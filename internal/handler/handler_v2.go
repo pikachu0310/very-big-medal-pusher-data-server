@@ -28,7 +28,7 @@ func (h *Handler) GetV2Data(ctx echo.Context, params models.GetV2DataParams) err
 	if err != nil {
 		return ctx.String(http.StatusBadRequest, "invalid user_id encoding")
 	}
-	signingStr := dataPart + "&user_id=" + uid
+	signingStr := dataPart + "&user_id=" + encodedUid
 
 	// 署名検証
 	if !verifySignature(signingStr, params.Sig, generateUserSecret(uid)) {
