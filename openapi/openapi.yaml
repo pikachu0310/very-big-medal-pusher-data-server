@@ -1,174 +1,140 @@
 openapi: 3.0.3
 info:
-  title: Very Big Medal Pusher Game Data API
-  version: "1.0.1"
+  title: Massive Medal Pusher Game Data API
+  version: "2.0.0"
   description: |
     VRChat用メダルプッシャーワールド「クソでっけぇプッシャーゲーム」のプレイデータを送信するAPI。
+    — v1 と後方互換の v2 を提供します。
 
 servers:
   - url: https://push.trap.games
 
 paths:
+  # v1 endpoints (従来)
   /data:
     get:
+      tags: [v1]
       summary: ゲームデータを送信
       description: HMAC署名付きの統計情報をGETで送信する
       parameters:
         - name: version
           in: query
           required: true
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: user_id
           in: query
           required: true
-          schema:
-            type: string
+          schema: { type: string }
         - name: have_medal
           in: query
           required: true
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: in_medal
           in: query
           required: true
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: out_medal
           in: query
           required: true
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: slot_hit
           in: query
           required: true
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: get_shirbe
           in: query
           required: true
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: start_slot
           in: query
           required: true
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: shirbe_buy300
           in: query
           required: true
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: medal_1
           in: query
           required: true
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: medal_2
           in: query
           required: true
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: medal_3
           in: query
           required: true
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: medal_4
           in: query
           required: true
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: medal_5
           in: query
           required: true
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: R_medal
           in: query
           required: true
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: total_play_time
           in: query
           required: true
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: fever
           in: query
           required: true
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: sig
           in: query
           required: true
           description: HMAC-SHA256署名（順序固定・user_id込みで生成）
-          schema:
-            type: string
+          schema: { type: string }
         - name: max_chain_item
           in: query
-          required: false
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: max_chain_orange
           in: query
-          required: false
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: max_chain_rainbow
           in: query
-          required: false
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: sugoroku_steps
           in: query
-          required: false
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: jackpots
           in: query
-          required: false
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: max_jackpot_win
           in: query
-          required: false
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: max_total_jackpot
           in: query
-          required: false
-          schema:
-            type: integer
+          schema: { type: integer }
         - name: max_total_ultimate
           in: query
-          required: false
-          schema:
-            type: integer
+          schema: { type: integer }
       responses:
-        '200':
-          description: 正常に保存されました
-        '400':
-          description: 不正な署名 or パラメータ
-        '500':
-          description: サーバー内部エラー
+        '200': { description: 正常に保存されました }
+        '400': { description: 不正な署名 or パラメータ }
+        '500': { description: サーバー内部エラー }
 
   /ping:
     get:
+      tags: [v1, v2]
       summary: ヘルスチェック
       responses:
-        '200':
-          description: サーバー稼働中
+        '200': { description: サーバー稼働中 }
 
   /users/{user_id}/data:
     get:
+      tags: [v1]
       summary: ユーザーごとのゲームデータを取得
       parameters:
         - name: user_id
           in: path
           required: true
-          schema:
-            type: string
+          schema: { type: string }
       responses:
         '200':
           description: ユーザーのゲームデータ
@@ -176,23 +142,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GameData'
-        '404':
-          description: ユーザーが見つかりません
+        '404': { description: ユーザーが見つかりません }
 
   /rankings:
     get:
+      tags: [v1]
       summary: ランキングを取得
       parameters:
         - name: sort
           in: query
-          required: false
           schema:
             type: string
-            enum: [ have_medal, fever, in_medal, out_medal, max_chain_item, max_chain_orange, max_chain_rainbow ]
+            enum:
+              - have_medal
+              - fever
+              - in_medal
+              - out_medal
+              - max_chain_item
+              - max_chain_orange
+              - max_chain_rainbow
             default: have_medal
         - name: limit
           in: query
-          required: false
           schema:
             type: integer
             default: 50
@@ -208,6 +179,7 @@ paths:
 
   /total_medals:
     get:
+      tags: [v1]
       summary: 全ユーザーのメダル総量を取得
       description: 全ユーザーの最新データにおける `have_medal` の合計を返します
       responses:
@@ -218,117 +190,268 @@ paths:
               schema:
                 type: object
                 properties:
-                  total_medals:
-                    type: integer
-                    description: 全ユーザーの `have_medal` 合計値
-        '500':
-          description: サーバー内部エラー
+                  total_medals: { type: integer }
+        '500': { description: サーバー内部エラー }
+
+  # v2 endpoints (新仕様)
+  /v2/data:
+    get:
+      tags: [v2]
+      summary: セーブデータを送信 (v2)
+      description: JSON 化したセーブデータを GET パラメータで送信して保存します。
+      parameters:
+        - name: data
+          in: query
+          required: true
+          schema: { type: string }
+          description: URL エンコード済み JSON セーブデータ
+        - name: user_id
+          in: query
+          required: true
+          schema: { type: string }
+        - name: sig
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: 正常に保存されました }
+        '400': { description: 無効なパラメータ }
+        '401': { description: 署名認証失敗 }
+        '409': { description: 同一データの重複検出 }
+        '500': { description: サーバー内部エラー }
+
+  /v2/users/{user_id}/data:
+    get:
+      tags: [v2]
+      summary: ユーザーの最新セーブデータを取得 (v2)
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: セーブデータ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaveDataV2'
+        '404': { description: データが見つかりません }
+        '500': { description: サーバー内部エラー }
+
+  /v2/statistics:
+    get:
+      tags: [v2]
+      summary: グローバル統計を取得 (v2)
+      description: 各種ランキングと全ユーザーのメダル総量をまとめて返します。
+      responses:
+        '200':
+          description: 統計データ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatisticsV2'
+        '500': { description: サーバー内部エラー }
 
 components:
   schemas:
+    # v1 schema
     GameData:
       type: object
       properties:
-        version:
-          type: integer
-        id:
-          type: string
+        version:       { type: integer }
+        id:            { type: string }
         user_id:
           type: string
-          x-oapi-codegen-extra-tags:
-            db: 'user_id'
+          x-oapi-codegen-extra-tags: { db: 'user_id' }
         have_medal:
           type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'have_medal'
+          x-oapi-codegen-extra-tags: { db: 'have_medal' }
         in_medal:
           type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'in_medal'
+          x-oapi-codegen-extra-tags: { db: 'in_medal' }
         out_medal:
           type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'out_medal'
+          x-oapi-codegen-extra-tags: { db: 'out_medal' }
         slot_hit:
           type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'slot_hit'
+          x-oapi-codegen-extra-tags: { db: 'slot_hit' }
         get_shirbe:
           type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'get_shirbe'
+          x-oapi-codegen-extra-tags: { db: 'get_shirbe' }
         start_slot:
           type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'start_slot'
+          x-oapi-codegen-extra-tags: { db: 'start_slot' }
         shirbe_buy300:
           type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'shirbe_buy300'
+          x-oapi-codegen-extra-tags: { db: 'shirbe_buy300' }
         medal_1:
           type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'medal_1'
+          x-oapi-codegen-extra-tags: { db: 'medal_1' }
         medal_2:
           type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'medal_2'
+          x-oapi-codegen-extra-tags: { db: 'medal_2' }
         medal_3:
           type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'medal_3'
+          x-oapi-codegen-extra-tags: { db: 'medal_3' }
         medal_4:
           type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'medal_4'
+          x-oapi-codegen-extra-tags: { db: 'medal_4' }
         medal_5:
           type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'medal_5'
+          x-oapi-codegen-extra-tags: { db: 'medal_5' }
         R_medal:
           type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'R_medal'
+          x-oapi-codegen-extra-tags: { db: 'R_medal' }
         total_play_time:
           type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'total_play_time'
+          x-oapi-codegen-extra-tags: { db: 'total_play_time' }
         fever:
           type: integer
         created_at:
           type: string
           format: date-time
-          x-oapi-codegen-extra-tags:
-            db: 'created_at'
+          x-oapi-codegen-extra-tags: { db: 'created_at' }
         max_chain_item:
           type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'max_chain_item'
+          x-oapi-codegen-extra-tags: { db: 'max_chain_item' }
         max_chain_orange:
           type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'max_chain_orange'
+          x-oapi-codegen-extra-tags: { db: 'max_chain_orange' }
         max_chain_rainbow:
           type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'max_chain_rainbow'
+          x-oapi-codegen-extra-tags: { db: 'max_chain_rainbow' }
         sugoroku_steps:
           type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'sugoroku_steps'
+          x-oapi-codegen-extra-tags: { db: 'sugoroku_steps' }
         jackpots:
           type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'jackpots'
+          x-oapi-codegen-extra-tags: { db: 'jackpots' }
         max_jackpot_win:
           type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'max_jackpot_win'
+          x-oapi-codegen-extra-tags: { db: 'max_jackpot_win' }
         max_total_jackpot:
           type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'max_total_jackpot'
+          x-oapi-codegen-extra-tags: { db: 'max_total_jackpot' }
         max_total_ultimate:
           type: integer
-          x-oapi-codegen-extra-tags:
-            db: 'max_total_ultimate'
+          x-oapi-codegen-extra-tags: { db: 'max_total_ultimate' }
+
+    # v2 schemas
+    SaveDataV2:
+      type: object
+      x-oapi-codegen-extra-tags: { db: 'save_data_v2' }
+      properties:
+        legacy:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'legacy' }
+        version:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'version' }
+        credit:
+          type: integer
+          format: int64
+          x-oapi-codegen-extra-tags: { db: 'credit' }
+        credit_all:
+          type: integer
+          format: int64
+          x-oapi-codegen-extra-tags: { db: 'credit_all' }
+        medal_in:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'medal_in' }
+        medal_get:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'medal_get' }
+        ball_get:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'ball_get' }
+        ball_chain:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'ball_chain' }
+        slot_start:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'slot_start' }
+        slot_startfev:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'slot_startfev' }
+        slot_hit:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'slot_hit' }
+        slot_getfev:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'slot_getfev' }
+        sqr_get:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'sqr_get' }
+        sqr_step:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'sqr_step' }
+        jack_get:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'jack_get' }
+        jack_startmax:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'jack_startmax' }
+        jack_totalmax:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'jack_totalmax' }
+        ult_get:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'ult_get' }
+        ult_combomax:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'ult_combomax' }
+        ult_totalmax:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'ult_totalmax' }
+        rmshbi_get:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'rmshbi_get' }
+        buy_shbi:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'buy_shbi' }
+        firstboot:
+          type: string
+        lastsave:
+          type: string
+        playtime:
+          type: integer
+          format: int64
+        dc_medal_get:
+          type: object
+          additionalProperties: { type: integer }
+          x-oapi-codegen-extra-tags: { table: 'save_data_v2_medal_get' }
+        dc_ball_get:
+          type: object
+          additionalProperties: { type: integer }
+          x-oapi-codegen-extra-tags: { table: 'save_data_v2_ball_get' }
+        dc_ball_chain:
+          type: object
+          additionalProperties: { type: integer }
+          x-oapi-codegen-extra-tags: { table: 'save_data_v2_ball_chain' }
+        l_achieve:
+          type: array
+          items: { type: string }
+          x-oapi-codegen-extra-tags: { table: 'save_data_v2_achievements' }
+
+    RankingEntry:
+      type: object
+      properties:
+        user_id:    { type: string }
+        value:      { type: integer }
+        created_at: { type: string, format: date-time }
+
+    StatisticsV2:
+      type: object
+      properties:
+        max_chain_orange:
+          type: array
+          items: { $ref: '#/components/schemas/RankingEntry' }
+        max_chain_rainbow:
+          type: array
+          items: { $ref: '#/components/schemas/RankingEntry' }
+        max_total_jackpot:
+          type: array
+          items: { $ref: '#/components/schemas/RankingEntry' }
+        total_medals:
+          type: integer
