@@ -7,6 +7,14 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
+)
+
+const (
+	// 統計データのキャッシュキー（単一なので何でも良い）
+	statisticsCacheKey = "v2_stats"
+	// キャッシュ TTL を 1 分に設定
+	statisticsCacheTTL = time.Minute
 )
 
 func (h *Handler) GetV2Data(ctx echo.Context, params models.GetV2DataParams) error {
@@ -73,8 +81,10 @@ func (h *Handler) GetV2UsersUserIdData(ctx echo.Context, userId string) error {
 	return ctx.JSON(http.StatusOK, model)
 }
 
+// GetV2Statistics returns combined rankings and total medals, with cache.
 func (h *Handler) GetV2Statistics(ctx echo.Context) error {
-	stats, err := h.repo.GetStatistics(ctx.Request().Context())
+	// キャッシュから取得。キーは statisticsCacheKey を常に使用
+	stats, err := h.statisticsCache.Get(ctx.Request().Context(), statisticsCacheKey)
 	if err != nil {
 		return ctx.String(http.StatusInternalServerError, err.Error())
 	}
