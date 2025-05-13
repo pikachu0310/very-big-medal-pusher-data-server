@@ -314,15 +314,15 @@ LIMIT 50;
 	// 4) total_medals (以前のまま)
 	{
 		q := `
-SELECT IFNULL(SUM(sd.medal_get),0)
+SELECT COALESCE(SUM(sd.credit), 0) AS total_medals
 FROM save_data_v2 AS sd
 JOIN (
-  SELECT user_id, MAX(created_at) AS max_at
+  SELECT user_id, MAX(id) AS max_id
   FROM save_data_v2
   GROUP BY user_id
 ) AS latest
   ON sd.user_id = latest.user_id
- AND sd.created_at = latest.max_at;
+ AND sd.id = latest.max_id;
 `
 		var total int
 		if err := r.db.GetContext(ctx, &total, q); err != nil {
