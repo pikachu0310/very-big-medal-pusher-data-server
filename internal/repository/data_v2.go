@@ -181,33 +181,16 @@ func (r *Repository) GetStatistics(ctx context.Context) (*models.StatisticsV2, e
 	// 1) max_chain_orange (ball_id = '1')
 	{
 		q := `
-WITH latest_chain AS (
-  SELECT 
-    sd.user_id,
-    bc.chain_count AS value,
-    sd.created_at
-  FROM save_data_v2_ball_chain AS bc
-  JOIN save_data_v2 AS sd ON bc.save_id = sd.id
-  WHERE bc.ball_id = '1'
-),
-max_per_user AS (
-  SELECT 
-    user_id,
-    MAX(value) AS max_value
-  FROM latest_chain
-  GROUP BY user_id
-)
-SELECT 
-  mpu.user_id,
-  mpu.max_value AS value,
-  MIN(lc.created_at) AS created_at
-FROM max_per_user AS mpu
-JOIN latest_chain AS lc
-  ON lc.user_id = mpu.user_id
- AND lc.value = mpu.max_value
-GROUP BY mpu.user_id, mpu.max_value
-ORDER BY mpu.max_value DESC, created_at ASC
-LIMIT 500;
+SELECT
+  sd.user_id,
+  MAX(bc.chain_count) AS value,
+  MIN(sd.created_at)  AS created_at
+FROM save_data_v2_ball_chain AS bc
+JOIN save_data_v2           AS sd ON bc.save_id = sd.id
+WHERE bc.ball_id = '1'
+GROUP BY sd.user_id
+ORDER BY value DESC, created_at ASC
+LIMIT 500
 `
 		rows, err := r.db.QueryxContext(ctx, q)
 		if err != nil {
@@ -229,33 +212,16 @@ LIMIT 500;
 	// 2) max_chain_rainbow (ball_id = '3')
 	{
 		q := `
-WITH latest_chain AS (
-  SELECT 
-    sd.user_id,
-    bc.chain_count AS value,
-    sd.created_at
-  FROM save_data_v2_ball_chain AS bc
-  JOIN save_data_v2 AS sd ON bc.save_id = sd.id
-  WHERE bc.ball_id = '3'
-),
-max_per_user AS (
-  SELECT 
-    user_id,
-    MAX(value) AS max_value
-  FROM latest_chain
-  GROUP BY user_id
-)
-SELECT 
-  mpu.user_id,
-  mpu.max_value AS value,
-  MIN(lc.created_at) AS created_at
-FROM max_per_user AS mpu
-JOIN latest_chain AS lc
-  ON lc.user_id = mpu.user_id
- AND lc.value = mpu.max_value
-GROUP BY mpu.user_id, mpu.max_value
-ORDER BY mpu.max_value DESC, created_at ASC
-LIMIT 500;
+SELECT
+  sd.user_id,
+  MAX(bc.chain_count) AS value,
+  MIN(sd.created_at)  AS created_at
+FROM save_data_v2_ball_chain AS bc
+JOIN save_data_v2           AS sd ON bc.save_id = sd.id
+WHERE bc.ball_id = '3'
+GROUP BY sd.user_id
+ORDER BY value DESC, created_at ASC
+LIMIT 500
 `
 		rows, err := r.db.QueryxContext(ctx, q)
 		if err != nil {
@@ -277,22 +243,14 @@ LIMIT 500;
 	// 3) max_total_jackpot (以前のまま)
 	{
 		q := `
-WITH max_jp AS (
-  SELECT user_id, MAX(jack_totalmax) AS value
-  FROM save_data_v2
-  GROUP BY user_id
-)
-SELECT 
-  mj.user_id,
-  mj.value,
-  MIN(sd.created_at) AS created_at
-FROM max_jp AS mj
-JOIN save_data_v2 AS sd
-  ON sd.user_id = mj.user_id
- AND sd.jack_totalmax = mj.value
-GROUP BY mj.user_id, mj.value
-ORDER BY mj.value DESC, created_at ASC
-LIMIT 500;
+SELECT
+  sd.user_id,
+  MAX(sd.jack_totalmax) AS value,
+  MIN(sd.created_at)    AS created_at
+FROM save_data_v2 AS sd
+GROUP BY sd.user_id
+ORDER BY value DESC, created_at ASC
+LIMIT 500
 `
 		rows, err := r.db.QueryxContext(ctx, q)
 		if err != nil {
@@ -314,15 +272,16 @@ LIMIT 500;
 	// 4) total_medals (以前のまま)
 	{
 		q := `
-SELECT COALESCE(SUM(sd.credit), 0) AS total_medals
-FROM save_data_v2 AS sd
-JOIN (
+SELECT
+  COALESCE(SUM(sd.credit),0) AS total_medals
+FROM (
   SELECT user_id, MAX(id) AS max_id
   FROM save_data_v2
   GROUP BY user_id
-) AS latest
-  ON sd.user_id = latest.user_id
- AND sd.id = latest.max_id;
+) AS t
+JOIN save_data_v2 AS sd
+  ON sd.user_id = t.user_id
+ AND sd.id      = t.max_id
 `
 		var total int
 		if err := r.db.GetContext(ctx, &total, q); err != nil {
