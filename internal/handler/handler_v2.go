@@ -13,8 +13,8 @@ import (
 const (
 	// 統計データのキャッシュキー（単一なので何でも良い）
 	statisticsCacheKey = "v2_stats"
-	// キャッシュ TTL を 1 分に設定
-	statisticsCacheTTL = time.Minute
+	// キャッシュ TTL を 5 分に設定
+	statisticsCacheTTL = 5 * time.Minute
 )
 
 func (h *Handler) GetV2Data(ctx echo.Context, params models.GetV2DataParams) error {

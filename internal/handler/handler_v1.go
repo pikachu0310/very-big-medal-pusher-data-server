@@ -70,8 +70,8 @@ func New(repo *repository.Repository) *Handler {
 			// key は使わないので無視
 			return repo.GetStatistics(ctx)
 		},
-		statisticsCacheTTL, // freshFor: 1分
-		statisticsCacheTTL, // ttl:      1分
+		statisticsCacheTTL, // freshFor: 5分
+		statisticsCacheTTL, // ttl:      5分
 		// 単一キーなのでバックエンドはデフォルトの map で十分
 	)
 	if err != nil {
