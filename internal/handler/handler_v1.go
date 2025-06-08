@@ -27,10 +27,11 @@ var GlobalSecret = "your_global_secret_here"
 const rankingsCacheTTL = time.Minute
 
 type Handler struct {
-	repo             *repository.Repository
-	rankingCache     *sc.Cache[string, []models.GameData]
-	totalMedalsCache *sc.Cache[string, int]
-	statisticsCache  *sc.Cache[string, *models.StatisticsV2]
+	repo              *repository.Repository
+	rankingCache      *sc.Cache[string, []models.GameData]
+	totalMedalsCache  *sc.Cache[string, int]
+	statisticsCache   *sc.Cache[string, *models.StatisticsV2]
+	statisticsCacheV3 *sc.Cache[string, *models.StatisticsV3]
 }
 
 func New(repo *repository.Repository) *Handler {
@@ -78,6 +79,21 @@ func New(repo *repository.Repository) *Handler {
 		log.Fatalf("failed to create statistics cache: %v", err)
 	}
 	h.statisticsCache = statsCache
+
+	// v3 統計データキャッシュの初期化
+	statsCacheV3, err := sc.New(
+		func(ctx context.Context, key string) (*models.StatisticsV3, error) {
+			// key は使わないので無視
+			return repo.GetStatisticsV3(ctx)
+		},
+		statisticsCacheV3TTL, // freshFor: 5分
+		statisticsCacheV3TTL, // ttl:      5分
+		// 単一キーなのでバックエンドはデフォルトの map で十分
+	)
+	if err != nil {
+		log.Fatalf("failed to create statistics v3 cache: %v", err)
+	}
+	h.statisticsCacheV3 = statsCacheV3
 
 	return h
 }
