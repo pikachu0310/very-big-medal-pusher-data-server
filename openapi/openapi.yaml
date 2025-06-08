@@ -13,7 +13,7 @@ paths:
   # v1 endpoints (従来)
   /data:
     get:
-      tags: [v1]
+      tags: [ v1 ]
       summary: ゲームデータを送信
       description: HMAC署名付きの統計情報をGETで送信する
       parameters:
@@ -121,14 +121,14 @@ paths:
 
   /ping:
     get:
-      tags: [v1, v2]
+      tags: [ v1, v2 ]
       summary: ヘルスチェック
       responses:
         '200': { description: サーバー稼働中 }
 
   /users/{user_id}/data:
     get:
-      tags: [v1]
+      tags: [ v1 ]
       summary: ユーザーごとのゲームデータを取得
       parameters:
         - name: user_id
@@ -146,7 +146,7 @@ paths:
 
   /rankings:
     get:
-      tags: [v1]
+      tags: [ v1 ]
       summary: ランキングを取得
       parameters:
         - name: sort
@@ -179,7 +179,7 @@ paths:
 
   /total_medals:
     get:
-      tags: [v1]
+      tags: [ v1 ]
       summary: 全ユーザーのメダル総量を取得
       description: 全ユーザーの最新データにおける `have_medal` の合計を返します
       responses:
@@ -196,7 +196,7 @@ paths:
   # v2 endpoints (新仕様)
   /v2/data:
     get:
-      tags: [v2]
+      tags: [ v2 ]
       summary: セーブデータを送信 (v2)
       description: JSON 化したセーブデータを GET パラメータで送信して保存します。
       parameters:
@@ -222,7 +222,7 @@ paths:
 
   /v2/users/{user_id}/data:
     get:
-      tags: [v2]
+      tags: [ v2 ]
       summary: ユーザーの最新セーブデータを取得 (v2)
       parameters:
         - name: user_id
@@ -241,7 +241,7 @@ paths:
 
   /v2/statistics:
     get:
-      tags: [v2]
+      tags: [ v2 ]
       summary: グローバル統計を取得 (v2)
       description: 各種ランキングと全ユーザーのメダル総量をまとめて返します。
       responses:
@@ -253,14 +253,82 @@ paths:
                 $ref: '#/components/schemas/StatisticsV2'
         '500': { description: サーバー内部エラー }
 
+  /v3/data:
+    get:
+      tags: [ v3 ]
+      summary: セーブデータを送信 (v3)
+      description: JSON 化したセーブデータを GET パラメータで送信して保存します。
+      parameters:
+        - name: data
+          in: query
+          required: true
+          schema: { type: string }
+          description: URL エンコード済み JSON セーブデータ
+        - name: user_id
+          in: query
+          required: true
+          schema: { type: string }
+        - name: sig
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: 正常に保存されました }
+        '400': { description: 無効なパラメータ }
+        '401': { description: 署名認証失敗 }
+        '409': { description: 同一データの重複検出 }
+        '500': { description: サーバー内部エラー }
+
+  /v3/users/{user_id}/data:
+    get:
+      tags: [ v3 ]
+      summary: ユーザーの最新セーブデータを取得 (v3・署名付き)
+      description: 指定ユーザーの最新セーブデータを返します。`sig` で HMAC 認証を行います。
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: sig
+          in: query
+          required: true
+          description: HMAC-SHA256 署名
+          schema: { type: string }
+      responses:
+        '200':
+          description: セーブデータ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaveDataV2'
+        '401': { description: 署名認証失敗 }
+        '404': { description: データが見つかりません }
+        '500': { description: サーバー内部エラー }
+
+  /v3/statistics:
+    get:
+      tags: [ v2 ]
+      summary: グローバル統計を取得 (v2・上位1000件)
+      description: >
+        各ランキングを最大 **1000 件** まで（/v2/statistics は 500 件まで）と、
+        全ユーザーのメダル総量をまとめて返します。
+      responses:
+        '200':
+          description: 統計データ (ランキング上限 1000)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatisticsV3'
+        '500': { description: サーバー内部エラー }
+
 components:
   schemas:
     # v1 schema
     GameData:
       type: object
       properties:
-        version:       { type: integer }
-        id:            { type: string }
+        version: { type: integer }
+        id: { type: string }
         user_id:
           type: string
           x-oapi-codegen-extra-tags: { db: 'user_id' }
@@ -410,6 +478,18 @@ components:
         buy_shbi:
           type: integer
           x-oapi-codegen-extra-tags: { db: 'buy_shbi' }
+        bstp_step:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'bstp_step' }
+        bstp_rwd:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'bstp_rwd' }
+        buy_total:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'buy_total' }
+        sp_use:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'sp_use' }
         firstboot:
           type: string
         lastsave:
@@ -437,8 +517,8 @@ components:
     RankingEntry:
       type: object
       properties:
-        user_id:    { type: string }
-        value:      { type: integer }
+        user_id: { type: string }
+        value: { type: integer }
         created_at: { type: string, format: date-time }
 
     StatisticsV2:
@@ -455,3 +535,34 @@ components:
           items: { $ref: '#/components/schemas/RankingEntry' }
         total_medals:
           type: integer
+
+    StatisticsV3:
+      type: object
+      properties:
+        max_chain_orange:
+          type: array
+          items: { $ref: '#/components/schemas/RankingEntry' }
+        max_chain_rainbow:
+          type: array
+          items: { $ref: '#/components/schemas/RankingEntry' }
+        jack_startmax:
+          type: array
+          items: { $ref: '#/components/schemas/RankingEntry' }
+        jack_totalmax:
+          type: array
+          items: { $ref: '#/components/schemas/RankingEntry' }
+        ult_combomax:
+          type: array
+          items: { $ref: '#/components/schemas/RankingEntry' }
+        ult_totalmax:
+          type: array
+          items: { $ref: '#/components/schemas/RankingEntry' }
+        sp_use:
+          type: array
+          items: { $ref: '#/components/schemas/RankingEntry' }
+        buy_shbi:
+          type: array
+          items: { $ref: '#/components/schemas/RankingEntry' }
+        total_medals:
+          type: integer
+

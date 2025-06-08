@@ -60,7 +60,10 @@ type RankingEntry struct {
 type SaveDataV2 struct {
 	BallChain    *int            `db:"ball_chain" json:"ball_chain,omitempty"`
 	BallGet      *int            `db:"ball_get" json:"ball_get,omitempty"`
+	BstpRwd      *int            `db:"bstp_rwd" json:"bstp_rwd,omitempty"`
+	BstpStep     *int            `db:"bstp_step" json:"bstp_step,omitempty"`
 	BuyShbi      *int            `db:"buy_shbi" json:"buy_shbi,omitempty"`
+	BuyTotal     *int            `db:"buy_total" json:"buy_total,omitempty"`
 	Credit       *int64          `db:"credit" json:"credit,omitempty"`
 	CreditAll    *int64          `db:"credit_all" json:"credit_all,omitempty"`
 	DcBallChain  *map[string]int `json:"dc_ball_chain,omitempty" table:"save_data_v2_ball_chain"`
@@ -81,6 +84,7 @@ type SaveDataV2 struct {
 	SlotHit      *int            `db:"slot_hit" json:"slot_hit,omitempty"`
 	SlotStart    *int            `db:"slot_start" json:"slot_start,omitempty"`
 	SlotStartfev *int            `db:"slot_startfev" json:"slot_startfev,omitempty"`
+	SpUse        *int            `db:"sp_use" json:"sp_use,omitempty"`
 	SqrGet       *int            `db:"sqr_get" json:"sqr_get,omitempty"`
 	SqrStep      *int            `db:"sqr_step" json:"sqr_step,omitempty"`
 	UltCombomax  *int            `db:"ult_combomax" json:"ult_combomax,omitempty"`
@@ -95,6 +99,19 @@ type StatisticsV2 struct {
 	MaxChainRainbow *[]RankingEntry `json:"max_chain_rainbow,omitempty"`
 	MaxTotalJackpot *[]RankingEntry `json:"max_total_jackpot,omitempty"`
 	TotalMedals     *int            `json:"total_medals,omitempty"`
+}
+
+// StatisticsV3 defines model for StatisticsV3.
+type StatisticsV3 struct {
+	BuyShbi         *[]RankingEntry `json:"buy_shbi,omitempty"`
+	JackStartmax    *[]RankingEntry `json:"jack_startmax,omitempty"`
+	JackTotalmax    *[]RankingEntry `json:"jack_totalmax,omitempty"`
+	MaxChainOrange  *[]RankingEntry `json:"max_chain_orange,omitempty"`
+	MaxChainRainbow *[]RankingEntry `json:"max_chain_rainbow,omitempty"`
+	SpUse           *[]RankingEntry `json:"sp_use,omitempty"`
+	TotalMedals     *int            `json:"total_medals,omitempty"`
+	UltCombomax     *[]RankingEntry `json:"ult_combomax,omitempty"`
+	UltTotalmax     *[]RankingEntry `json:"ult_totalmax,omitempty"`
 }
 
 // GetDataParams defines parameters for GetData.
@@ -144,4 +161,18 @@ type GetV2DataParams struct {
 	Data   string `form:"data" json:"data"`
 	UserId string `form:"user_id" json:"user_id"`
 	Sig    string `form:"sig" json:"sig"`
+}
+
+// GetV3DataParams defines parameters for GetV3Data.
+type GetV3DataParams struct {
+	// Data URL エンコード済み JSON セーブデータ
+	Data   string `form:"data" json:"data"`
+	UserId string `form:"user_id" json:"user_id"`
+	Sig    string `form:"sig" json:"sig"`
+}
+
+// GetV3UsersUserIdDataParams defines parameters for GetV3UsersUserIdData.
+type GetV3UsersUserIdDataParams struct {
+	// Sig HMAC-SHA256 署名
+	Sig string `form:"sig" json:"sig"`
 }
