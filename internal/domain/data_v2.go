@@ -2,6 +2,7 @@ package domain
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
 	"net/url"
 	"strconv"
@@ -37,6 +38,10 @@ type SaveData struct {
 	FirstBoot    int64     `db:"firstboot"`
 	LastSave     int64     `db:"lastsave"`
 	Playtime     int64     `db:"playtime"`
+	BstpStep     int       `db:"bstp_step"`
+	BstpRwd      int       `db:"bstp_rwd"`
+	BuyTotal     int       `db:"buy_total"`
+	SpUse        int       `db:"sp_use"`
 	CreatedAt    time.Time `db:"created_at"`
 	UpdatedAt    time.Time `db:"updated_at"`
 
@@ -54,6 +59,7 @@ func ParseSaveData(raw string) (*SaveData, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	var m struct {
 		Legacy       *int           `json:"legacy"`
 		Version      *int           `json:"version"`
@@ -80,15 +86,33 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		FirstBoot    *string        `json:"firstboot"`
 		LastSave     *string        `json:"lastsave"`
 		Playtime     *int64         `json:"playtime"`
+		BstpStep     *int           `json:"bstp_step"`
+		BstpRwd      *int           `json:"bstp_rwd"`
+		BuyTotal     *int           `json:"buy_total"`
+		SpUse        *int           `json:"sp_use"`
 		DCMedalGet   map[string]int `json:"dc_medal_get"`
 		DCBallGet    map[string]int `json:"dc_ball_get"`
 		DCBallChain  map[string]int `json:"dc_ball_chain"`
-		LAchieve     []string       `json:"l_achieve"`
+		LAchieve     []interface{}  `json:"l_achieve"`
 		UserId       *string        `json:"user_id"`
 	}
 	if err := json.Unmarshal([]byte(decoded), &m); err != nil {
 		return nil, err
 	}
+
+	// ---------- ここで数値⇔文字列を吸収 ----------
+	var ach []string
+	for _, v := range m.LAchieve {
+		switch val := v.(type) {
+		case string:
+			ach = append(ach, val)
+		case float64:
+			ach = append(ach, strconv.FormatInt(int64(val), 10))
+		default:
+			ach = append(ach, fmt.Sprint(val))
+		}
+	}
+
 	sd := &SaveData{
 		UserId:       safeString(m.UserId),
 		Legacy:       safeInt(m.Legacy),
@@ -116,10 +140,14 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		FirstBoot:    parseUnix(m.FirstBoot),
 		LastSave:     parseUnix(m.LastSave),
 		Playtime:     safeInt64(m.Playtime),
+		BstpStep:     safeInt(m.BstpStep),
+		BstpRwd:      safeInt(m.BstpRwd),
+		BuyTotal:     safeInt(m.BuyTotal),
+		SpUse:        safeInt(m.SpUse),
 		DCMedalGet:   m.DCMedalGet,
 		DCBallGet:    m.DCBallGet,
 		DCBallChain:  m.DCBallChain,
-		LAchieve:     m.LAchieve,
+		LAchieve:     ach,
 	}
 	return sd, nil
 }
@@ -157,6 +185,10 @@ func (sd *SaveData) ToModel() *models.SaveDataV2 {
 		Firstboot:    strPtr(strconv.FormatInt(sd.FirstBoot, 10)),
 		Lastsave:     strPtr(strconv.FormatInt(sd.LastSave, 10)),
 		Playtime:     int64Ptr(sd.Playtime),
+		BstpStep:     intPtr(sd.BstpStep),
+		BstpRwd:      intPtr(sd.BstpRwd),
+		BuyTotal:     intPtr(sd.BuyTotal),
+		SpUse:        intPtr(sd.SpUse),
 
 		// dictionaries and list
 		DcMedalGet:  &sd.DCMedalGet,
