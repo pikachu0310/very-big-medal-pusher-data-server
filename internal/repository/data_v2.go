@@ -29,16 +29,16 @@ INSERT INTO save_data_v2 (
     slot_hit, slot_getfev, sqr_get, sqr_step,
     jack_get, jack_startmax, jack_totalmax,
     ult_get, ult_combomax, ult_totalmax,
-    rmshbi_get, buy_shbi,
+    rmshbi_get, bstp_step, bstp_rwd, buy_total, sp_use, buy_shbi,
     firstboot, lastsave, playtime
-) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
 		sd.UserId, sd.Legacy, sd.Version,
 		sd.Credit, sd.CreditAll, sd.MedalIn, sd.MedalGet,
 		sd.BallGet, sd.BallChain, sd.SlotStart, sd.SlotStartFev,
 		sd.SlotHit, sd.SlotGetFev, sd.SqrGet, sd.SqrStep,
 		sd.JackGet, sd.JackStartMax, sd.JackTotalMax,
 		sd.UltGet, sd.UltComboMax, sd.UltTotalMax,
-		sd.RmShbiGet, sd.BuyShbi,
+		sd.RmShbiGet, sd.BstpStep, sd.BstpRwd, sd.BuyTotal, sd.SpUse, sd.BuyShbi,
 		sd.FirstBoot, sd.LastSave, sd.Playtime,
 	)
 	if err != nil {
@@ -270,6 +270,170 @@ LIMIT 500
 	}
 
 	// 4) total_medals (以前のまま)
+	{
+		q := `
+SELECT
+  COALESCE(SUM(sd.credit),0) AS total_medals
+FROM (
+  SELECT user_id, MAX(id) AS max_id
+  FROM save_data_v2
+  GROUP BY user_id
+) AS t
+JOIN save_data_v2 AS sd
+  ON sd.user_id = t.user_id
+ AND sd.id      = t.max_id
+`
+		var total int
+		if err := r.db.GetContext(ctx, &total, q); err != nil {
+			return nil, err
+		}
+		stats.TotalMedals = &total
+	}
+
+	return stats, nil
+}
+
+// GetStatisticsV3 returns the latest statistics for V3 (ランキング上限 1000).
+func (r *Repository) GetStatisticsV3(ctx context.Context) (*models.StatisticsV3, error) {
+	stats := &models.StatisticsV3{}
+
+	// ------ 共通ヘルパ (匿名関数) -----------------------------------------
+	addRanking := func(ptr **[]models.RankingEntry, query string, args ...interface{}) error {
+		rows, err := r.db.QueryxContext(ctx, query, args...)
+		if err != nil {
+			return err
+		}
+		defer rows.Close()
+
+		list := []models.RankingEntry{}
+		for rows.Next() {
+			var e models.RankingEntry
+			if err := rows.Scan(&e.UserId, &e.Value, &e.CreatedAt); err != nil {
+				return err
+			}
+			list = append(list, e)
+		}
+		*ptr = &list
+		return nil
+	}
+
+	// 1) max_chain_orange (ball_id = '1')
+	if err := addRanking(&stats.MaxChainOrange, `
+SELECT
+  sd.user_id,
+  MAX(bc.chain_count) AS value,
+  MIN(sd.created_at)  AS created_at
+FROM save_data_v2_ball_chain AS bc
+JOIN save_data_v2           AS sd ON bc.save_id = sd.id
+WHERE bc.ball_id = '1'
+GROUP BY sd.user_id
+ORDER BY value DESC, created_at ASC
+LIMIT 1000
+`); err != nil {
+		return nil, err
+	}
+
+	// 2) max_chain_rainbow (ball_id = '3')
+	if err := addRanking(&stats.MaxChainRainbow, `
+SELECT
+  sd.user_id,
+  MAX(bc.chain_count) AS value,
+  MIN(sd.created_at)  AS created_at
+FROM save_data_v2_ball_chain AS bc
+JOIN save_data_v2           AS sd ON bc.save_id = sd.id
+WHERE bc.ball_id = '3'
+GROUP BY sd.user_id
+ORDER BY value DESC, created_at ASC
+LIMIT 1000
+`); err != nil {
+		return nil, err
+	}
+
+	// 3) jack_startmax
+	if err := addRanking(&stats.JackStartmax, `
+SELECT
+  user_id,
+  MAX(jack_startmax) AS value,
+  MIN(created_at)    AS created_at
+FROM save_data_v2
+GROUP BY user_id
+ORDER BY value DESC, created_at ASC
+LIMIT 1000
+`); err != nil {
+		return nil, err
+	}
+
+	// 4) jack_totalmax
+	if err := addRanking(&stats.JackTotalmax, `
+SELECT
+  user_id,
+  MAX(jack_totalmax) AS value,
+  MIN(created_at)    AS created_at
+FROM save_data_v2
+GROUP BY user_id
+ORDER BY value DESC, created_at ASC
+LIMIT 1000
+`); err != nil {
+		return nil, err
+	}
+
+	// 5) ult_combomax
+	if err := addRanking(&stats.UltCombomax, `
+SELECT
+  user_id,
+  MAX(ult_combomax) AS value,
+  MIN(created_at)   AS created_at
+FROM save_data_v2
+GROUP BY user_id
+ORDER BY value DESC, created_at ASC
+LIMIT 1000
+`); err != nil {
+		return nil, err
+	}
+
+	// 6) ult_totalmax
+	if err := addRanking(&stats.UltTotalmax, `
+SELECT
+  user_id,
+  MAX(ult_totalmax) AS value,
+  MIN(created_at)   AS created_at
+FROM save_data_v2
+GROUP BY user_id
+ORDER BY value DESC, created_at ASC
+LIMIT 1000
+`); err != nil {
+		return nil, err
+	}
+
+	// 7) sp_use
+	if err := addRanking(&stats.SpUse, `
+SELECT
+  user_id,
+  MAX(sp_use)     AS value,
+  MIN(created_at) AS created_at
+FROM save_data_v2
+GROUP BY user_id
+ORDER BY value DESC, created_at ASC
+LIMIT 1000
+`); err != nil {
+		return nil, err
+	}
+
+	// 8) buy_shbi
+	if err := addRanking(&stats.BuyShbi, `
+SELECT
+  user_id,
+  MAX(buy_shbi)   AS value,
+  MIN(created_at) AS created_at
+FROM save_data_v2
+GROUP BY user_id
+ORDER BY value DESC, created_at ASC
+LIMIT 1000
+`); err != nil {
+		return nil, err
+	}
+
+	// 9) total_medals（最新セーブの credit 合計）
 	{
 		q := `
 SELECT
