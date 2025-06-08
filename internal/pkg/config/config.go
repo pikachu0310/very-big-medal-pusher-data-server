@@ -15,7 +15,13 @@ func getEnv(key, defaultValue string) string {
 }
 
 func GetSecretKey() string {
-	return getEnv("SECRET_KEY", "secret-medal-pusher")
+	return getEnv("SECRET_KEY", "A")
+}
+func GetSecretKeySaveV2() string {
+	return getEnv("SAVE", "B")
+}
+func GetSecretKeyLoadV2() string {
+	return getEnv("LOAD", "C")
 }
 
 func AppAddr() string {
