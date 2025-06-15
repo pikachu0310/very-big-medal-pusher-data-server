@@ -320,14 +320,21 @@ func (r *Repository) GetStatisticsV3(ctx context.Context) (*models.StatisticsV3,
 	// 1) max_chain_orange (ball_id = '1')
 	if err := addRanking(&stats.MaxChainOrange, `
 SELECT
-  sd.user_id,
-  MAX(bc.chain_count) AS value,
-  MIN(sd.created_at)  AS created_at
-FROM save_data_v2_ball_chain AS bc
-JOIN save_data_v2           AS sd ON bc.save_id = sd.id
-WHERE bc.ball_id = '1'
-GROUP BY sd.user_id
-ORDER BY value DESC, created_at ASC
+  ranked.user_id,
+  ranked.value,
+  ranked.created_at
+FROM (
+  SELECT
+    sd.user_id,
+    bc.chain_count AS value,
+    sd.created_at,
+    ROW_NUMBER() OVER (PARTITION BY sd.user_id ORDER BY bc.chain_count DESC, sd.created_at ASC) AS rn
+  FROM save_data_v2_ball_chain AS bc
+  JOIN save_data_v2 AS sd ON bc.save_id = sd.id
+  WHERE bc.ball_id = '1'
+) AS ranked
+WHERE ranked.rn = 1
+ORDER BY ranked.value DESC, ranked.created_at ASC
 LIMIT 1000
 `); err != nil {
 		return nil, err
@@ -336,14 +343,21 @@ LIMIT 1000
 	// 2) max_chain_rainbow (ball_id = '3')
 	if err := addRanking(&stats.MaxChainRainbow, `
 SELECT
-  sd.user_id,
-  MAX(bc.chain_count) AS value,
-  MIN(sd.created_at)  AS created_at
-FROM save_data_v2_ball_chain AS bc
-JOIN save_data_v2           AS sd ON bc.save_id = sd.id
-WHERE bc.ball_id = '3'
-GROUP BY sd.user_id
-ORDER BY value DESC, created_at ASC
+  ranked.user_id,
+  ranked.value,
+  ranked.created_at
+FROM (
+  SELECT
+    sd.user_id,
+    bc.chain_count AS value,
+    sd.created_at,
+    ROW_NUMBER() OVER (PARTITION BY sd.user_id ORDER BY bc.chain_count DESC, sd.created_at ASC) AS rn
+  FROM save_data_v2_ball_chain AS bc
+  JOIN save_data_v2 AS sd ON bc.save_id = sd.id
+  WHERE bc.ball_id = '3'
+) AS ranked
+WHERE ranked.rn = 1
+ORDER BY ranked.value DESC, ranked.created_at ASC
 LIMIT 1000
 `); err != nil {
 		return nil, err
@@ -352,12 +366,19 @@ LIMIT 1000
 	// 3) jack_startmax
 	if err := addRanking(&stats.JackStartmax, `
 SELECT
-  user_id,
-  MAX(jack_startmax) AS value,
-  MIN(created_at)    AS created_at
-FROM save_data_v2
-GROUP BY user_id
-ORDER BY value DESC, created_at ASC
+  ranked.user_id,
+  ranked.value,
+  ranked.created_at
+FROM (
+  SELECT
+    user_id,
+    jack_startmax AS value,
+    created_at,
+    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY jack_startmax DESC, created_at ASC) AS rn
+  FROM save_data_v2
+) AS ranked
+WHERE ranked.rn = 1
+ORDER BY ranked.value DESC, ranked.created_at ASC
 LIMIT 1000
 `); err != nil {
 		return nil, err
@@ -366,12 +387,19 @@ LIMIT 1000
 	// 4) jack_totalmax
 	if err := addRanking(&stats.JackTotalmax, `
 SELECT
-  user_id,
-  MAX(jack_totalmax) AS value,
-  MIN(created_at)    AS created_at
-FROM save_data_v2
-GROUP BY user_id
-ORDER BY value DESC, created_at ASC
+  ranked.user_id,
+  ranked.value,
+  ranked.created_at
+FROM (
+  SELECT
+    user_id,
+    jack_totalmax AS value,
+    created_at,
+    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY jack_totalmax DESC, created_at ASC) AS rn
+  FROM save_data_v2
+) AS ranked
+WHERE ranked.rn = 1
+ORDER BY ranked.value DESC, ranked.created_at ASC
 LIMIT 1000
 `); err != nil {
 		return nil, err
@@ -380,12 +408,19 @@ LIMIT 1000
 	// 5) ult_combomax
 	if err := addRanking(&stats.UltCombomax, `
 SELECT
-  user_id,
-  MAX(ult_combomax) AS value,
-  MIN(created_at)   AS created_at
-FROM save_data_v2
-GROUP BY user_id
-ORDER BY value DESC, created_at ASC
+  ranked.user_id,
+  ranked.value,
+  ranked.created_at
+FROM (
+  SELECT
+    user_id,
+    ult_combomax AS value,
+    created_at,
+    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY ult_combomax DESC, created_at ASC) AS rn
+  FROM save_data_v2
+) AS ranked
+WHERE ranked.rn = 1
+ORDER BY ranked.value DESC, ranked.created_at ASC
 LIMIT 1000
 `); err != nil {
 		return nil, err
@@ -394,12 +429,19 @@ LIMIT 1000
 	// 6) ult_totalmax
 	if err := addRanking(&stats.UltTotalmax, `
 SELECT
-  user_id,
-  MAX(ult_totalmax) AS value,
-  MIN(created_at)   AS created_at
-FROM save_data_v2
-GROUP BY user_id
-ORDER BY value DESC, created_at ASC
+  ranked.user_id,
+  ranked.value,
+  ranked.created_at
+FROM (
+  SELECT
+    user_id,
+    ult_totalmax AS value,
+    created_at,
+    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY ult_totalmax DESC, created_at ASC) AS rn
+  FROM save_data_v2
+) AS ranked
+WHERE ranked.rn = 1
+ORDER BY ranked.value DESC, ranked.created_at ASC
 LIMIT 1000
 `); err != nil {
 		return nil, err
@@ -408,12 +450,19 @@ LIMIT 1000
 	// 7) sp_use
 	if err := addRanking(&stats.SpUse, `
 SELECT
-  user_id,
-  MAX(sp_use)     AS value,
-  MIN(created_at) AS created_at
-FROM save_data_v2
-GROUP BY user_id
-ORDER BY value DESC, created_at ASC
+  ranked.user_id,
+  ranked.value,
+  ranked.created_at
+FROM (
+  SELECT
+    user_id,
+    sp_use AS value,
+    created_at,
+    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY sp_use DESC, created_at ASC) AS rn
+  FROM save_data_v2
+) AS ranked
+WHERE ranked.rn = 1
+ORDER BY ranked.value DESC, ranked.created_at ASC
 LIMIT 1000
 `); err != nil {
 		return nil, err
@@ -422,12 +471,19 @@ LIMIT 1000
 	// 8) buy_shbi
 	if err := addRanking(&stats.BuyShbi, `
 SELECT
-  user_id,
-  MAX(buy_shbi)   AS value,
-  MIN(created_at) AS created_at
-FROM save_data_v2
-GROUP BY user_id
-ORDER BY value DESC, created_at ASC
+  ranked.user_id,
+  ranked.value,
+  ranked.created_at
+FROM (
+  SELECT
+    user_id,
+    buy_shbi AS value,
+    created_at,
+    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY buy_shbi DESC, created_at ASC) AS rn
+  FROM save_data_v2
+) AS ranked
+WHERE ranked.rn = 1
+ORDER BY ranked.value DESC, ranked.created_at ASC
 LIMIT 1000
 `); err != nil {
 		return nil, err
