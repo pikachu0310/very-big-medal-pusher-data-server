@@ -125,3 +125,12 @@ func generateUserSecretV3(userID string) []byte {
 	h.Write([]byte(userID))
 	return h.Sum(nil)
 }
+
+// GetV3AchievementsRates returns achievement acquisition rates
+func (h *Handler) GetV3AchievementsRates(ctx echo.Context) error {
+	rates, err := h.repo.GetAchievementRates(ctx.Request().Context())
+	if err != nil {
+		return ctx.String(http.StatusInternalServerError, err.Error())
+	}
+	return ctx.JSON(http.StatusOK, rates)
+}
