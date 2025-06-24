@@ -18,6 +18,21 @@ const (
 	OutMedal        GetRankingsParamsSort = "out_medal"
 )
 
+// AchievementRates defines model for AchievementRates.
+type AchievementRates struct {
+	// AchievementRates 実績IDごとの取得率データ
+	AchievementRates *map[string]struct {
+		// Count この実績を取得したユーザー数
+		Count *int `json:"count,omitempty"`
+
+		// Rate 取得率（0.0-1.0）
+		Rate *float32 `json:"rate,omitempty"`
+	} `json:"achievement_rates,omitempty"`
+
+	// TotalUsers 総ユーザー数
+	TotalUsers *int `json:"total_users,omitempty"`
+}
+
 // GameData defines model for GameData.
 type GameData struct {
 	RMedal           *int       `db:"R_medal" json:"R_medal,omitempty"`

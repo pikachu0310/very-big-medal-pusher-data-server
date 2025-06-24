@@ -321,6 +321,20 @@ paths:
                 $ref: '#/components/schemas/StatisticsV3'
         '500': { description: サーバー内部エラー }
 
+  /v3/achievements/rates:
+    get:
+      tags: [ v3 ]
+      summary: 実績取得率を取得
+      description: 各実績IDの取得率（取得したユーザー数 / 全ユーザー数）を返します。
+      responses:
+        '200':
+          description: 実績取得率データ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AchievementRates'
+        '500': { description: サーバー内部エラー }
+
 components:
   schemas:
     # v1 schema
@@ -565,4 +579,24 @@ components:
           items: { $ref: '#/components/schemas/RankingEntry' }
         total_medals:
           type: integer
+
+    AchievementRates:
+      type: object
+      properties:
+        total_users:
+          type: integer
+          description: 総ユーザー数
+        achievement_rates:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              count:
+                type: integer
+                description: この実績を取得したユーザー数
+              rate:
+                type: number
+                format: float
+                description: 取得率（0.0-1.0）
+          description: 実績IDごとの取得率データ
 
