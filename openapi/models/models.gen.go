@@ -103,15 +103,16 @@ type StatisticsV2 struct {
 
 // StatisticsV3 defines model for StatisticsV3.
 type StatisticsV3 struct {
-	BuyShbi         *[]RankingEntry `json:"buy_shbi,omitempty"`
-	JackStartmax    *[]RankingEntry `json:"jack_startmax,omitempty"`
-	JackTotalmax    *[]RankingEntry `json:"jack_totalmax,omitempty"`
-	MaxChainOrange  *[]RankingEntry `json:"max_chain_orange,omitempty"`
-	MaxChainRainbow *[]RankingEntry `json:"max_chain_rainbow,omitempty"`
-	SpUse           *[]RankingEntry `json:"sp_use,omitempty"`
-	TotalMedals     *int            `json:"total_medals,omitempty"`
-	UltCombomax     *[]RankingEntry `json:"ult_combomax,omitempty"`
-	UltTotalmax     *[]RankingEntry `json:"ult_totalmax,omitempty"`
+	AchievementsCount *[]RankingEntry `json:"achievements_count,omitempty"`
+	BuyShbi           *[]RankingEntry `json:"buy_shbi,omitempty"`
+	JackStartmax      *[]RankingEntry `json:"jack_startmax,omitempty"`
+	JackTotalmax      *[]RankingEntry `json:"jack_totalmax,omitempty"`
+	MaxChainOrange    *[]RankingEntry `json:"max_chain_orange,omitempty"`
+	MaxChainRainbow   *[]RankingEntry `json:"max_chain_rainbow,omitempty"`
+	SpUse             *[]RankingEntry `json:"sp_use,omitempty"`
+	TotalMedals       *int            `json:"total_medals,omitempty"`
+	UltCombomax       *[]RankingEntry `json:"ult_combomax,omitempty"`
+	UltTotalmax       *[]RankingEntry `json:"ult_totalmax,omitempty"`
 }
 
 // GetDataParams defines parameters for GetData.
