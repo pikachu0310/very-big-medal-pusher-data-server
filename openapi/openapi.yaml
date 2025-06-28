@@ -563,6 +563,9 @@ components:
         buy_shbi:
           type: array
           items: { $ref: '#/components/schemas/RankingEntry' }
+        achievements_count:
+          type: array
+          items: { $ref: '#/components/schemas/RankingEntry' }
         total_medals:
           type: integer
 
