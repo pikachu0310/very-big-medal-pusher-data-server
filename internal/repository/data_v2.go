@@ -489,7 +489,27 @@ LIMIT 1000
 		return nil, err
 	}
 
-	// 9) total_medals（最新セーブの credit 合計）
+	// 9) achievements_count
+	if err := addRanking(&stats.AchievementsCount, `
+SELECT
+  sd.user_id,
+  COUNT(a.achievement_id) AS value,
+  sd.created_at
+FROM (
+  SELECT user_id, MAX(id) AS max_id
+  FROM save_data_v2
+  GROUP BY user_id
+) AS latest
+JOIN save_data_v2 AS sd ON sd.id = latest.max_id
+LEFT JOIN save_data_v2_achievements AS a ON a.save_id = sd.id
+GROUP BY sd.user_id, sd.created_at
+ORDER BY value DESC, sd.created_at ASC
+LIMIT 1000
+`); err != nil {
+		return nil, err
+	}
+
+	// 10) total_medals（最新セーブの credit 合計）
 	{
 		q := `
 SELECT
