@@ -59,7 +59,7 @@ func (h *Handler) GetV2Data(ctx echo.Context, params models.GetV2DataParams) err
 	}
 
 	// 保存
-	sd.UserId = uid
+	sd.UserID = uid
 	if err := h.repo.InsertSave(ctx.Request().Context(), sd); err != nil {
 		return ctx.String(http.StatusInternalServerError, err.Error())
 	}

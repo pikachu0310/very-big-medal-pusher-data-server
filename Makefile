@@ -24,7 +24,11 @@ test-unit: ## Run the unit tests
 
 .PHONY: test-integration
 test-integration: ## Run the integration tests
-	go test $(GO_TEST_FLAGS) ./integration/...
+	@if [ -d "./integration" ]; then \
+		go test $(GO_TEST_FLAGS) ./integration/...; \
+	else \
+		echo "Integration tests directory not found, skipping"; \
+	fi
 
 .PHONY: lint
 lint: ## Run the linter

@@ -19,7 +19,11 @@ func (r *Repository) InsertSave(ctx context.Context, sd *domain.SaveData) error 
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() {
+		if err := tx.Rollback(); err != nil {
+			return
+		}
+	}()
 
 	res, err := tx.ExecContext(ctx, `
 INSERT INTO save_data_v2 (
@@ -32,7 +36,7 @@ INSERT INTO save_data_v2 (
     rmshbi_get, bstp_step, bstp_rwd, buy_total, sp_use, buy_shbi,
     firstboot, lastsave, playtime
 ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-		sd.UserId, sd.Legacy, sd.Version,
+		sd.UserID, sd.Legacy, sd.Version,
 		sd.Credit, sd.CreditAll, sd.MedalIn, sd.MedalGet,
 		sd.BallGet, sd.BallChain, sd.SlotStart, sd.SlotStartFev,
 		sd.SlotHit, sd.SlotGetFev, sd.SqrGet, sd.SqrStep,

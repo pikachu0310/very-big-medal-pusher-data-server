@@ -63,7 +63,7 @@ func (h *Handler) GetV3Data(ctx echo.Context, params models.GetV3DataParams) err
 	}
 
 	// 保存
-	sd.UserId = uid
+	sd.UserID = uid
 	if err := h.repo.InsertSave(ctx.Request().Context(), sd); err != nil {
 		return ctx.String(http.StatusInternalServerError, err.Error())
 	}
