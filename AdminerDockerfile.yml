@@ -1,0 +1,12 @@
+# ベースイメージとして、PHPとApacheがプリインストールされた公式イメージを選択します
+FROM php:apache
+  
+  # Webサーバーのルートディレクトリに移動します
+WORKDIR /var/www/html
+  
+  # 最新のAdminerをダウンロードし、ファイル名を「index.php」として保存します。
+  # これにより、コンテナのURLにアクセスした際にデフォルトでAdminerが起動します。
+RUN curl -fsSL "https://www.adminer.org/latest.php" -o index.php
+  
+  # ファイルの所有者をWebサーバーの実行ユーザーに変更します
+RUN chown www-data:www-data index.php
