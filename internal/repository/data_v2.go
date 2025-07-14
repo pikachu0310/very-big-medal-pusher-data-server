@@ -535,21 +535,17 @@ JOIN save_data_v2 AS sd
 
 // GetAchievementRates returns achievement acquisition rates
 func (r *Repository) GetAchievementRates(ctx context.Context) (*models.AchievementRates, error) {
-	// 1) 総ユーザー数を取得（最新セーブを持つユーザー数）
-	var totalUsers int
-	err := r.db.GetContext(ctx, &totalUsers, `
-SELECT COUNT(DISTINCT user_id) 
-FROM save_data_v2
-`)
-	if err != nil {
-		return nil, err
-	}
-
-	// 2) 各実績IDごとの取得者数を取得
+	// 最適化されたクエリ：1回のクエリで総ユーザー数と各実績の取得者数を取得
 	rows, err := r.db.QueryxContext(ctx, `
+WITH users_with_achievements AS (
+    SELECT DISTINCT sd.user_id
+    FROM save_data_v2_achievements a
+    JOIN save_data_v2 sd ON a.save_id = sd.id
+)
 SELECT 
     achievement_id,
-    COUNT(DISTINCT sd.user_id) as user_count
+    COUNT(DISTINCT sd.user_id) as user_count,
+    (SELECT COUNT(*) FROM users_with_achievements) as total_users
 FROM save_data_v2_achievements a
 JOIN save_data_v2 sd ON a.save_id = sd.id
 GROUP BY achievement_id
@@ -564,10 +560,11 @@ GROUP BY achievement_id
 		Rate  *float32 `json:"rate,omitempty"`
 	})
 	
+	var totalUsers int
 	for rows.Next() {
 		var achievementID string
 		var userCount int
-		if err := rows.Scan(&achievementID, &userCount); err != nil {
+		if err := rows.Scan(&achievementID, &userCount, &totalUsers); err != nil {
 			return nil, err
 		}
 		
