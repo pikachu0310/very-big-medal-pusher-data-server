@@ -532,3 +532,61 @@ JOIN save_data_v2 AS sd
 
 	return stats, nil
 }
+
+// GetAchievementRates returns achievement acquisition rates
+func (r *Repository) GetAchievementRates(ctx context.Context) (*models.AchievementRates, error) {
+	// 1) 総ユーザー数を取得（最新セーブを持つユーザー数）
+	var totalUsers int
+	err := r.db.GetContext(ctx, &totalUsers, `
+SELECT COUNT(DISTINCT user_id) 
+FROM save_data_v2
+`)
+	if err != nil {
+		return nil, err
+	}
+
+	// 2) 各実績IDごとの取得者数を取得
+	rows, err := r.db.QueryxContext(ctx, `
+SELECT 
+    achievement_id,
+    COUNT(DISTINCT sd.user_id) as user_count
+FROM save_data_v2_achievements a
+JOIN save_data_v2 sd ON a.save_id = sd.id
+GROUP BY achievement_id
+`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	achievementRates := make(map[string]struct {
+		Count *int     `json:"count,omitempty"`
+		Rate  *float32 `json:"rate,omitempty"`
+	})
+	
+	for rows.Next() {
+		var achievementID string
+		var userCount int
+		if err := rows.Scan(&achievementID, &userCount); err != nil {
+			return nil, err
+		}
+		
+		rate := float32(0.0)
+		if totalUsers > 0 {
+			rate = float32(userCount) / float32(totalUsers)
+		}
+		
+		achievementRates[achievementID] = struct {
+			Count *int     `json:"count,omitempty"`
+			Rate  *float32 `json:"rate,omitempty"`
+		}{
+			Count: &userCount,
+			Rate:  &rate,
+		}
+	}
+
+	return &models.AchievementRates{
+		TotalUsers:       &totalUsers,
+		AchievementRates: &achievementRates,
+	}, nil
+}
