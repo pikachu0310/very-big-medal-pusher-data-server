@@ -149,6 +149,7 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		DCBallChain:  m.DCBallChain,
 		LAchieve:     ach,
 	}
+
 	return sd, nil
 }
 
@@ -204,18 +205,21 @@ func safeInt(p *int) int {
 	if p == nil {
 		return 0
 	}
+
 	return *p
 }
 func safeInt64(p *int64) int64 {
 	if p == nil {
 		return 0
 	}
+
 	return *p
 }
 func safeString(p *string) string {
 	if p == nil {
 		return ""
 	}
+
 	return *p
 }
 func parseUnix(s *string) int64 {
