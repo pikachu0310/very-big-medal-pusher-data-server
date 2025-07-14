@@ -35,12 +35,12 @@ func (h *Handler) GetV3Data(ctx echo.Context, params models.GetV3DataParams) err
 	if len(kv) != 2 {
 		return ctx.String(http.StatusBadRequest, "missing user_id")
 	}
-	dataPart, encodedUid := kv[0], kv[1]
-	uid, err := url.QueryUnescape(encodedUid)
+	dataPart, encodedUID := kv[0], kv[1]
+	uid, err := url.QueryUnescape(encodedUID)
 	if err != nil {
 		return ctx.String(http.StatusBadRequest, "invalid user_id encoding")
 	}
-	signingStr := dataPart + "&user_id=" + encodedUid
+	signingStr := dataPart + "&user_id=" + encodedUID
 
 	// 署名検証
 	if !verifySignature(signingStr, params.Sig, generateUserSecretV3(uid)) {
