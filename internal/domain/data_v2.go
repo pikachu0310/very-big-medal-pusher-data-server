@@ -227,5 +227,6 @@ func parseUnix(s *string) int64 {
 		return 0
 	}
 	i, _ := strconv.ParseInt(*s, 10, 64)
+
 	return i
 }
