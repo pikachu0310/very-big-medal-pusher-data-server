@@ -1,12 +1,15 @@
 # ベースイメージとして、PHPとApacheがプリインストールされた公式イメージを選択します
 FROM php:apache
-  
-  # Webサーバーのルートディレクトリに移動します
+
+# MySQLに接続するためのPHP拡張機能 (MySQLi, PDO_MySQL) をインストールします
+RUN docker-php-ext-install pdo_mysql mysqli
+
+# Webサーバーのルートディレクトリに移動します
 WORKDIR /var/www/html
   
-  # 最新のAdminerをダウンロードし、ファイル名を「index.php」として保存します。
-  # これにより、コンテナのURLにアクセスした際にデフォルトでAdminerが起動します。
+# 最新のAdminerをダウンロードし、ファイル名を「index.php」として保存します。
+# これにより、コンテナのURLにアクセスした際にデフォルトでAdminerが起動します。
 RUN curl -fsSL "https://www.adminer.org/latest.php" -o index.php
   
-  # ファイルの所有者をWebサーバーの実行ユーザーに変更します
+# ファイルの所有者をWebサーバーの実行ユーザーに変更します
 RUN chown www-data:www-data index.php
