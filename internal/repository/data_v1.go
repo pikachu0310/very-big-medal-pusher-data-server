@@ -33,6 +33,7 @@ func (r *Repository) InsertGameData(ctx context.Context, data models.GameData) e
 	if err != nil {
 		return fmt.Errorf("insert game data: %w", err)
 	}
+
 	return nil
 }
 

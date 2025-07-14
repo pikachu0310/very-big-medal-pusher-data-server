@@ -12,7 +12,7 @@ import (
 // SaveData holds parsed v2 save data *and* DB metadata.
 type SaveData struct {
 	ID           int64     `db:"id"`
-	UserId       string    `db:"user_id"`
+	UserID       string    `db:"user_id"`
 	Legacy       int       `db:"legacy"`
 	Version      int       `db:"version"`
 	Credit       int64     `db:"credit"`
@@ -114,7 +114,7 @@ func ParseSaveData(raw string) (*SaveData, error) {
 	}
 
 	sd := &SaveData{
-		UserId:       safeString(m.UserId),
+		UserID:       safeString(m.UserId),
 		Legacy:       safeInt(m.Legacy),
 		Version:      safeInt(m.Version),
 		Credit:       safeInt64(m.Credit),
@@ -149,6 +149,7 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		DCBallChain:  m.DCBallChain,
 		LAchieve:     ach,
 	}
+
 	return sd, nil
 }
 
@@ -204,18 +205,21 @@ func safeInt(p *int) int {
 	if p == nil {
 		return 0
 	}
+
 	return *p
 }
 func safeInt64(p *int64) int64 {
 	if p == nil {
 		return 0
 	}
+
 	return *p
 }
 func safeString(p *string) string {
 	if p == nil {
 		return ""
 	}
+
 	return *p
 }
 func parseUnix(s *string) int64 {
@@ -223,5 +227,6 @@ func parseUnix(s *string) int64 {
 		return 0
 	}
 	i, _ := strconv.ParseInt(*s, 10, 64)
+
 	return i
 }

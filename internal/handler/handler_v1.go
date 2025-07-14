@@ -67,7 +67,7 @@ func New(repo *repository.Repository) *Handler {
 
 	// v2 統計データキャッシュの初期化
 	statsCache, err := sc.New(
-		func(ctx context.Context, key string) (*models.StatisticsV2, error) {
+		func(ctx context.Context, _ string) (*models.StatisticsV2, error) {
 			// key は使わないので無視
 			return repo.GetStatistics(ctx)
 		},
@@ -82,7 +82,7 @@ func New(repo *repository.Repository) *Handler {
 
 	// v3 統計データキャッシュの初期化
 	statsCacheV3, err := sc.New(
-		func(ctx context.Context, key string) (*models.StatisticsV3, error) {
+		func(ctx context.Context, _ string) (*models.StatisticsV3, error) {
 			// key は使わないので無視
 			return repo.GetStatisticsV3(ctx)
 		},
@@ -262,6 +262,7 @@ func createSortedParamString(params models.GetDataParams) string {
 			sb.WriteByte('&')
 		}
 	}
+
 	return sb.String()
 }
 
@@ -269,5 +270,6 @@ func verifySignature(data, sig string, secret []byte) bool {
 	mac := hmac.New(sha256.New, secret)
 	mac.Write([]byte(data))
 	expected := hex.EncodeToString(mac.Sum(nil))
+
 	return hmac.Equal([]byte(expected), []byte(sig))
 }
