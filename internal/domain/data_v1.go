@@ -63,6 +63,7 @@ func GetDatasToRankingResponseMaxChainOrange(data []models.GameData) []RankingRe
 			MaxChainOrange: d.MaxChainOrange,
 		})
 	}
+
 	return response
 }
 
@@ -83,6 +84,7 @@ func GetDatasToRankingResponseMaxChainRainbow(data []models.GameData) []RankingR
 			MaxChainRainbow: d.MaxChainRainbow,
 		})
 	}
+
 	return response
 }
 
@@ -103,6 +105,7 @@ func GetDatasToRankingResponseMaxTotalJackpot(data []models.GameData) []RankingR
 			MaxTotalJackpot: d.MaxTotalJackpot,
 		})
 	}
+
 	return response
 }
 
