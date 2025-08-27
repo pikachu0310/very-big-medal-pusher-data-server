@@ -42,6 +42,23 @@ type SaveData struct {
 	BstpRwd      int       `db:"bstp_rwd"`
 	BuyTotal     int       `db:"buy_total"`
 	SpUse        int       `db:"sp_use"`
+	HideRecord   int       `db:"hide_record"`
+	CpMMax       float64   `db:"cpm_max"`
+	JackTotalMaxV2 float64 `db:"jack_totalmax_v2"`
+	UltimateTotalMaxV2 float64 `db:"ult_totalmax_v2"`
+	PalettaBallGet int     `db:"palball_get"`
+	PalettaLotteryAttemptTier0 int `db:"pallot_lot_t0"`
+	PalettaLotteryAttemptTier1 int `db:"pallot_lot_t1"`
+	PalettaLotteryAttemptTier2 int `db:"pallot_lot_t2"`
+	PalettaLotteryAttemptTier3 int `db:"pallot_lot_t3"`
+	JackpotSuperGetTotal float64 `db:"jacksp_get_all"`
+	JackpotSuperGetTier0 float64 `db:"jacksp_get_t0"`
+	JackpotSuperGetTier1 float64 `db:"jacksp_get_t1"`
+	JackpotSuperGetTier2 float64 `db:"jacksp_get_t2"`
+	JackpotSuperGetTier3 float64 `db:"jacksp_get_t3"`
+	JackpotSuperStartMax float64 `db:"jacksp_startmax"`
+	JackpotSuperTotalMax float64 `db:"jacksp_totalmax"`
+	TaskCompleteCount int `db:"task_cnt"`
 	CreatedAt    time.Time `db:"created_at"`
 	UpdatedAt    time.Time `db:"updated_at"`
 
@@ -50,6 +67,10 @@ type SaveData struct {
 	DCBallGet   map[string]int `db:"-"`
 	DCBallChain map[string]int `db:"-"`
 	LAchieve    []string       `db:"-"`
+	DCPalettaBallGet map[string]int `db:"-"`
+	DCPalettaBallJackpot map[string]int `db:"-"`
+	LPerkLevels []int `db:"-"`
+	LPerkUsedCredits []int `db:"-"`
 }
 
 // ParseSaveData decodes URL-encoded JSON into a minimal SaveData for insert.
@@ -90,10 +111,31 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		BstpRwd      *int           `json:"bstp_rwd"`
 		BuyTotal     *int           `json:"buy_total"`
 		SpUse        *int           `json:"sp_use"`
+		HideRecord   *int           `json:"hide_record"`
+		CpMMax       *float64       `json:"cpm_max"`
+		JackTotalMaxV2 *float64     `json:"jack_totalmax_v2"`
+		UltimateTotalMaxV2 *float64 `json:"ult_totalmax_v2"`
+		PalettaBallGet *int         `json:"palball_get"`
+		PalettaLotteryAttemptTier0 *int `json:"pallot_lot_t0"`
+		PalettaLotteryAttemptTier1 *int `json:"pallot_lot_t1"`
+		PalettaLotteryAttemptTier2 *int `json:"pallot_lot_t2"`
+		PalettaLotteryAttemptTier3 *int `json:"pallot_lot_t3"`
+		JackpotSuperGetTotal *float64 `json:"jacksp_get_all"`
+		JackpotSuperGetTier0 *float64 `json:"jacksp_get_t0"`
+		JackpotSuperGetTier1 *float64 `json:"jacksp_get_t1"`
+		JackpotSuperGetTier2 *float64 `json:"jacksp_get_t2"`
+		JackpotSuperGetTier3 *float64 `json:"jacksp_get_t3"`
+		JackpotSuperStartMax *float64 `json:"jacksp_startmax"`
+		JackpotSuperTotalMax *float64 `json:"jacksp_totalmax"`
+		TaskCompleteCount *int       `json:"task_cnt"`
 		DCMedalGet   map[string]int `json:"dc_medal_get"`
 		DCBallGet    map[string]int `json:"dc_ball_get"`
 		DCBallChain  map[string]int `json:"dc_ball_chain"`
 		LAchieve     []interface{}  `json:"l_achieve"`
+		DCPalettaBallGet map[string]int `json:"dc_palball_get"`
+		DCPalettaBallJackpot map[string]int `json:"dc_palball_jp"`
+		LPerkLevels []interface{} `json:"l_perks"`
+		LPerkUsedCredits []interface{} `json:"l_perks_credit"`
 		UserId       *string        `json:"user_id"`
 	}
 	if err := json.Unmarshal([]byte(decoded), &m); err != nil {
@@ -144,10 +186,31 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		BstpRwd:      safeInt(m.BstpRwd),
 		BuyTotal:     safeInt(m.BuyTotal),
 		SpUse:        safeInt(m.SpUse),
+		HideRecord:   safeInt(m.HideRecord),
+		CpMMax:       safeFloat64(m.CpMMax),
+		JackTotalMaxV2: safeFloat64(m.JackTotalMaxV2),
+		UltimateTotalMaxV2: safeFloat64(m.UltimateTotalMaxV2),
+		PalettaBallGet: safeInt(m.PalettaBallGet),
+		PalettaLotteryAttemptTier0: safeInt(m.PalettaLotteryAttemptTier0),
+		PalettaLotteryAttemptTier1: safeInt(m.PalettaLotteryAttemptTier1),
+		PalettaLotteryAttemptTier2: safeInt(m.PalettaLotteryAttemptTier2),
+		PalettaLotteryAttemptTier3: safeInt(m.PalettaLotteryAttemptTier3),
+		JackpotSuperGetTotal: safeFloat64(m.JackpotSuperGetTotal),
+		JackpotSuperGetTier0: safeFloat64(m.JackpotSuperGetTier0),
+		JackpotSuperGetTier1: safeFloat64(m.JackpotSuperGetTier1),
+		JackpotSuperGetTier2: safeFloat64(m.JackpotSuperGetTier2),
+		JackpotSuperGetTier3: safeFloat64(m.JackpotSuperGetTier3),
+		JackpotSuperStartMax: safeFloat64(m.JackpotSuperStartMax),
+		JackpotSuperTotalMax: safeFloat64(m.JackpotSuperTotalMax),
+		TaskCompleteCount: safeInt(m.TaskCompleteCount),
 		DCMedalGet:   m.DCMedalGet,
 		DCBallGet:    m.DCBallGet,
 		DCBallChain:  m.DCBallChain,
 		LAchieve:     ach,
+		DCPalettaBallGet: m.DCPalettaBallGet,
+		DCPalettaBallJackpot: m.DCPalettaBallJackpot,
+		LPerkLevels: parseIntArray(m.LPerkLevels),
+		LPerkUsedCredits: parseIntArray(m.LPerkUsedCredits),
 	}
 	return sd, nil
 }
@@ -158,6 +221,7 @@ func (sd *SaveData) ToModel() *models.SaveDataV2 {
 	intPtr := func(i int) *int { return &i }
 	int64Ptr := func(i int64) *int64 { return &i }
 	strPtr := func(s string) *string { return &s }
+	float64Ptr := func(f float64) *float64 { return &f }
 
 	m := &models.SaveDataV2{
 		Legacy:       intPtr(sd.Legacy),
@@ -189,12 +253,33 @@ func (sd *SaveData) ToModel() *models.SaveDataV2 {
 		BstpRwd:      intPtr(sd.BstpRwd),
 		BuyTotal:     intPtr(sd.BuyTotal),
 		SpUse:        intPtr(sd.SpUse),
+		HideRecord:   intPtr(sd.HideRecord),
+		CpmMax:       float64Ptr(sd.CpMMax),
+		JackTotalmaxV2: float64Ptr(sd.JackTotalMaxV2),
+		UltTotalmaxV2: float64Ptr(sd.UltimateTotalMaxV2),
+		PalballGet:   intPtr(sd.PalettaBallGet),
+		PallotLotT0:  intPtr(sd.PalettaLotteryAttemptTier0),
+		PallotLotT1:  intPtr(sd.PalettaLotteryAttemptTier1),
+		PallotLotT2:  intPtr(sd.PalettaLotteryAttemptTier2),
+		PallotLotT3:  intPtr(sd.PalettaLotteryAttemptTier3),
+		JackspGetAll: float64Ptr(sd.JackpotSuperGetTotal),
+		JackspGetT0:  float64Ptr(sd.JackpotSuperGetTier0),
+		JackspGetT1:  float64Ptr(sd.JackpotSuperGetTier1),
+		JackspGetT2:  float64Ptr(sd.JackpotSuperGetTier2),
+		JackspGetT3:  float64Ptr(sd.JackpotSuperGetTier3),
+		JackspStartmax: float64Ptr(sd.JackpotSuperStartMax),
+		JackspTotalmax: float64Ptr(sd.JackpotSuperTotalMax),
+		TaskCnt:      intPtr(sd.TaskCompleteCount),
 
 		// dictionaries and list
 		DcMedalGet:  &sd.DCMedalGet,
 		DcBallGet:   &sd.DCBallGet,
 		DcBallChain: &sd.DCBallChain,
 		LAchieve:    &sd.LAchieve,
+		DcPalballGet: &sd.DCPalettaBallGet,
+		DcPalballJp: &sd.DCPalettaBallJackpot,
+		LPerks:      &sd.LPerkLevels,
+		LPerksCredit: &sd.LPerkUsedCredits,
 	}
 
 	return m
@@ -212,6 +297,12 @@ func safeInt64(p *int64) int64 {
 	}
 	return *p
 }
+func safeFloat64(p *float64) float64 {
+	if p == nil {
+		return 0.0
+	}
+	return *p
+}
 func safeString(p *string) string {
 	if p == nil {
 		return ""
@@ -224,4 +315,22 @@ func parseUnix(s *string) int64 {
 	}
 	i, _ := strconv.ParseInt(*s, 10, 64)
 	return i
+}
+func parseIntArray(arr []interface{}) []int {
+	if arr == nil {
+		return []int{}
+	}
+	var result []int
+	for _, v := range arr {
+		switch val := v.(type) {
+		case int:
+			result = append(result, val)
+		case float64:
+			result = append(result, int(val))
+		default:
+			// 文字列の場合は0として扱う
+			result = append(result, 0)
+		}
+	}
+	return result
 }

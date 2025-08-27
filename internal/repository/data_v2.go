@@ -30,8 +30,12 @@ INSERT INTO save_data_v2 (
     jack_get, jack_startmax, jack_totalmax,
     ult_get, ult_combomax, ult_totalmax,
     rmshbi_get, bstp_step, bstp_rwd, buy_total, sp_use, buy_shbi,
+    hide_record, cpm_max, jack_totalmax_v2, ult_totalmax_v2,
+    palball_get, pallot_lot_t0, pallot_lot_t1, pallot_lot_t2, pallot_lot_t3,
+    jacksp_get_all, jacksp_get_t0, jacksp_get_t1, jacksp_get_t2, jacksp_get_t3,
+    jacksp_startmax, jacksp_totalmax, task_cnt,
     firstboot, lastsave, playtime
-) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
 		sd.UserId, sd.Legacy, sd.Version,
 		sd.Credit, sd.CreditAll, sd.MedalIn, sd.MedalGet,
 		sd.BallGet, sd.BallChain, sd.SlotStart, sd.SlotStartFev,
@@ -39,6 +43,10 @@ INSERT INTO save_data_v2 (
 		sd.JackGet, sd.JackStartMax, sd.JackTotalMax,
 		sd.UltGet, sd.UltComboMax, sd.UltTotalMax,
 		sd.RmShbiGet, sd.BstpStep, sd.BstpRwd, sd.BuyTotal, sd.SpUse, sd.BuyShbi,
+		sd.HideRecord, sd.CpMMax, sd.JackTotalMaxV2, sd.UltimateTotalMaxV2,
+		sd.PalettaBallGet, sd.PalettaLotteryAttemptTier0, sd.PalettaLotteryAttemptTier1, sd.PalettaLotteryAttemptTier2, sd.PalettaLotteryAttemptTier3,
+		sd.JackpotSuperGetTotal, sd.JackpotSuperGetTier0, sd.JackpotSuperGetTier1, sd.JackpotSuperGetTier2, sd.JackpotSuperGetTier3,
+		sd.JackpotSuperStartMax, sd.JackpotSuperTotalMax, sd.TaskCompleteCount,
 		sd.FirstBoot, sd.LastSave, sd.Playtime,
 	)
 	if err != nil {
@@ -70,6 +78,34 @@ INSERT INTO save_data_v2 (
 	// achievements
 	for _, aid := range sd.LAchieve {
 		if _, err := tx.ExecContext(ctx, `INSERT INTO save_data_v2_achievements(save_id, achievement_id) VALUES(?,?)`, saveID, aid); err != nil {
+			return err
+		}
+	}
+
+	// palball_get
+	for id, cnt := range sd.DCPalettaBallGet {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO save_data_v2_palball_get(save_id, ball_id, count) VALUES(?,?,?)`, saveID, id, cnt); err != nil {
+			return err
+		}
+	}
+
+	// palball_jp
+	for id, cnt := range sd.DCPalettaBallJackpot {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO save_data_v2_palball_jp(save_id, ball_id, count) VALUES(?,?,?)`, saveID, id, cnt); err != nil {
+			return err
+		}
+	}
+
+	// perks
+	for i, level := range sd.LPerkLevels {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO save_data_v2_perks(save_id, perk_id, level) VALUES(?,?,?)`, saveID, i, level); err != nil {
+			return err
+		}
+	}
+
+	// perks_credit
+	for i, credits := range sd.LPerkUsedCredits {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO save_data_v2_perks_credit(save_id, perk_id, credits) VALUES(?,?,?)`, saveID, i, credits); err != nil {
 			return err
 		}
 	}
@@ -167,6 +203,94 @@ WHERE save_id = ?
 			return nil, err
 		}
 		sd.LAchieve = append(sd.LAchieve, aid)
+	}
+	rows.Close()
+
+	// 6) palball_get
+	sd.DCPalettaBallGet = make(map[string]int)
+	rows, err = r.db.QueryxContext(ctx, `
+SELECT ball_id, count 
+FROM save_data_v2_palball_get 
+WHERE save_id = ?
+`, sd.ID)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id string
+		var cnt int
+		if err := rows.Scan(&id, &cnt); err != nil {
+			return nil, err
+		}
+		sd.DCPalettaBallGet[id] = cnt
+	}
+	rows.Close()
+
+	// 7) palball_jp
+	sd.DCPalettaBallJackpot = make(map[string]int)
+	rows, err = r.db.QueryxContext(ctx, `
+SELECT ball_id, count 
+FROM save_data_v2_palball_jp 
+WHERE save_id = ?
+`, sd.ID)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id string
+		var cnt int
+		if err := rows.Scan(&id, &cnt); err != nil {
+			return nil, err
+		}
+		sd.DCPalettaBallJackpot[id] = cnt
+	}
+	rows.Close()
+
+	// 8) perks
+	rows, err = r.db.QueryxContext(ctx, `
+SELECT perk_id, level 
+FROM save_data_v2_perks 
+WHERE save_id = ?
+ORDER BY perk_id
+`, sd.ID)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var perkID int
+		var level int
+		if err := rows.Scan(&perkID, &level); err != nil {
+			return nil, err
+		}
+		// perk_idの順序に合わせて配列を拡張
+		for len(sd.LPerkLevels) <= perkID {
+			sd.LPerkLevels = append(sd.LPerkLevels, 0)
+		}
+		sd.LPerkLevels[perkID] = level
+	}
+	rows.Close()
+
+	// 9) perks_credit
+	rows, err = r.db.QueryxContext(ctx, `
+SELECT perk_id, credits 
+FROM save_data_v2_perks_credit 
+WHERE save_id = ?
+ORDER BY perk_id
+`, sd.ID)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var perkID int
+		var credits int
+		if err := rows.Scan(&perkID, &credits); err != nil {
+			return nil, err
+		}
+		// perk_idの順序に合わせて配列を拡張
+		for len(sd.LPerkUsedCredits) <= perkID {
+			sd.LPerkUsedCredits = append(sd.LPerkUsedCredits, 0)
+		}
+		sd.LPerkUsedCredits[perkID] = credits
 	}
 	rows.Close()
 

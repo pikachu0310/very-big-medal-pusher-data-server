@@ -504,6 +504,83 @@ components:
         sp_use:
           type: integer
           x-oapi-codegen-extra-tags: { db: 'sp_use' }
+        hide_record:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'hide_record' }
+        cpm_max:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'cpm_max' }
+        jack_totalmax_v2:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'jack_totalmax_v2' }
+        ult_totalmax_v2:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'ult_totalmax_v2' }
+        palball_get:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'palball_get' }
+        pallot_lot_t0:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'pallot_lot_t0' }
+        pallot_lot_t1:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'pallot_lot_t1' }
+        pallot_lot_t2:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'pallot_lot_t2' }
+        pallot_lot_t3:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'pallot_lot_t3' }
+        jacksp_get_all:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'jacksp_get_all' }
+        jacksp_get_t0:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'jacksp_get_t0' }
+        jacksp_get_t1:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'jacksp_get_t1' }
+        jacksp_get_t2:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'jacksp_get_t2' }
+        jacksp_get_t3:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'jacksp_get_t3' }
+        jacksp_startmax:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'jacksp_startmax' }
+        jacksp_totalmax:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'jacksp_totalmax' }
+        task_cnt:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'task_cnt' }
+        dc_palball_get:
+          type: object
+          additionalProperties: { type: integer }
+          x-oapi-codegen-extra-tags: { table: 'save_data_v2_palball_get' }
+        dc_palball_jp:
+          type: object
+          additionalProperties: { type: integer }
+          x-oapi-codegen-extra-tags: { table: 'save_data_v2_palball_jp' }
+        l_perks:
+          type: array
+          items: { type: integer }
+          x-oapi-codegen-extra-tags: { table: 'save_data_v2_perks' }
+        l_perks_credit:
+          type: array
+          items: { type: integer }
+          x-oapi-codegen-extra-tags: { table: 'save_data_v2_perks_credit' }
         firstboot:
           type: string
         lastsave:
