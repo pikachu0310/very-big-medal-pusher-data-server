@@ -630,7 +630,7 @@ SELECT
 FROM (
   SELECT
     user_id,
-    cpm_max AS value,
+    CAST(cpm_max AS SIGNED) AS value,
     created_at,
     ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY cpm_max DESC, created_at ASC) AS rn
   FROM save_data_v2
