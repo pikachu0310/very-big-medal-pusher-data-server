@@ -520,19 +520,24 @@ components:
           format: double
           x-oapi-codegen-extra-tags: { db: 'ult_totalmax_v2' }
         palball_get:
-          type: integer
+          type: number
+          format: double
           x-oapi-codegen-extra-tags: { db: 'palball_get' }
         pallot_lot_t0:
-          type: integer
+          type: number
+          format: double
           x-oapi-codegen-extra-tags: { db: 'pallot_lot_t0' }
         pallot_lot_t1:
-          type: integer
+          type: number
+          format: double
           x-oapi-codegen-extra-tags: { db: 'pallot_lot_t1' }
         pallot_lot_t2:
-          type: integer
+          type: number
+          format: double
           x-oapi-codegen-extra-tags: { db: 'pallot_lot_t2' }
         pallot_lot_t3:
-          type: integer
+          type: number
+          format: double
           x-oapi-codegen-extra-tags: { db: 'pallot_lot_t3' }
         jacksp_get_all:
           type: number
@@ -563,7 +568,8 @@ components:
           format: double
           x-oapi-codegen-extra-tags: { db: 'jacksp_totalmax' }
         task_cnt:
-          type: integer
+          type: number
+          format: double
           x-oapi-codegen-extra-tags: { db: 'task_cnt' }
         dc_palball_get:
           type: object
@@ -579,7 +585,9 @@ components:
           x-oapi-codegen-extra-tags: { table: 'save_data_v2_perks' }
         l_perks_credit:
           type: array
-          items: { type: integer }
+          items:
+            type: integer
+            format: int64
           x-oapi-codegen-extra-tags: { table: 'save_data_v2_perks_credit' }
         firstboot:
           type: string

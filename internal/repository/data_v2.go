@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/domain"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
 )
@@ -282,7 +283,7 @@ ORDER BY perk_id
 	}
 	for rows.Next() {
 		var perkID int
-		var credits int
+		var credits int64
 		if err := rows.Scan(&perkID, &credits); err != nil {
 			return nil, err
 		}
@@ -683,7 +684,7 @@ GROUP BY achievement_id
 		Count *int     `json:"count,omitempty"`
 		Rate  *float32 `json:"rate,omitempty"`
 	})
-	
+
 	var totalUsers int
 	for rows.Next() {
 		var achievementID string
@@ -691,12 +692,12 @@ GROUP BY achievement_id
 		if err := rows.Scan(&achievementID, &userCount, &totalUsers); err != nil {
 			return nil, err
 		}
-		
+
 		rate := float32(0.0)
 		if totalUsers > 0 {
 			rate = float32(userCount) / float32(totalUsers)
 		}
-		
+
 		achievementRates[achievementID] = struct {
 			Count *int     `json:"count,omitempty"`
 			Rate  *float32 `json:"rate,omitempty"`
