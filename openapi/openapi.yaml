@@ -650,6 +650,21 @@ components:
         jack_totalmax:
           type: array
           items: { $ref: '#/components/schemas/RankingEntry' }
+        jack_totalmax_v2:
+          type: array
+          items: { $ref: '#/components/schemas/RankingEntry' }
+        ult_totalmax_v2:
+          type: array
+          items: { $ref: '#/components/schemas/RankingEntry' }
+        jacksp_startmax:
+          type: array
+          items: { $ref: '#/components/schemas/RankingEntry' }
+        golden_palball_get:
+          type: array
+          items: { $ref: '#/components/schemas/RankingEntry' }
+        cpm_max:
+          type: array
+          items: { $ref: '#/components/schemas/RankingEntry' }
         ult_combomax:
           type: array
           items: { $ref: '#/components/schemas/RankingEntry' }

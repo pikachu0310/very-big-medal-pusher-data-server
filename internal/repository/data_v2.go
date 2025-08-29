@@ -456,7 +456,7 @@ FROM (
     ROW_NUMBER() OVER (PARTITION BY sd.user_id ORDER BY bc.chain_count DESC, sd.created_at ASC) AS rn
   FROM save_data_v2_ball_chain AS bc
   JOIN save_data_v2 AS sd ON bc.save_id = sd.id
-  WHERE bc.ball_id = '1'
+  WHERE bc.ball_id = '1' AND sd.hide_record = false
 ) AS ranked
 WHERE ranked.rn = 1
 ORDER BY ranked.value DESC, ranked.created_at ASC
@@ -479,7 +479,7 @@ FROM (
     ROW_NUMBER() OVER (PARTITION BY sd.user_id ORDER BY bc.chain_count DESC, sd.created_at ASC) AS rn
   FROM save_data_v2_ball_chain AS bc
   JOIN save_data_v2 AS sd ON bc.save_id = sd.id
-  WHERE bc.ball_id = '3'
+  WHERE bc.ball_id = '3' AND sd.hide_record = false
 ) AS ranked
 WHERE ranked.rn = 1
 ORDER BY ranked.value DESC, ranked.created_at ASC
@@ -501,6 +501,7 @@ FROM (
     created_at,
     ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY jack_startmax DESC, created_at ASC) AS rn
   FROM save_data_v2
+  WHERE hide_record = false
 ) AS ranked
 WHERE ranked.rn = 1
 ORDER BY ranked.value DESC, ranked.created_at ASC
@@ -522,6 +523,7 @@ FROM (
     created_at,
     ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY jack_totalmax DESC, created_at ASC) AS rn
   FROM save_data_v2
+  WHERE hide_record = false
 ) AS ranked
 WHERE ranked.rn = 1
 ORDER BY ranked.value DESC, ranked.created_at ASC
@@ -530,7 +532,118 @@ LIMIT 1000
 		return nil, err
 	}
 
-	// 5) ult_combomax
+	// 5) jack_totalmax_v2
+	if err := addRanking(&stats.JackTotalmaxV2, `
+SELECT
+  ranked.user_id,
+  ranked.value,
+  ranked.created_at
+FROM (
+  SELECT
+    user_id,
+    jack_totalmax_v2 AS value,
+    created_at,
+    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY jack_totalmax_v2 DESC, created_at ASC) AS rn
+  FROM save_data_v2
+  WHERE hide_record = false
+) AS ranked
+WHERE ranked.rn = 1
+ORDER BY ranked.value DESC, ranked.created_at ASC
+LIMIT 1000
+`); err != nil {
+		return nil, err
+	}
+
+	// 6) ult_totalmax_v2
+	if err := addRanking(&stats.UltTotalmaxV2, `
+SELECT
+  ranked.user_id,
+  ranked.value,
+  ranked.created_at
+FROM (
+  SELECT
+    user_id,
+    ult_totalmax_v2 AS value,
+    created_at,
+    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY ult_totalmax_v2 DESC, created_at ASC) AS rn
+  FROM save_data_v2
+  WHERE hide_record = false
+) AS ranked
+WHERE ranked.rn = 1
+ORDER BY ranked.value DESC, ranked.created_at ASC
+LIMIT 1000
+`); err != nil {
+		return nil, err
+	}
+
+	// 7) jacksp_startmax
+	if err := addRanking(&stats.JackspStartmax, `
+SELECT
+  ranked.user_id,
+  ranked.value,
+  ranked.created_at
+FROM (
+  SELECT
+    user_id,
+    jacksp_startmax AS value,
+    created_at,
+    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY jacksp_startmax DESC, created_at ASC) AS rn
+  FROM save_data_v2
+  WHERE hide_record = false
+) AS ranked
+WHERE ranked.rn = 1
+ORDER BY ranked.value DESC, ranked.created_at ASC
+LIMIT 1000
+`); err != nil {
+		return nil, err
+	}
+
+	// 8) golden_palball_get (ID 100)
+	if err := addRanking(&stats.GoldenPalballGet, `
+SELECT
+  ranked.user_id,
+  ranked.value,
+  ranked.created_at
+FROM (
+  SELECT
+    sd.user_id,
+    COALESCE(dpg.count, 0) AS value,
+    sd.created_at,
+    ROW_NUMBER() OVER (PARTITION BY sd.user_id ORDER BY COALESCE(dpg.count, 0) DESC, sd.created_at ASC) AS rn
+  FROM save_data_v2 AS sd
+  LEFT JOIN save_data_v2_palball_get AS dpg ON dpg.save_id = sd.id AND dpg.ball_id = '100'
+  WHERE sd.hide_record = false
+) AS ranked
+WHERE ranked.rn = 1
+ORDER BY ranked.value DESC, ranked.created_at ASC
+LIMIT 1000
+`); err != nil {
+		return nil, err
+	}
+
+	// 9) cpm_max
+	if err := addRanking(&stats.CpmMax, `
+SELECT
+  ranked.user_id,
+  ranked.value,
+  ranked.created_at
+FROM (
+  SELECT
+    user_id,
+    cpm_max AS value,
+    created_at,
+    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY cpm_max DESC, created_at ASC) AS rn
+  FROM save_data_v2
+  WHERE hide_record = false
+) AS ranked
+WHERE ranked.rn = 1
+ORDER BY ranked.value DESC, ranked.created_at ASC
+LIMIT 1000
+`); err != nil {
+		return nil, err
+	}
+
+	// 10) ult_combomax
 	if err := addRanking(&stats.UltCombomax, `
 SELECT
   ranked.user_id,
@@ -543,6 +656,7 @@ FROM (
     created_at,
     ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY ult_combomax DESC, created_at ASC) AS rn
   FROM save_data_v2
+  WHERE hide_record = false
 ) AS ranked
 WHERE ranked.rn = 1
 ORDER BY ranked.value DESC, ranked.created_at ASC
@@ -551,7 +665,7 @@ LIMIT 1000
 		return nil, err
 	}
 
-	// 6) ult_totalmax
+	// 11) ult_totalmax
 	if err := addRanking(&stats.UltTotalmax, `
 SELECT
   ranked.user_id,
@@ -564,6 +678,7 @@ FROM (
     created_at,
     ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY ult_totalmax DESC, created_at ASC) AS rn
   FROM save_data_v2
+  WHERE hide_record = false
 ) AS ranked
 WHERE ranked.rn = 1
 ORDER BY ranked.value DESC, ranked.created_at ASC
@@ -572,7 +687,7 @@ LIMIT 1000
 		return nil, err
 	}
 
-	// 7) sp_use
+	// 12) sp_use
 	if err := addRanking(&stats.SpUse, `
 SELECT
   ranked.user_id,
@@ -585,6 +700,7 @@ FROM (
     created_at,
     ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY sp_use DESC, created_at ASC) AS rn
   FROM save_data_v2
+  WHERE hide_record = false
 ) AS ranked
 WHERE ranked.rn = 1
 ORDER BY ranked.value DESC, ranked.created_at ASC
@@ -593,7 +709,7 @@ LIMIT 1000
 		return nil, err
 	}
 
-	// 8) buy_shbi
+	// 13) buy_shbi
 	if err := addRanking(&stats.BuyShbi, `
 SELECT
   ranked.user_id,
@@ -606,6 +722,7 @@ FROM (
     created_at,
     ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY buy_shbi DESC, created_at ASC) AS rn
   FROM save_data_v2
+  WHERE hide_record = false
 ) AS ranked
 WHERE ranked.rn = 1
 ORDER BY ranked.value DESC, ranked.created_at ASC
@@ -614,7 +731,7 @@ LIMIT 1000
 		return nil, err
 	}
 
-	// 9) achievements_count
+	// 14) achievements_count
 	if err := addRanking(&stats.AchievementsCount, `
 SELECT
   sd.user_id,
@@ -623,6 +740,7 @@ SELECT
 FROM (
   SELECT user_id, MAX(id) AS max_id
   FROM save_data_v2
+  WHERE hide_record = false
   GROUP BY user_id
 ) AS latest
 JOIN save_data_v2 AS sd ON sd.id = latest.max_id
@@ -634,7 +752,7 @@ LIMIT 1000
 		return nil, err
 	}
 
-	// 10) total_medals（最新セーブの credit 合計）
+	// 15) total_medals（最新セーブの credit 合計）
 	{
 		q := `
 SELECT
@@ -642,6 +760,7 @@ SELECT
 FROM (
   SELECT user_id, MAX(id) AS max_id
   FROM save_data_v2
+  WHERE hide_record = false
   GROUP BY user_id
 ) AS t
 JOIN save_data_v2 AS sd
