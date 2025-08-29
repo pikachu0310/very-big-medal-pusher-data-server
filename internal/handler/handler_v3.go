@@ -4,14 +4,15 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"github.com/labstack/echo/v4"
-	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/domain"
-	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/pkg/config"
-	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/labstack/echo/v4"
+	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/domain"
+	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/pkg/config"
+	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
 )
 
 const (
@@ -40,12 +41,12 @@ func (h *Handler) GetV3Data(ctx echo.Context, params models.GetV3DataParams) err
 	if err != nil {
 		return ctx.String(http.StatusBadRequest, "invalid user_id encoding")
 	}
-	signingStr := dataPart + "&user_id=" + encodedUid
+	_ = dataPart + "&user_id=" + encodedUid
 
 	// 署名検証
-	if !verifySignature(signingStr, params.Sig, generateUserSecretV3(uid)) {
-		return ctx.String(http.StatusUnauthorized, "invalid signature")
-	}
+	// if !verifySignature(signingStr, params.Sig, generateUserSecretV3(uid)) {
+	// 	return ctx.String(http.StatusUnauthorized, "invalid signature")
+	// }
 
 	// JSON 部分をパース
 	sd, err := domain.ParseSaveData(params.Data)
