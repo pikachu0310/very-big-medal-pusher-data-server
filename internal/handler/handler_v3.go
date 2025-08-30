@@ -4,7 +4,6 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -32,11 +31,6 @@ func (h *Handler) GetV3Data(ctx echo.Context, params models.GetV3DataParams) err
 	dataEncoded := strings.ReplaceAll(url.QueryEscape(params.Data), "+", "%20")
 	userIdEncoded := strings.ReplaceAll(url.QueryEscape(params.UserId), "+", "%20")
 	signingStr := "data=" + dataEncoded + "&user_id=" + userIdEncoded
-
-	// デバッグ出力
-	log.Printf("[DEBUG] GetV3Data called with params: %+v", params)
-	log.Printf("[DEBUG] Signing string: %s", signingStr)
-	log.Printf("[DEBUG] Received signature: %s", params.Sig)
 
 	// 3. 署名検証
 	if !verifySignature(signingStr, params.Sig, generateUserSecretV3(params.UserId)) {
@@ -117,17 +111,9 @@ func (h *Handler) GetV3Statistics(ctx echo.Context) error {
 }
 
 func generateUserSecretV3(userID string) []byte {
-	log.Printf("[DEBUG] generateUserSecretV3 called with userID: %s", userID)
-
-	secretKey := config.GetSecretKeySaveV2()
-	log.Printf("[DEBUG] Secret key: %s", secretKey)
-
-	h := hmac.New(sha256.New, []byte(secretKey))
+	h := hmac.New(sha256.New, []byte(config.GetSecretKeySaveV2()))
 	h.Write([]byte(userID))
-	result := h.Sum(nil)
-
-	log.Printf("[DEBUG] Generated user secret (hex): %x", result)
-	return result
+	return h.Sum(nil)
 }
 
 // GetV3AchievementsRates returns achievement acquisition rates
