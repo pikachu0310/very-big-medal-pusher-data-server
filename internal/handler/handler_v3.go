@@ -24,47 +24,26 @@ const (
 )
 
 func (h *Handler) GetV3Data(ctx echo.Context, params models.GetV3DataParams) error {
+	// クエリパラメータを正しい順序で構築して署名検証を行う
+	// クエリパラメータの順序は重要: data, user_id, sig の順序で署名を生成する必要がある
+
+	// 1. 署名対象となるクエリ文字列を構築（sigパラメータを除く）
+	queryParams := url.Values{}
+	queryParams.Set("data", params.Data)
+	queryParams.Set("user_id", params.UserId)
+
+	// 2. 署名対象文字列を生成（URLエンコードされた形式）
+	signingStr := queryParams.Encode()
+
+	// デバッグ出力
 	log.Printf("[DEBUG] GetV3Data called with params: %+v", params)
-
-	// クエリ文字列から signature 部分を切り出し
-	rawQS := ctx.Request().URL.RawQuery
-	log.Printf("[DEBUG] Raw query string: %s", rawQS)
-
-	parts := strings.SplitN(rawQS, "&sig=", 2)
-	if len(parts) != 2 {
-		log.Printf("[DEBUG] Failed to split query string by &sig=, parts: %v", parts)
-		return ctx.String(http.StatusBadRequest, "missing signature")
-	}
-	rawQueryPart := parts[0] // "data=…&user_id=%5B1%5D%20Local%20Player"
-	log.Printf("[DEBUG] Raw query part (before sig): %s", rawQueryPart)
-
-	// user_id をデコードして署名対象を再構築
-	kv := strings.SplitN(rawQueryPart, "&user_id=", 2)
-	if len(kv) != 2 {
-		log.Printf("[DEBUG] Failed to split by &user_id=, kv: %v", kv)
-		return ctx.String(http.StatusBadRequest, "missing user_id")
-	}
-	dataPart, encodedUid := kv[0], kv[1]
-	log.Printf("[DEBUG] Data part: %s, encoded user_id: %s", dataPart, encodedUid)
-
-	uid, err := url.QueryUnescape(encodedUid)
-	if err != nil {
-		log.Printf("[DEBUG] Failed to unescape user_id: %v", err)
-		return ctx.String(http.StatusBadRequest, "invalid user_id encoding")
-	}
-	log.Printf("[DEBUG] Decoded user_id: %s", uid)
-
-	signingStr := dataPart + "&user_id=" + encodedUid
 	log.Printf("[DEBUG] Signing string: %s", signingStr)
-
-	// 署名検証
-	userSecret := generateUserSecretV3(uid)
-	log.Printf("[DEBUG] Generated user secret (hex): %x", userSecret)
 	log.Printf("[DEBUG] Received signature: %s", params.Sig)
 
-	// if !verifySignature(signingStr, params.Sig, generateUserSecretV3(uid)) {
-	// 	return ctx.String(http.StatusUnauthorized, "invalid signature")
-	// }
+	// 3. 署名検証
+	if !verifySignature(signingStr, params.Sig, generateUserSecretV3(params.UserId)) {
+		return ctx.String(http.StatusUnauthorized, "invalid signature")
+	}
 
 	// JSON 部分をパース
 	sd, err := domain.ParseSaveData(params.Data)
@@ -73,7 +52,7 @@ func (h *Handler) GetV3Data(ctx echo.Context, params models.GetV3DataParams) err
 	}
 
 	// 重複チェック
-	exists, err := h.repo.ExistsSameSave(ctx.Request().Context(), uid, sd.Playtime)
+	exists, err := h.repo.ExistsSameSave(ctx.Request().Context(), params.UserId, sd.Playtime)
 	if err != nil {
 		return ctx.String(http.StatusInternalServerError, err.Error())
 	}
@@ -82,7 +61,7 @@ func (h *Handler) GetV3Data(ctx echo.Context, params models.GetV3DataParams) err
 	}
 
 	// 保存
-	sd.UserId = uid
+	sd.UserId = params.UserId
 	if err := h.repo.InsertSave(ctx.Request().Context(), sd); err != nil {
 		return ctx.String(http.StatusInternalServerError, err.Error())
 	}
@@ -98,20 +77,11 @@ func (h *Handler) GetV3UsersUserIdData(
 	userId string,
 	params models.GetV3UsersUserIdDataParams, // ← Sig はここに入ってくる
 ) error {
-	log.Printf("[DEBUG] GetV3UsersUserIdData called with userId: %s, params: %+v", userId, params)
-
 	// 1) 署名必須
 	if params.Sig == "" {
-		log.Printf("[DEBUG] Missing signature for userId: %s", userId)
 		return ctx.String(http.StatusBadRequest, "missing signature")
 	}
-
-	log.Printf("[DEBUG] Verifying signature for userId: %s, sig: %s", userId, params.Sig)
-	valid := verifyUserSignature(userId, params.Sig)
-	log.Printf("[DEBUG] Signature verification result: %t", valid)
-
-	if !valid {
-		log.Printf("[DEBUG] Invalid signature for userId: %s", userId)
+	if !verifyUserSignature(userId, params.Sig) {
 		return ctx.String(http.StatusUnauthorized, "invalid signature")
 	}
 
@@ -129,18 +99,11 @@ func (h *Handler) GetV3UsersUserIdData(
 // 署名検証：sig == HMAC-SHA256( key=<LoadSecret>, msg=userID )
 // -----------------------------------------------------------------
 func verifyUserSignature(userID, sig string) bool {
-	log.Printf("[DEBUG] verifyUserSignature called with userID: %s, sig: %s", userID, sig)
-
 	secret := []byte(config.GetSecretKeyLoadV2())
-	log.Printf("[DEBUG] Load secret key (hex): %x", secret)
 
 	mac := hmac.New(sha256.New, secret)
 	mac.Write([]byte(userID))
 	expected := hex.EncodeToString(mac.Sum(nil))
-
-	log.Printf("[DEBUG] Expected signature: %s", expected)
-	log.Printf("[DEBUG] Received signature: %s", sig)
-	log.Printf("[DEBUG] Signatures match (case-insensitive): %t", strings.EqualFold(sig, expected))
 
 	return strings.EqualFold(sig, expected)
 }
@@ -159,7 +122,7 @@ func generateUserSecretV3(userID string) []byte {
 	log.Printf("[DEBUG] generateUserSecretV3 called with userID: %s", userID)
 
 	secretKey := config.GetSecretKeySaveV2()
-	log.Printf("[DEBUG] Save secret key (hex): %x", []byte(secretKey))
+	log.Printf("[DEBUG] Secret key: %s", secretKey)
 
 	h := hmac.New(sha256.New, []byte(secretKey))
 	h.Write([]byte(userID))
