@@ -752,11 +752,11 @@ LIMIT 1000
 		return nil, err
 	}
 
-	// 15) total_medals（最新セーブの credit 合計）
+	// 15) total_medals（最新セーブの credit_all 合計）
 	{
 		q := `
 SELECT
-  COALESCE(SUM(sd.credit),0) AS total_medals
+  COALESCE(SUM(sd.credit_all),0) AS total_medals
 FROM (
   SELECT user_id, MAX(id) AS max_id
   FROM save_data_v2
