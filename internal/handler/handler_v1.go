@@ -103,6 +103,12 @@ func (h *Handler) GetPing(ctx echo.Context) error {
 }
 
 func (h *Handler) GetData(ctx echo.Context, params models.GetDataParams) error {
+	// v1エンドポイントはもう使われなくなりました
+	return ctx.JSON(http.StatusGone, map[string]string{
+		"error": "This endpoint is deprecated and no longer available. Please use v3 endpoints instead.",
+		"code":  "DEPRECATED_ENDPOINT",
+	})
+
 	log.Printf("Received params: %+v", params)
 	userSecret := generateUserSecret(params.UserId)
 	paramStr := createSortedParamString(params)
@@ -147,6 +153,12 @@ func nullifyNullValues(params *models.GetDataParams) {
 }
 
 func (h *Handler) GetUsersUserIdData(ctx echo.Context, userId string) error {
+	// v1エンドポイントはもう使われなくなりました
+	return ctx.JSON(http.StatusGone, map[string]string{
+		"error": "This endpoint is deprecated and no longer available. Please use v3 endpoints instead.",
+		"code":  "DEPRECATED_ENDPOINT",
+	})
+
 	data, err := h.repo.GetUserGameData(ctx.Request().Context(), userId)
 	if err != nil {
 		return ctx.JSON(http.StatusNotFound, err.Error())
@@ -155,6 +167,12 @@ func (h *Handler) GetUsersUserIdData(ctx echo.Context, userId string) error {
 }
 
 func (h *Handler) GetRankings(ctx echo.Context, params models.GetRankingsParams) error {
+	// v1エンドポイントはもう使われなくなりました
+	return ctx.JSON(http.StatusGone, map[string]string{
+		"error": "This endpoint is deprecated and no longer available. Please use v3 endpoints instead.",
+		"code":  "DEPRECATED_ENDPOINT",
+	})
+
 	sortBy := "have_medal"
 	if params.Sort != nil {
 		sortBy = string(*params.Sort)
@@ -190,6 +208,12 @@ func (h *Handler) GetRankings(ctx echo.Context, params models.GetRankingsParams)
 
 // GetTotalMedals は全ユーザーの最新 have_medal 合計を返すエンドポイント
 func (h *Handler) GetTotalMedals(ctx echo.Context) error {
+	// v1エンドポイントはもう使われなくなりました
+	return ctx.JSON(http.StatusGone, map[string]string{
+		"error": "This endpoint is deprecated and no longer available. Please use v3 endpoints instead.",
+		"code":  "DEPRECATED_ENDPOINT",
+	})
+
 	total, err := h.totalMedalsCache.Get(ctx.Request().Context(), "total")
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, err.Error())

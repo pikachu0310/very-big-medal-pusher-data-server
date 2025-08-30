@@ -1,13 +1,14 @@
 package handler
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/domain"
-	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/labstack/echo/v4"
+	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/domain"
+	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
 )
 
 const (
@@ -18,6 +19,12 @@ const (
 )
 
 func (h *Handler) GetV2Data(ctx echo.Context, params models.GetV2DataParams) error {
+	// v2エンドポイントはもう使われなくなりました
+	return ctx.JSON(http.StatusGone, map[string]string{
+		"error": "This endpoint is deprecated and no longer available. Please use v3 endpoints instead.",
+		"code":  "DEPRECATED_ENDPOINT",
+	})
+
 	// クエリ文字列から signature 部分を切り出し
 	rawQS := ctx.Request().URL.RawQuery
 	parts := strings.SplitN(rawQS, "&sig=", 2)
@@ -68,6 +75,12 @@ func (h *Handler) GetV2Data(ctx echo.Context, params models.GetV2DataParams) err
 }
 
 func (h *Handler) GetV2UsersUserIdData(ctx echo.Context, userId string) error {
+	// v2エンドポイントはもう使われなくなりました
+	return ctx.JSON(http.StatusGone, map[string]string{
+		"error": "This endpoint is deprecated and no longer available. Please use v3 endpoints instead.",
+		"code":  "DEPRECATED_ENDPOINT",
+	})
+
 	// 1. 最新のセーブデータを取得
 	sd, err := h.repo.GetLatestSave(ctx.Request().Context(), userId)
 	if err != nil {
@@ -83,6 +96,12 @@ func (h *Handler) GetV2UsersUserIdData(ctx echo.Context, userId string) error {
 
 // GetV2Statistics returns combined rankings and total medals, with cache.
 func (h *Handler) GetV2Statistics(ctx echo.Context) error {
+	// v2エンドポイントはもう使われなくなりました
+	return ctx.JSON(http.StatusGone, map[string]string{
+		"error": "This endpoint is deprecated and no longer available. Please use v3 endpoints instead.",
+		"code":  "DEPRECATED_ENDPOINT",
+	})
+
 	// キャッシュから取得。キーは statisticsCacheKey を常に使用
 	stats, err := h.statisticsCache.Get(ctx.Request().Context(), statisticsCacheKey)
 	if err != nil {

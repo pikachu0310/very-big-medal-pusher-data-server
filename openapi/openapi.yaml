@@ -14,8 +14,12 @@ paths:
   /data:
     get:
       tags: [ v1 ]
-      summary: ゲームデータを送信
-      description: HMAC署名付きの統計情報をGETで送信する
+      summary: ゲームデータを送信 (非推奨)
+      description: |
+        **⚠️ このエンドポイントは非推奨です。もう使われなくなりました。**
+        
+        HMAC署名付きの統計情報をGETで送信する
+      deprecated: true
       parameters:
         - name: version
           in: query
@@ -115,13 +119,14 @@ paths:
           in: query
           schema: { type: integer }
       responses:
+        '410': { description: このエンドポイントはもう使われなくなりました }
         '200': { description: 正常に保存されました }
         '400': { description: 不正な署名 or パラメータ }
         '500': { description: サーバー内部エラー }
 
   /ping:
     get:
-      tags: [ v1, v2 ]
+      tags: [ v1, v2, v3 ]
       summary: ヘルスチェック
       responses:
         '200': { description: サーバー稼働中 }
@@ -129,13 +134,17 @@ paths:
   /users/{user_id}/data:
     get:
       tags: [ v1 ]
-      summary: ユーザーごとのゲームデータを取得
+      summary: ユーザーごとのゲームデータを取得 (非推奨)
+      description: |
+        **⚠️ このエンドポイントは非推奨です。もう使われなくなりました。**
+      deprecated: true
       parameters:
         - name: user_id
           in: path
           required: true
           schema: { type: string }
       responses:
+        '410': { description: このエンドポイントはもう使われなくなりました }
         '200':
           description: ユーザーのゲームデータ
           content:
@@ -147,7 +156,10 @@ paths:
   /rankings:
     get:
       tags: [ v1 ]
-      summary: ランキングを取得
+      summary: ランキングを取得 (非推奨)
+      description: |
+        **⚠️ このエンドポイントは非推奨です。もう使われなくなりました。**
+      deprecated: true
       parameters:
         - name: sort
           in: query
@@ -168,6 +180,7 @@ paths:
             type: integer
             default: 50
       responses:
+        '410': { description: このエンドポイントはもう使われなくなりました }
         '200':
           description: ランキングデータ
           content:
@@ -180,9 +193,14 @@ paths:
   /total_medals:
     get:
       tags: [ v1 ]
-      summary: 全ユーザーのメダル総量を取得
-      description: 全ユーザーの最新データにおける `have_medal` の合計を返します
+      summary: 全ユーザーのメダル総量を取得 (非推奨)
+      description: |
+        **⚠️ このエンドポイントは非推奨です。もう使われなくなりました。**
+        
+        全ユーザーの最新データにおける `have_medal` の合計を返します
+      deprecated: true
       responses:
+        '410': { description: このエンドポイントはもう使われなくなりました }
         '200':
           description: メダル総量を返します
           content:
@@ -197,8 +215,12 @@ paths:
   /v2/data:
     get:
       tags: [ v2 ]
-      summary: セーブデータを送信 (v2)
-      description: JSON 化したセーブデータを GET パラメータで送信して保存します。
+      summary: セーブデータを送信 (v2・非推奨)
+      description: |
+        **⚠️ このエンドポイントは非推奨です。もう使われなくなりました。**
+        
+        JSON 化したセーブデータを GET パラメータで送信して保存します。
+      deprecated: true
       parameters:
         - name: data
           in: query
@@ -214,6 +236,7 @@ paths:
           required: true
           schema: { type: string }
       responses:
+        '410': { description: このエンドポイントはもう使われなくなりました }
         '200': { description: 正常に保存されました }
         '400': { description: 無効なパラメータ }
         '401': { description: 署名認証失敗 }
@@ -223,13 +246,17 @@ paths:
   /v2/users/{user_id}/data:
     get:
       tags: [ v2 ]
-      summary: ユーザーの最新セーブデータを取得 (v2)
+      summary: ユーザーの最新セーブデータを取得 (v2・非推奨)
+      description: |
+        **⚠️ このエンドポイントは非推奨です。もう使われなくなりました。**
+      deprecated: true
       parameters:
         - name: user_id
           in: path
           required: true
           schema: { type: string }
       responses:
+        '410': { description: このエンドポイントはもう使われなくなりました }
         '200':
           description: セーブデータ
           content:
@@ -242,9 +269,14 @@ paths:
   /v2/statistics:
     get:
       tags: [ v2 ]
-      summary: グローバル統計を取得 (v2)
-      description: 各種ランキングと全ユーザーのメダル総量をまとめて返します。
+      summary: グローバル統計を取得 (v2・非推奨)
+      description: |
+        **⚠️ このエンドポイントは非推奨です。もう使われなくなりました。**
+        
+        各種ランキングと全ユーザーのメダル総量をまとめて返します。
+      deprecated: true
       responses:
+        '410': { description: このエンドポイントはもう使われなくなりました }
         '200':
           description: 統計データ
           content:
@@ -307,7 +339,7 @@ paths:
 
   /v3/statistics:
     get:
-      tags: [ v2 ]
+      tags: [ v3 ]
       summary: グローバル統計を取得 (v2・上位1000件)
       description: >
         各ランキングを最大 **1000 件** まで（/v2/statistics は 500 件まで）と、
