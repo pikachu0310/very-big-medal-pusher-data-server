@@ -28,8 +28,10 @@ func (h *Handler) GetV3Data(ctx echo.Context, params models.GetV3DataParams) err
 	// クエリパラメータの順序は重要: data, user_id, sig の順序で署名を生成する必要がある
 
 	// 1. 署名対象となるクエリ文字列を構築（sigパラメータを除く）
-	// スペースを%20として扱うため、手動でクエリ文字列を構築
-	signingStr := "data=" + url.QueryEscape(params.Data) + "&user_id=" + url.QueryEscape(params.UserId)
+	// クライアント側と同じエンコーディングを使用するため、手動でエンコーディング
+	dataEncoded := strings.ReplaceAll(url.QueryEscape(params.Data), "+", "%20")
+	userIdEncoded := strings.ReplaceAll(url.QueryEscape(params.UserId), "+", "%20")
+	signingStr := "data=" + dataEncoded + "&user_id=" + userIdEncoded
 
 	// デバッグ出力
 	log.Printf("[DEBUG] GetV3Data called with params: %+v", params)
