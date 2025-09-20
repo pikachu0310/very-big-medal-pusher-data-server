@@ -18,8 +18,8 @@ import (
 const (
 	// 統計データのキャッシュキー（単一なので何でも良い）
 	statisticsCacheV3Key = "v3_stats"
-	// キャッシュ TTL を 5 分に設定
-	statisticsCacheV3TTL = 5 * time.Minute
+	// キャッシュ TTL を 30 分に設定
+	statisticsCacheV3TTL = 30 * time.Minute
 )
 
 func (h *Handler) GetV3Data(ctx echo.Context, params models.GetV3DataParams) error {
