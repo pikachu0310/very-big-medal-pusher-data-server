@@ -30,7 +30,6 @@ type Handler struct {
 	repo              *repository.Repository
 	rankingCache      *sc.Cache[string, []models.GameData]
 	totalMedalsCache  *sc.Cache[string, int]
-	statisticsCache   *sc.Cache[string, *models.StatisticsV2]
 	statisticsCacheV3 *sc.Cache[string, *models.StatisticsV3]
 }
 
@@ -64,21 +63,6 @@ func New(repo *repository.Repository) *Handler {
 		log.Fatalf("failed to create total medals cache: %v", err)
 	}
 	h.totalMedalsCache = medalCache
-
-	// v2 統計データキャッシュの初期化
-	statsCache, err := sc.New(
-		func(ctx context.Context, key string) (*models.StatisticsV2, error) {
-			// key は使わないので無視
-			return repo.GetStatistics(ctx)
-		},
-		statisticsCacheTTL, // freshFor: 5分
-		statisticsCacheTTL, // ttl:      5分
-		// 単一キーなのでバックエンドはデフォルトの map で十分
-	)
-	if err != nil {
-		log.Fatalf("failed to create statistics cache: %v", err)
-	}
-	h.statisticsCache = statsCache
 
 	// v3 統計データキャッシュの初期化
 	statsCacheV3, err := sc.New(

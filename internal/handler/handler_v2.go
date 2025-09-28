@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/domain"
@@ -12,10 +11,7 @@ import (
 )
 
 const (
-	// 統計データのキャッシュキー（単一なので何でも良い）
-	statisticsCacheKey = "v2_stats"
-	// キャッシュ TTL を 5 分に設定
-	statisticsCacheTTL = 5 * time.Minute
+// v2エンドポイントは非推奨のため、キャッシュ関連の定数は削除
 )
 
 func (h *Handler) GetV2Data(ctx echo.Context, params models.GetV2DataParams) error {
@@ -102,10 +98,11 @@ func (h *Handler) GetV2Statistics(ctx echo.Context) error {
 		"code":  "DEPRECATED_ENDPOINT",
 	})
 
+	// v2エンドポイントは非推奨のため、実際の処理は実行されません
 	// キャッシュから取得。キーは statisticsCacheKey を常に使用
-	stats, err := h.statisticsCache.Get(ctx.Request().Context(), statisticsCacheKey)
-	if err != nil {
-		return ctx.String(http.StatusInternalServerError, err.Error())
-	}
-	return ctx.JSON(http.StatusOK, stats)
+	// stats, err := h.statisticsCache.Get(ctx.Request().Context(), statisticsCacheKey)
+	// if err != nil {
+	// 	return ctx.String(http.StatusInternalServerError, err.Error())
+	// }
+	// return ctx.JSON(http.StatusOK, stats)
 }
