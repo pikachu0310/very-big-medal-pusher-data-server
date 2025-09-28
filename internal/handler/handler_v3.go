@@ -4,6 +4,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -23,6 +24,8 @@ const (
 )
 
 func (h *Handler) GetV3Data(ctx echo.Context, params models.GetV3DataParams) error {
+	fmt.Printf("[V3-DEBUG] GetV3Data START - user_id=%s, data_len=%d\n", params.UserId, len(params.Data))
+
 	// クエリパラメータを正しい順序で構築して署名検証を行う
 	// クエリパラメータの順序は重要: data, user_id, sig の順序で署名を生成する必要がある
 
@@ -34,30 +37,39 @@ func (h *Handler) GetV3Data(ctx echo.Context, params models.GetV3DataParams) err
 
 	// 3. 署名検証
 	if !verifySignature(signingStr, params.Sig, generateUserSecretV3(params.UserId)) {
+		fmt.Printf("[V3-DEBUG] GetV3Data SIGNATURE_INVALID - user_id=%s\n", params.UserId)
 		return ctx.String(http.StatusUnauthorized, "invalid signature")
 	}
 
 	// JSON 部分をパース
+	fmt.Printf("[V3-DEBUG] GetV3Data PARSING_DATA - user_id=%s\n", params.UserId)
 	sd, err := domain.ParseSaveData(params.Data)
 	if err != nil {
+		fmt.Printf("[V3-DEBUG] GetV3Data PARSE_ERROR - user_id=%s, error=%v\n", params.UserId, err)
 		return ctx.String(http.StatusBadRequest, err.Error())
 	}
 
 	// 重複チェック
+	fmt.Printf("[V3-DEBUG] GetV3Data CHECKING_DUPLICATE - user_id=%s\n", params.UserId)
 	exists, err := h.repo.ExistsSameSave(ctx.Request().Context(), params.UserId, sd.Playtime)
 	if err != nil {
+		fmt.Printf("[V3-DEBUG] GetV3Data DUPLICATE_CHECK_ERROR - user_id=%s, error=%v\n", params.UserId, err)
 		return ctx.String(http.StatusInternalServerError, err.Error())
 	}
 	if exists {
+		fmt.Printf("[V3-DEBUG] GetV3Data DUPLICATE_FOUND - user_id=%s\n", params.UserId)
 		return ctx.String(http.StatusConflict, "duplicate save data")
 	}
 
 	// 保存
+	fmt.Printf("[V3-DEBUG] GetV3Data INSERTING_DATA - user_id=%s\n", params.UserId)
 	sd.UserId = params.UserId
 	if err := h.repo.InsertSave(ctx.Request().Context(), sd); err != nil {
+		fmt.Printf("[V3-DEBUG] GetV3Data INSERT_ERROR - user_id=%s, error=%v\n", params.UserId, err)
 		return ctx.String(http.StatusInternalServerError, err.Error())
 	}
 
+	fmt.Printf("[V3-DEBUG] GetV3Data SUCCESS - user_id=%s\n", params.UserId)
 	return ctx.JSON(http.StatusOK, "success")
 }
 
@@ -69,22 +81,31 @@ func (h *Handler) GetV3UsersUserIdData(
 	userId string,
 	params models.GetV3UsersUserIdDataParams, // ← Sig はここに入ってくる
 ) error {
+	fmt.Printf("[V3-DEBUG] GetV3UsersUserIdData START - user_id=%s\n", userId)
+
 	// 1) 署名必須
 	if params.Sig == "" {
+		fmt.Printf("[V3-DEBUG] GetV3UsersUserIdData MISSING_SIGNATURE - user_id=%s\n", userId)
 		return ctx.String(http.StatusBadRequest, "missing signature")
 	}
 	if !verifyUserSignature(userId, params.Sig) {
+		fmt.Printf("[V3-DEBUG] GetV3UsersUserIdData INVALID_SIGNATURE - user_id=%s\n", userId)
 		return ctx.String(http.StatusUnauthorized, "invalid signature")
 	}
 
 	// 2) 最新セーブデータ取得
+	fmt.Printf("[V3-DEBUG] GetV3UsersUserIdData FETCHING_DATA - user_id=%s\n", userId)
 	sd, err := h.repo.GetLatestSave(ctx.Request().Context(), userId)
 	if err != nil {
+		fmt.Printf("[V3-DEBUG] GetV3UsersUserIdData FETCH_ERROR - user_id=%s, error=%v\n", userId, err)
 		return ctx.String(http.StatusNotFound, err.Error())
 	}
 
 	// 3) OpenAPI モデル化 & 返却
-	return ctx.JSON(http.StatusOK, sd.ToModel())
+	fmt.Printf("[V3-DEBUG] GetV3UsersUserIdData CONVERTING_TO_MODEL - user_id=%s\n", userId)
+	model := sd.ToModel()
+	fmt.Printf("[V3-DEBUG] GetV3UsersUserIdData SUCCESS - user_id=%s\n", userId)
+	return ctx.JSON(http.StatusOK, model)
 }
 
 // -----------------------------------------------------------------
@@ -102,11 +123,17 @@ func verifyUserSignature(userID, sig string) bool {
 
 // GetV3Statistics returns combined rankings and total medals, with cache.
 func (h *Handler) GetV3Statistics(ctx echo.Context) error {
+	fmt.Printf("[V3-DEBUG] GetV3Statistics START\n")
+
 	// キャッシュから取得。キーは statisticsCacheKey を常に使用
+	fmt.Printf("[V3-DEBUG] GetV3Statistics FETCHING_FROM_CACHE\n")
 	stats, err := h.statisticsCacheV3.Get(ctx.Request().Context(), statisticsCacheV3Key)
 	if err != nil {
+		fmt.Printf("[V3-DEBUG] GetV3Statistics CACHE_ERROR - error=%v\n", err)
 		return ctx.String(http.StatusInternalServerError, err.Error())
 	}
+
+	fmt.Printf("[V3-DEBUG] GetV3Statistics SUCCESS\n")
 	return ctx.JSON(http.StatusOK, stats)
 }
 
@@ -118,9 +145,15 @@ func generateUserSecretV3(userID string) []byte {
 
 // GetV3AchievementsRates returns achievement acquisition rates
 func (h *Handler) GetV3AchievementsRates(ctx echo.Context) error {
+	fmt.Printf("[V3-DEBUG] GetV3AchievementsRates START\n")
+
+	fmt.Printf("[V3-DEBUG] GetV3AchievementsRates FETCHING_RATES\n")
 	rates, err := h.repo.GetAchievementRates(ctx.Request().Context())
 	if err != nil {
+		fmt.Printf("[V3-DEBUG] GetV3AchievementsRates FETCH_ERROR - error=%v\n", err)
 		return ctx.String(http.StatusInternalServerError, err.Error())
 	}
+
+	fmt.Printf("[V3-DEBUG] GetV3AchievementsRates SUCCESS\n")
 	return ctx.JSON(http.StatusOK, rates)
 }

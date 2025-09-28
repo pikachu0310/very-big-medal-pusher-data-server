@@ -218,59 +218,103 @@ func ParseSaveData(raw string) (*SaveData, error) {
 
 // ToModel converts a domain.SaveData into the OpenAPI model SaveDataV2.
 func (sd *SaveData) ToModel() *models.SaveDataV2 {
-	// helpers to get pointers
-	intPtr := func(i int) *int { return &i }
-	int64Ptr := func(i int64) *int64 { return &i }
-	strPtr := func(s string) *string { return &s }
-	float64Ptr := func(f float64) *float64 { return &f }
+	// メモリ効率を改善するため、一時変数を使用してポインタを作成
+	var (
+		legacy         = sd.Legacy
+		version        = sd.Version
+		credit         = sd.Credit
+		creditAll      = sd.CreditAll
+		medalIn        = sd.MedalIn
+		medalGet       = sd.MedalGet
+		ballGet        = sd.BallGet
+		ballChain      = sd.BallChain
+		slotStart      = sd.SlotStart
+		slotStartfev   = sd.SlotStartFev
+		slotHit        = sd.SlotHit
+		slotGetfev     = sd.SlotGetFev
+		sqrGet         = sd.SqrGet
+		sqrStep        = sd.SqrStep
+		jackGet        = sd.JackGet
+		jackStartmax   = sd.JackStartMax
+		jackTotalmax   = sd.JackTotalMax
+		ultGet         = sd.UltGet
+		ultCombomax    = sd.UltComboMax
+		ultTotalmax    = sd.UltTotalMax
+		rmshbiGet      = sd.RmShbiGet
+		buyShbi        = sd.BuyShbi
+		firstboot      = strconv.FormatInt(sd.FirstBoot, 10)
+		lastsave       = strconv.FormatInt(sd.LastSave, 10)
+		playtime       = sd.Playtime
+		bstpStep       = sd.BstpStep
+		bstpRwd        = sd.BstpRwd
+		buyTotal       = sd.BuyTotal
+		spUse          = sd.SpUse
+		hideRecord     = sd.HideRecord
+		cpmMax         = sd.CpMMax
+		jackTotalmaxV2 = float64(sd.JackTotalMaxV2)
+		ultTotalmaxV2  = float64(sd.UltimateTotalMaxV2)
+		palballGet     = float64(sd.PalettaBallGet)
+		pallotLotT0    = float64(sd.PalettaLotteryAttemptTier0)
+		pallotLotT1    = float64(sd.PalettaLotteryAttemptTier1)
+		pallotLotT2    = float64(sd.PalettaLotteryAttemptTier2)
+		pallotLotT3    = float64(sd.PalettaLotteryAttemptTier3)
+		jackspGetAll   = float64(sd.JackpotSuperGetTotal)
+		jackspGetT0    = float64(sd.JackpotSuperGetTier0)
+		jackspGetT1    = float64(sd.JackpotSuperGetTier1)
+		jackspGetT2    = float64(sd.JackpotSuperGetTier2)
+		jackspGetT3    = float64(sd.JackpotSuperGetTier3)
+		jackspStartmax = float64(sd.JackpotSuperStartMax)
+		jackspTotalmax = float64(sd.JackpotSuperTotalMax)
+		taskCnt        = float64(sd.TaskCompleteCount)
+	)
 
 	m := &models.SaveDataV2{
-		Legacy:         intPtr(sd.Legacy),
-		Version:        intPtr(sd.Version),
-		Credit:         int64Ptr(sd.Credit),
-		CreditAll:      int64Ptr(sd.CreditAll),
-		MedalIn:        intPtr(sd.MedalIn),
-		MedalGet:       intPtr(sd.MedalGet),
-		BallGet:        intPtr(sd.BallGet),
-		BallChain:      intPtr(sd.BallChain),
-		SlotStart:      intPtr(sd.SlotStart),
-		SlotStartfev:   intPtr(sd.SlotStartFev),
-		SlotHit:        intPtr(sd.SlotHit),
-		SlotGetfev:     intPtr(sd.SlotGetFev),
-		SqrGet:         intPtr(sd.SqrGet),
-		SqrStep:        intPtr(sd.SqrStep),
-		JackGet:        intPtr(sd.JackGet),
-		JackStartmax:   intPtr(sd.JackStartMax),
-		JackTotalmax:   intPtr(sd.JackTotalMax),
-		UltGet:         intPtr(sd.UltGet),
-		UltCombomax:    intPtr(sd.UltComboMax),
-		UltTotalmax:    intPtr(sd.UltTotalMax),
-		RmshbiGet:      intPtr(sd.RmShbiGet),
-		BuyShbi:        intPtr(sd.BuyShbi),
-		Firstboot:      strPtr(strconv.FormatInt(sd.FirstBoot, 10)),
-		Lastsave:       strPtr(strconv.FormatInt(sd.LastSave, 10)),
-		Playtime:       int64Ptr(sd.Playtime),
-		BstpStep:       intPtr(sd.BstpStep),
-		BstpRwd:        intPtr(sd.BstpRwd),
-		BuyTotal:       intPtr(sd.BuyTotal),
-		SpUse:          intPtr(sd.SpUse),
-		HideRecord:     intPtr(sd.HideRecord),
-		CpmMax:         float64Ptr(sd.CpMMax),
-		JackTotalmaxV2: float64Ptr(float64(sd.JackTotalMaxV2)),
-		UltTotalmaxV2:  float64Ptr(float64(sd.UltimateTotalMaxV2)),
-		PalballGet:     float64Ptr(float64(sd.PalettaBallGet)),
-		PallotLotT0:    float64Ptr(float64(sd.PalettaLotteryAttemptTier0)),
-		PallotLotT1:    float64Ptr(float64(sd.PalettaLotteryAttemptTier1)),
-		PallotLotT2:    float64Ptr(float64(sd.PalettaLotteryAttemptTier2)),
-		PallotLotT3:    float64Ptr(float64(sd.PalettaLotteryAttemptTier3)),
-		JackspGetAll:   float64Ptr(float64(sd.JackpotSuperGetTotal)),
-		JackspGetT0:    float64Ptr(float64(sd.JackpotSuperGetTier0)),
-		JackspGetT1:    float64Ptr(float64(sd.JackpotSuperGetTier1)),
-		JackspGetT2:    float64Ptr(float64(sd.JackpotSuperGetTier2)),
-		JackspGetT3:    float64Ptr(float64(sd.JackpotSuperGetTier3)),
-		JackspStartmax: float64Ptr(float64(sd.JackpotSuperStartMax)),
-		JackspTotalmax: float64Ptr(float64(sd.JackpotSuperTotalMax)),
-		TaskCnt:        float64Ptr(float64(sd.TaskCompleteCount)),
+		Legacy:         &legacy,
+		Version:        &version,
+		Credit:         &credit,
+		CreditAll:      &creditAll,
+		MedalIn:        &medalIn,
+		MedalGet:       &medalGet,
+		BallGet:        &ballGet,
+		BallChain:      &ballChain,
+		SlotStart:      &slotStart,
+		SlotStartfev:   &slotStartfev,
+		SlotHit:        &slotHit,
+		SlotGetfev:     &slotGetfev,
+		SqrGet:         &sqrGet,
+		SqrStep:        &sqrStep,
+		JackGet:        &jackGet,
+		JackStartmax:   &jackStartmax,
+		JackTotalmax:   &jackTotalmax,
+		UltGet:         &ultGet,
+		UltCombomax:    &ultCombomax,
+		UltTotalmax:    &ultTotalmax,
+		RmshbiGet:      &rmshbiGet,
+		BuyShbi:        &buyShbi,
+		Firstboot:      &firstboot,
+		Lastsave:       &lastsave,
+		Playtime:       &playtime,
+		BstpStep:       &bstpStep,
+		BstpRwd:        &bstpRwd,
+		BuyTotal:       &buyTotal,
+		SpUse:          &spUse,
+		HideRecord:     &hideRecord,
+		CpmMax:         &cpmMax,
+		JackTotalmaxV2: &jackTotalmaxV2,
+		UltTotalmaxV2:  &ultTotalmaxV2,
+		PalballGet:     &palballGet,
+		PallotLotT0:    &pallotLotT0,
+		PallotLotT1:    &pallotLotT1,
+		PallotLotT2:    &pallotLotT2,
+		PallotLotT3:    &pallotLotT3,
+		JackspGetAll:   &jackspGetAll,
+		JackspGetT0:    &jackspGetT0,
+		JackspGetT1:    &jackspGetT1,
+		JackspGetT2:    &jackspGetT2,
+		JackspGetT3:    &jackspGetT3,
+		JackspStartmax: &jackspStartmax,
+		JackspTotalmax: &jackspTotalmax,
+		TaskCnt:        &taskCnt,
 
 		// dictionaries and list
 		DcMedalGet:   &sd.DCMedalGet,
@@ -360,4 +404,3 @@ func parseUnix(s *string) int64 {
 	}
 	return i
 }
-

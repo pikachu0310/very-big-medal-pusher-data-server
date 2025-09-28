@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/domain"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
@@ -116,8 +117,11 @@ INSERT INTO save_data_v2 (
 
 // GetLatestSave retrieves the latest SaveData for a user
 func (r *Repository) GetLatestSave(ctx context.Context, userID string) (*domain.SaveData, error) {
+	fmt.Printf("[REPO-DEBUG] GetLatestSave START - user_id=%s\n", userID)
+
 	var sd domain.SaveData
 	// 1) main row
+	fmt.Printf("[REPO-DEBUG] GetLatestSave FETCHING_MAIN_ROW - user_id=%s\n", userID)
 	err := r.db.GetContext(ctx, &sd, `
 SELECT * 
 FROM save_data_v2 
@@ -126,6 +130,7 @@ ORDER BY created_at DESC
 LIMIT 1
 `, userID)
 	if err != nil {
+		fmt.Printf("[REPO-DEBUG] GetLatestSave MAIN_ROW_ERROR - user_id=%s, error=%v\n", userID, err)
 		return nil, err
 	}
 
@@ -198,6 +203,8 @@ WHERE save_id = ?
 	if err != nil {
 		return nil, err
 	}
+	// 事前に容量を確保してメモリ効率を改善（最大1000個まで）
+	sd.LAchieve = make([]string, 0, 1000)
 	for rows.Next() {
 		var aid string
 		if err := rows.Scan(&aid); err != nil {
@@ -257,17 +264,21 @@ ORDER BY perk_id
 	if err != nil {
 		return nil, err
 	}
+	// 事前に容量を確保してメモリ効率を改善（最大100個まで）
+	sd.LPerkLevels = make([]int, 0, 100)
 	for rows.Next() {
 		var perkID int
 		var level int
 		if err := rows.Scan(&perkID, &level); err != nil {
 			return nil, err
 		}
-		// perk_idの順序に合わせて配列を拡張
-		for len(sd.LPerkLevels) <= perkID {
+		// perk_idの順序に合わせて配列を拡張（制限付き）
+		for len(sd.LPerkLevels) <= perkID && len(sd.LPerkLevels) < 100 {
 			sd.LPerkLevels = append(sd.LPerkLevels, 0)
 		}
-		sd.LPerkLevels[perkID] = level
+		if perkID < len(sd.LPerkLevels) {
+			sd.LPerkLevels[perkID] = level
+		}
 	}
 	rows.Close()
 
@@ -281,20 +292,25 @@ ORDER BY perk_id
 	if err != nil {
 		return nil, err
 	}
+	// 事前に容量を確保してメモリ効率を改善（最大100個まで）
+	sd.LPerkUsedCredits = make([]int64, 0, 100)
 	for rows.Next() {
 		var perkID int
 		var credits int64
 		if err := rows.Scan(&perkID, &credits); err != nil {
 			return nil, err
 		}
-		// perk_idの順序に合わせて配列を拡張
-		for len(sd.LPerkUsedCredits) <= perkID {
+		// perk_idの順序に合わせて配列を拡張（制限付き）
+		for len(sd.LPerkUsedCredits) <= perkID && len(sd.LPerkUsedCredits) < 100 {
 			sd.LPerkUsedCredits = append(sd.LPerkUsedCredits, 0)
 		}
-		sd.LPerkUsedCredits[perkID] = credits
+		if perkID < len(sd.LPerkUsedCredits) {
+			sd.LPerkUsedCredits[perkID] = credits
+		}
 	}
 	rows.Close()
 
+	fmt.Printf("[REPO-DEBUG] GetLatestSave SUCCESS - user_id=%s, achievements=%d, perks=%d\n", userID, len(sd.LAchieve), len(sd.LPerkLevels))
 	return &sd, nil
 }
 
@@ -420,6 +436,7 @@ JOIN save_data_v2 AS sd
 
 // GetStatisticsV3 returns the latest statistics for V3 (ランキング上限 1000).
 func (r *Repository) GetStatisticsV3(ctx context.Context) (*models.StatisticsV3, error) {
+	fmt.Printf("[REPO-DEBUG] GetStatisticsV3 START\n")
 	stats := &models.StatisticsV3{}
 
 	// ------ 共通ヘルパ (匿名関数) -----------------------------------------
@@ -753,6 +770,7 @@ LIMIT 1000
 	}
 
 	// 15) total_medals（最新セーブの credit_all 合計）
+	var totalMedals int
 	{
 		q := `
 SELECT
@@ -767,13 +785,13 @@ JOIN save_data_v2 AS sd
   ON sd.user_id = t.user_id
  AND sd.id      = t.max_id
 `
-		var total int
-		if err := r.db.GetContext(ctx, &total, q); err != nil {
+		if err := r.db.GetContext(ctx, &totalMedals, q); err != nil {
 			return nil, err
 		}
-		stats.TotalMedals = &total
+		stats.TotalMedals = &totalMedals
 	}
 
+	fmt.Printf("[REPO-DEBUG] GetStatisticsV3 SUCCESS - total_medals=%d\n", totalMedals)
 	return stats, nil
 }
 
