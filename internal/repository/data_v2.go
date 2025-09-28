@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"runtime"
 
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/domain"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
@@ -447,7 +448,8 @@ func (r *Repository) GetStatisticsV3(ctx context.Context) (*models.StatisticsV3,
 		}
 		defer rows.Close()
 
-		list := []models.RankingEntry{}
+		// 事前に容量を確保してメモリ効率を改善（最大1000個）
+		list := make([]models.RankingEntry, 0, 1000)
 		for rows.Next() {
 			var e models.RankingEntry
 			if err := rows.Scan(&e.UserId, &e.Value, &e.CreatedAt); err != nil {
@@ -460,6 +462,7 @@ func (r *Repository) GetStatisticsV3(ctx context.Context) (*models.StatisticsV3,
 	}
 
 	// 1) max_chain_orange (ball_id = '1')
+	fmt.Printf("[REPO-DEBUG] GetStatisticsV3 CREATING_RANKING_1 - max_chain_orange\n")
 	if err := addRanking(&stats.MaxChainOrange, `
 SELECT
   ranked.user_id,
@@ -483,6 +486,7 @@ LIMIT 1000
 	}
 
 	// 2) max_chain_rainbow (ball_id = '3')
+	fmt.Printf("[REPO-DEBUG] GetStatisticsV3 CREATING_RANKING_2 - max_chain_rainbow\n")
 	if err := addRanking(&stats.MaxChainRainbow, `
 SELECT
   ranked.user_id,
@@ -593,7 +597,12 @@ LIMIT 1000
 		return nil, err
 	}
 
+	// 中間地点でGCを促してメモリ使用量を安定化
+	fmt.Printf("[REPO-DEBUG] GetStatisticsV3 MIDPOINT_GC_TRIGGER\n")
+	runtime.GC()
+
 	// 7) jacksp_startmax
+	fmt.Printf("[REPO-DEBUG] GetStatisticsV3 CREATING_RANKING_7 - jacksp_startmax\n")
 	if err := addRanking(&stats.JackspStartmax, `
 SELECT
   ranked.user_id,
@@ -749,6 +758,7 @@ LIMIT 1000
 	}
 
 	// 14) achievements_count
+	fmt.Printf("[REPO-DEBUG] GetStatisticsV3 CREATING_RANKING_14 - achievements_count\n")
 	if err := addRanking(&stats.AchievementsCount, `
 SELECT
   sd.user_id,
@@ -768,6 +778,10 @@ LIMIT 1000
 `); err != nil {
 		return nil, err
 	}
+
+	// 最終段階でGCを促してメモリ使用量を安定化
+	fmt.Printf("[REPO-DEBUG] GetStatisticsV3 FINAL_GC_TRIGGER\n")
+	runtime.GC()
 
 	// 15) total_medals（最新セーブの credit_all 合計）
 	var totalMedals int
