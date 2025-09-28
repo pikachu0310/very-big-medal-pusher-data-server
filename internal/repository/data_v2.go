@@ -435,7 +435,7 @@ JOIN save_data_v2 AS sd
 	return stats, nil
 }
 
-// GetStatisticsV3 returns the latest statistics for V3 (ランキング上限 1000).
+// GetStatisticsV3 returns the latest statistics for V3 (ランキング上限 500).
 func (r *Repository) GetStatisticsV3(ctx context.Context) (*models.StatisticsV3, error) {
 	fmt.Printf("[REPO-DEBUG] GetStatisticsV3 START\n")
 	stats := &models.StatisticsV3{}
@@ -448,8 +448,8 @@ func (r *Repository) GetStatisticsV3(ctx context.Context) (*models.StatisticsV3,
 		}
 		defer rows.Close()
 
-		// 事前に容量を確保してメモリ効率を改善（最大1000個）
-		list := make([]models.RankingEntry, 0, 1000)
+		// 事前に容量を確保してメモリ効率を改善（最大500個）
+		list := make([]models.RankingEntry, 0, 500)
 		for rows.Next() {
 			var e models.RankingEntry
 			if err := rows.Scan(&e.UserId, &e.Value, &e.CreatedAt); err != nil {
@@ -480,7 +480,7 @@ FROM (
 ) AS ranked
 WHERE ranked.rn = 1
 ORDER BY ranked.value DESC, ranked.created_at ASC
-LIMIT 1000
+LIMIT 500
 `); err != nil {
 		return nil, err
 	}
@@ -504,7 +504,7 @@ FROM (
 ) AS ranked
 WHERE ranked.rn = 1
 ORDER BY ranked.value DESC, ranked.created_at ASC
-LIMIT 1000
+LIMIT 500
 `); err != nil {
 		return nil, err
 	}
@@ -526,7 +526,7 @@ FROM (
 ) AS ranked
 WHERE ranked.rn = 1
 ORDER BY ranked.value DESC, ranked.created_at ASC
-LIMIT 1000
+LIMIT 500
 `); err != nil {
 		return nil, err
 	}
@@ -548,7 +548,7 @@ FROM (
 ) AS ranked
 WHERE ranked.rn = 1
 ORDER BY ranked.value DESC, ranked.created_at ASC
-LIMIT 1000
+LIMIT 500
 `); err != nil {
 		return nil, err
 	}
@@ -570,7 +570,7 @@ FROM (
 ) AS ranked
 WHERE ranked.rn = 1
 ORDER BY ranked.value DESC, ranked.created_at ASC
-LIMIT 1000
+LIMIT 500
 `); err != nil {
 		return nil, err
 	}
@@ -592,7 +592,7 @@ FROM (
 ) AS ranked
 WHERE ranked.rn = 1
 ORDER BY ranked.value DESC, ranked.created_at ASC
-LIMIT 1000
+LIMIT 500
 `); err != nil {
 		return nil, err
 	}
@@ -619,7 +619,7 @@ FROM (
 ) AS ranked
 WHERE ranked.rn = 1
 ORDER BY ranked.value DESC, ranked.created_at ASC
-LIMIT 1000
+LIMIT 500
 `); err != nil {
 		return nil, err
 	}
@@ -642,7 +642,7 @@ FROM (
 ) AS ranked
 WHERE ranked.rn = 1
 ORDER BY ranked.value DESC, ranked.created_at ASC
-LIMIT 1000
+LIMIT 500
 `); err != nil {
 		return nil, err
 	}
@@ -664,7 +664,7 @@ FROM (
 ) AS ranked
 WHERE ranked.rn = 1
 ORDER BY ranked.value DESC, ranked.created_at ASC
-LIMIT 1000
+LIMIT 500
 `); err != nil {
 		return nil, err
 	}
@@ -686,7 +686,7 @@ FROM (
 ) AS ranked
 WHERE ranked.rn = 1
 ORDER BY ranked.value DESC, ranked.created_at ASC
-LIMIT 1000
+LIMIT 500
 `); err != nil {
 		return nil, err
 	}
@@ -708,7 +708,7 @@ FROM (
 ) AS ranked
 WHERE ranked.rn = 1
 ORDER BY ranked.value DESC, ranked.created_at ASC
-LIMIT 1000
+LIMIT 500
 `); err != nil {
 		return nil, err
 	}
@@ -730,7 +730,7 @@ FROM (
 ) AS ranked
 WHERE ranked.rn = 1
 ORDER BY ranked.value DESC, ranked.created_at ASC
-LIMIT 1000
+LIMIT 500
 `); err != nil {
 		return nil, err
 	}
@@ -752,7 +752,7 @@ FROM (
 ) AS ranked
 WHERE ranked.rn = 1
 ORDER BY ranked.value DESC, ranked.created_at ASC
-LIMIT 1000
+LIMIT 500
 `); err != nil {
 		return nil, err
 	}
@@ -774,7 +774,7 @@ JOIN save_data_v2 AS sd ON sd.id = latest.max_id
 LEFT JOIN save_data_v2_achievements AS a ON a.save_id = sd.id
 GROUP BY sd.user_id, sd.created_at
 ORDER BY value DESC, sd.created_at ASC
-LIMIT 1000
+LIMIT 500
 `); err != nil {
 		return nil, err
 	}
