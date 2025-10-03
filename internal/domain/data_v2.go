@@ -105,8 +105,8 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		UltTotalMax                *int           `json:"ult_totalmax"`
 		RmShbiGet                  *int           `json:"rmshbi_get"`
 		BuyShbi                    *int           `json:"buy_shbi"`
-		FirstBoot                  *string        `json:"firstboot"`
-		LastSave                   *string        `json:"lastsave"`
+		FirstBoot                  *json.Number   `json:"firstboot"`
+		LastSave                   *json.Number   `json:"lastsave"`
 		Playtime                   *int64         `json:"playtime"`
 		BstpStep                   *int           `json:"bstp_step"`
 		BstpRwd                    *int           `json:"bstp_rwd"`
@@ -180,8 +180,8 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		UltTotalMax:                safeInt(m.UltTotalMax),
 		RmShbiGet:                  safeInt(m.RmShbiGet),
 		BuyShbi:                    safeInt(m.BuyShbi),
-		FirstBoot:                  parseUnix(m.FirstBoot),
-		LastSave:                   parseUnix(m.LastSave),
+		FirstBoot:                  parseUnixFromNumber(m.FirstBoot),
+		LastSave:                   parseUnixFromNumber(m.LastSave),
 		Playtime:                   safeInt64(m.Playtime),
 		BstpStep:                   safeInt(m.BstpStep),
 		BstpRwd:                    safeInt(m.BstpRwd),
@@ -399,6 +399,17 @@ func parseUnix(s *string) int64 {
 		return 0
 	}
 	i, err := strconv.ParseInt(*s, 10, 64)
+	if err != nil {
+		return 0
+	}
+	return i
+}
+
+func parseUnixFromNumber(n *json.Number) int64 {
+	if n == nil {
+		return 0
+	}
+	i, err := n.Int64()
 	if err != nil {
 		return 0
 	}
