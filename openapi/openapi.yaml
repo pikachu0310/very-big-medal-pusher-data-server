@@ -367,6 +367,88 @@ paths:
                 $ref: '#/components/schemas/AchievementRates'
         '500': { description: サーバー内部エラー }
 
+  /v4/data:
+    get:
+      tags: [ v4 ]
+      summary: セーブデータを送信 (v4)
+      description: JSON 化したセーブデータを GET パラメータで送信して保存します。
+      parameters:
+        - name: data
+          in: query
+          required: true
+          schema: { type: string }
+          description: URL エンコード済み JSON セーブデータ
+        - name: user_id
+          in: query
+          required: true
+          schema: { type: string }
+        - name: sig
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: 正常に保存されました }
+        '400': { description: 無効なパラメータ }
+        '401': { description: 署名認証失敗 }
+        '409': { description: 同一データの重複検出 }
+        '500': { description: サーバー内部エラー }
+
+  /v4/users/{user_id}/data:
+    get:
+      tags: [ v4 ]
+      summary: ユーザーの最新セーブデータを取得 (v4・署名付き)
+      description: 指定ユーザーの最新セーブデータを返します。`sig` で HMAC 認証を行います。
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: sig
+          in: query
+          required: true
+          description: HMAC-SHA256 署名
+          schema: { type: string }
+      responses:
+        '200':
+          description: セーブデータ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaveDataV2'
+        '401': { description: 署名認証失敗 }
+        '404': { description: データが見つかりません }
+        '500': { description: サーバー内部エラー }
+
+  /v4/statistics:
+    get:
+      tags: [ v4 ]
+      summary: グローバル統計を取得 (v4・上位1000件・最適化版)
+      description: >
+        最適化された統計データを最大 **1000 件** まで返します。
+        v3_user_latest_save_data テーブルを使用して高速化されています。
+      responses:
+        '200':
+          description: 統計データ (ランキング上限 1000)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatisticsV4'
+        '500': { description: サーバー内部エラー }
+
+  /v4/achievements/rates:
+    get:
+      tags: [ v4 ]
+      summary: 実績取得率を取得 (v4)
+      description: 各実績IDの取得率（取得したユーザー数 / 全ユーザー数）を返します。
+      responses:
+        '200':
+          description: 実績取得率データ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AchievementRates'
+        '500': { description: サーバー内部エラー }
+
 components:
   schemas:
     # v1 schema
@@ -742,4 +824,48 @@ components:
                 format: float
                 description: 取得率（0.0-1.0）
           description: 実績IDごとの取得率データ
+
+    # v4 schema
+    StatisticsV4:
+      type: object
+      properties:
+        achievements_count:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankingEntry'
+        jacksp_startmax:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankingEntry'
+        golden_palball_get:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankingEntry'
+        cpm_max:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankingEntry'
+        max_chain_rainbow:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankingEntry'
+        jack_totalmax_v2:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankingEntry'
+        ult_combomax:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankingEntry'
+        ult_totalmax_v2:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankingEntry'
+        sp_use:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankingEntry'
+        total_medals:
+          type: integer
+          description: 全ユーザーのメダル合計
 
