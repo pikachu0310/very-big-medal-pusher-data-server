@@ -327,8 +327,8 @@ SELECT
   sd.user_id,
   MAX(bc.chain_count) AS value,
   MIN(sd.created_at)  AS created_at
-FROM save_data_v2_ball_chain AS bc
-JOIN save_data_v2           AS sd ON bc.save_id = sd.id
+FROM v2_save_data_ball_chain AS bc
+JOIN v2_save_data           AS sd ON bc.save_id = sd.id
 WHERE bc.ball_id = '1'
 GROUP BY sd.user_id
 ORDER BY value DESC, created_at ASC
@@ -358,8 +358,8 @@ SELECT
   sd.user_id,
   MAX(bc.chain_count) AS value,
   MIN(sd.created_at)  AS created_at
-FROM save_data_v2_ball_chain AS bc
-JOIN save_data_v2           AS sd ON bc.save_id = sd.id
+FROM v2_save_data_ball_chain AS bc
+JOIN v2_save_data           AS sd ON bc.save_id = sd.id
 WHERE bc.ball_id = '3'
 GROUP BY sd.user_id
 ORDER BY value DESC, created_at ASC
@@ -389,7 +389,7 @@ SELECT
   sd.user_id,
   MAX(sd.jack_totalmax) AS value,
   MIN(sd.created_at)    AS created_at
-FROM save_data_v2 AS sd
+FROM v2_save_data AS sd
 GROUP BY sd.user_id
 ORDER BY value DESC, created_at ASC
 LIMIT 500
@@ -418,10 +418,10 @@ SELECT
   COALESCE(SUM(sd.credit),0) AS total_medals
 FROM (
   SELECT user_id, MAX(id) AS max_id
-  FROM save_data_v2
+  FROM v2_save_data
   GROUP BY user_id
 ) AS t
-JOIN save_data_v2 AS sd
+JOIN v2_save_data AS sd
   ON sd.user_id = t.user_id
  AND sd.id      = t.max_id
 `
@@ -474,8 +474,8 @@ FROM (
     bc.chain_count AS value,
     sd.created_at,
     ROW_NUMBER() OVER (PARTITION BY sd.user_id ORDER BY bc.chain_count DESC, sd.created_at ASC) AS rn
-  FROM save_data_v2_ball_chain AS bc
-  JOIN save_data_v2 AS sd ON bc.save_id = sd.id
+  FROM v2_save_data_ball_chain AS bc
+  JOIN v2_save_data AS sd ON bc.save_id = sd.id
   WHERE bc.ball_id = '1' AND sd.hide_record = false
 ) AS ranked
 WHERE ranked.rn = 1
@@ -498,8 +498,8 @@ FROM (
     bc.chain_count AS value,
     sd.created_at,
     ROW_NUMBER() OVER (PARTITION BY sd.user_id ORDER BY bc.chain_count DESC, sd.created_at ASC) AS rn
-  FROM save_data_v2_ball_chain AS bc
-  JOIN save_data_v2 AS sd ON bc.save_id = sd.id
+  FROM v2_save_data_ball_chain AS bc
+  JOIN v2_save_data AS sd ON bc.save_id = sd.id
   WHERE bc.ball_id = '3' AND sd.hide_record = false
 ) AS ranked
 WHERE ranked.rn = 1
@@ -521,7 +521,7 @@ FROM (
     jack_startmax AS value,
     created_at,
     ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY jack_startmax DESC, created_at ASC) AS rn
-  FROM save_data_v2
+  FROM v2_save_data
   WHERE hide_record = false
 ) AS ranked
 WHERE ranked.rn = 1
@@ -543,7 +543,7 @@ FROM (
     jack_totalmax AS value,
     created_at,
     ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY jack_totalmax DESC, created_at ASC) AS rn
-  FROM save_data_v2
+  FROM v2_save_data
   WHERE hide_record = false
 ) AS ranked
 WHERE ranked.rn = 1
@@ -565,7 +565,7 @@ FROM (
     jack_totalmax_v2 AS value,
     created_at,
     ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY jack_totalmax_v2 DESC, created_at ASC) AS rn
-  FROM save_data_v2
+  FROM v2_save_data
   WHERE hide_record = false
 ) AS ranked
 WHERE ranked.rn = 1
@@ -587,7 +587,7 @@ FROM (
     ult_totalmax_v2 AS value,
     created_at,
     ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY ult_totalmax_v2 DESC, created_at ASC) AS rn
-  FROM save_data_v2
+  FROM v2_save_data
   WHERE hide_record = false
 ) AS ranked
 WHERE ranked.rn = 1
@@ -614,7 +614,7 @@ FROM (
     jacksp_startmax AS value,
     created_at,
     ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY jacksp_startmax DESC, created_at ASC) AS rn
-  FROM save_data_v2
+  FROM v2_save_data
   WHERE hide_record = false
 ) AS ranked
 WHERE ranked.rn = 1
@@ -636,8 +636,8 @@ FROM (
     COALESCE(dpg.count, 0) AS value,
     sd.created_at,
     ROW_NUMBER() OVER (PARTITION BY sd.user_id ORDER BY COALESCE(dpg.count, 0) DESC, sd.created_at ASC) AS rn
-  FROM save_data_v2 AS sd
-  LEFT JOIN save_data_v2_palball_get AS dpg ON dpg.save_id = sd.id AND dpg.ball_id = '100'
+  FROM v2_save_data AS sd
+  LEFT JOIN v2_save_data_palball_get AS dpg ON dpg.save_id = sd.id AND dpg.ball_id = '100'
   WHERE sd.hide_record = false
 ) AS ranked
 WHERE ranked.rn = 1
@@ -659,7 +659,7 @@ FROM (
     CAST(cpm_max AS SIGNED) AS value,
     created_at,
     ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY cpm_max DESC, created_at ASC) AS rn
-  FROM save_data_v2
+  FROM v2_save_data
   WHERE hide_record = false
 ) AS ranked
 WHERE ranked.rn = 1
@@ -681,7 +681,7 @@ FROM (
     ult_combomax AS value,
     created_at,
     ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY ult_combomax DESC, created_at ASC) AS rn
-  FROM save_data_v2
+  FROM v2_save_data
   WHERE hide_record = false
 ) AS ranked
 WHERE ranked.rn = 1
@@ -703,7 +703,7 @@ FROM (
     ult_totalmax AS value,
     created_at,
     ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY ult_totalmax DESC, created_at ASC) AS rn
-  FROM save_data_v2
+  FROM v2_save_data
   WHERE hide_record = false
 ) AS ranked
 WHERE ranked.rn = 1
@@ -725,7 +725,7 @@ FROM (
     sp_use AS value,
     created_at,
     ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY sp_use DESC, created_at ASC) AS rn
-  FROM save_data_v2
+  FROM v2_save_data
   WHERE hide_record = false
 ) AS ranked
 WHERE ranked.rn = 1
@@ -747,7 +747,7 @@ FROM (
     buy_shbi AS value,
     created_at,
     ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY buy_shbi DESC, created_at ASC) AS rn
-  FROM save_data_v2
+  FROM v2_save_data
   WHERE hide_record = false
 ) AS ranked
 WHERE ranked.rn = 1
@@ -766,12 +766,12 @@ SELECT
   sd.created_at
 FROM (
   SELECT user_id, MAX(id) AS max_id
-  FROM save_data_v2
+  FROM v2_save_data
   WHERE hide_record = false
   GROUP BY user_id
 ) AS latest
-JOIN save_data_v2 AS sd ON sd.id = latest.max_id
-LEFT JOIN save_data_v2_achievements AS a ON a.save_id = sd.id
+JOIN v2_save_data AS sd ON sd.id = latest.max_id
+LEFT JOIN v2_save_data_achievements AS a ON a.save_id = sd.id
 GROUP BY sd.user_id, sd.created_at
 ORDER BY value DESC, sd.created_at ASC
 LIMIT 500
@@ -791,11 +791,11 @@ SELECT
   COALESCE(SUM(sd.credit_all),0) AS total_medals
 FROM (
   SELECT user_id, MAX(id) AS max_id
-  FROM save_data_v2
+  FROM v2_save_data
   WHERE hide_record = false
   GROUP BY user_id
 ) AS t
-JOIN save_data_v2 AS sd
+JOIN v2_save_data AS sd
   ON sd.user_id = t.user_id
  AND sd.id      = t.max_id
 `

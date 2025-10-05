@@ -227,7 +227,7 @@ LIMIT 1000
 	if err := addRanking(&stats.CpmMax, `
 SELECT
   user_id,
-  cpm_max AS value,
+  CAST(cpm_max AS SIGNED) AS value,
   created_at
 FROM v3_user_latest_save_data
 ORDER BY cpm_max DESC, created_at ASC
