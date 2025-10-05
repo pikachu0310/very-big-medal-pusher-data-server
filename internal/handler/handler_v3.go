@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/domain"
@@ -19,8 +18,6 @@ import (
 const (
 	// 統計データのキャッシュキー（単一なので何でも良い）
 	statisticsCacheV3Key = "v3_stats"
-	// キャッシュ TTL を 30 分に設定
-	statisticsCacheV3TTL = 30 * time.Minute
 )
 
 func (h *Handler) GetV3Data(ctx echo.Context, params models.GetV3DataParams) error {
