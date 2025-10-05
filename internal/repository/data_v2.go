@@ -10,7 +10,7 @@ import (
 )
 
 func (r *Repository) ExistsSameSave(ctx context.Context, userID string, playtime int64) (bool, error) {
-	const q = `SELECT EXISTS(SELECT 1 FROM save_data_v2 WHERE user_id=? AND playtime=?)`
+	const q = `SELECT EXISTS(SELECT 1 FROM v2_save_data WHERE user_id=? AND playtime=?)`
 	var exists int
 	err := r.db.QueryRowContext(ctx, q, userID, playtime).Scan(&exists)
 	return exists == 1, err
@@ -25,7 +25,7 @@ func (r *Repository) InsertSave(ctx context.Context, sd *domain.SaveData) error 
 	defer tx.Rollback()
 
 	res, err := tx.ExecContext(ctx, `
-INSERT INTO save_data_v2 (
+INSERT INTO v2_save_data (
     user_id, legacy, version,
     credit, credit_all, medal_in, medal_get,
     ball_get, ball_chain, slot_start, slot_startfev,
@@ -62,53 +62,53 @@ INSERT INTO save_data_v2 (
 
 	// medal_get
 	for id, cnt := range sd.DCMedalGet {
-		if _, err := tx.ExecContext(ctx, `INSERT INTO save_data_v2_medal_get(save_id, medal_id, count) VALUES(?,?,?)`, saveID, id, cnt); err != nil {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO v2_save_data_medal_get(save_id, medal_id, count) VALUES(?,?,?)`, saveID, id, cnt); err != nil {
 			return err
 		}
 	}
 	// ball_get
 	for id, cnt := range sd.DCBallGet {
-		if _, err := tx.ExecContext(ctx, `INSERT INTO save_data_v2_ball_get(save_id, ball_id, count) VALUES(?,?,?)`, saveID, id, cnt); err != nil {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO v2_save_data_ball_get(save_id, ball_id, count) VALUES(?,?,?)`, saveID, id, cnt); err != nil {
 			return err
 		}
 	}
 	// ball_chain
 	for id, cnt := range sd.DCBallChain {
-		if _, err := tx.ExecContext(ctx, `INSERT INTO save_data_v2_ball_chain(save_id, ball_id, chain_count) VALUES(?,?,?)`, saveID, id, cnt); err != nil {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO v2_save_data_ball_chain(save_id, ball_id, chain_count) VALUES(?,?,?)`, saveID, id, cnt); err != nil {
 			return err
 		}
 	}
 	// achievements
 	for _, aid := range sd.LAchieve {
-		if _, err := tx.ExecContext(ctx, `INSERT INTO save_data_v2_achievements(save_id, achievement_id) VALUES(?,?)`, saveID, aid); err != nil {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO v2_save_data_achievements(save_id, achievement_id) VALUES(?,?)`, saveID, aid); err != nil {
 			return err
 		}
 	}
 
 	// palball_get
 	for id, cnt := range sd.DCPalettaBallGet {
-		if _, err := tx.ExecContext(ctx, `INSERT INTO save_data_v2_palball_get(save_id, ball_id, count) VALUES(?,?,?)`, saveID, id, cnt); err != nil {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO v2_save_data_palball_get(save_id, ball_id, count) VALUES(?,?,?)`, saveID, id, cnt); err != nil {
 			return err
 		}
 	}
 
 	// palball_jp
 	for id, cnt := range sd.DCPalettaBallJackpot {
-		if _, err := tx.ExecContext(ctx, `INSERT INTO save_data_v2_palball_jp(save_id, ball_id, count) VALUES(?,?,?)`, saveID, id, cnt); err != nil {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO v2_save_data_palball_jp(save_id, ball_id, count) VALUES(?,?,?)`, saveID, id, cnt); err != nil {
 			return err
 		}
 	}
 
 	// perks
 	for i, level := range sd.LPerkLevels {
-		if _, err := tx.ExecContext(ctx, `INSERT INTO save_data_v2_perks(save_id, perk_id, level) VALUES(?,?,?)`, saveID, i, level); err != nil {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO v2_save_data_perks(save_id, perk_id, level) VALUES(?,?,?)`, saveID, i, level); err != nil {
 			return err
 		}
 	}
 
 	// perks_credit
 	for i, credits := range sd.LPerkUsedCredits {
-		if _, err := tx.ExecContext(ctx, `INSERT INTO save_data_v2_perks_credit(save_id, perk_id, credits) VALUES(?,?,?)`, saveID, i, credits); err != nil {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO v2_save_data_perks_credit(save_id, perk_id, credits) VALUES(?,?,?)`, saveID, i, credits); err != nil {
 			return err
 		}
 	}
@@ -125,7 +125,7 @@ func (r *Repository) GetLatestSave(ctx context.Context, userID string) (*domain.
 	fmt.Printf("[REPO-DEBUG] GetLatestSave FETCHING_MAIN_ROW - user_id=%s\n", userID)
 	err := r.db.GetContext(ctx, &sd, `
 SELECT * 
-FROM save_data_v2 
+FROM v2_save_data 
 WHERE user_id = ? 
 ORDER BY created_at DESC 
 LIMIT 1
@@ -139,7 +139,7 @@ LIMIT 1
 	sd.DCMedalGet = make(map[string]int)
 	rows, err := r.db.QueryxContext(ctx, `
 SELECT medal_id, count 
-FROM save_data_v2_medal_get 
+FROM v2_save_data_medal_get 
 WHERE save_id = ?
 `, sd.ID)
 	if err != nil {
@@ -159,7 +159,7 @@ WHERE save_id = ?
 	sd.DCBallGet = make(map[string]int)
 	rows, err = r.db.QueryxContext(ctx, `
 SELECT ball_id, count 
-FROM save_data_v2_ball_get 
+FROM v2_save_data_ball_get 
 WHERE save_id = ?
 `, sd.ID)
 	if err != nil {
@@ -179,7 +179,7 @@ WHERE save_id = ?
 	sd.DCBallChain = make(map[string]int)
 	rows, err = r.db.QueryxContext(ctx, `
 SELECT ball_id, chain_count 
-FROM save_data_v2_ball_chain 
+FROM v2_save_data_ball_chain 
 WHERE save_id = ?
 `, sd.ID)
 	if err != nil {
@@ -198,7 +198,7 @@ WHERE save_id = ?
 	// 5) achievements
 	rows, err = r.db.QueryxContext(ctx, `
 SELECT achievement_id 
-FROM save_data_v2_achievements 
+FROM v2_save_data_achievements 
 WHERE save_id = ?
 `, sd.ID)
 	if err != nil {
@@ -219,7 +219,7 @@ WHERE save_id = ?
 	sd.DCPalettaBallGet = make(map[string]int)
 	rows, err = r.db.QueryxContext(ctx, `
 SELECT ball_id, count 
-FROM save_data_v2_palball_get 
+FROM v2_save_data_palball_get 
 WHERE save_id = ?
 `, sd.ID)
 	if err != nil {
@@ -239,7 +239,7 @@ WHERE save_id = ?
 	sd.DCPalettaBallJackpot = make(map[string]int)
 	rows, err = r.db.QueryxContext(ctx, `
 SELECT ball_id, count 
-FROM save_data_v2_palball_jp 
+FROM v2_save_data_palball_jp 
 WHERE save_id = ?
 `, sd.ID)
 	if err != nil {
@@ -258,7 +258,7 @@ WHERE save_id = ?
 	// 8) perks
 	rows, err = r.db.QueryxContext(ctx, `
 SELECT perk_id, level 
-FROM save_data_v2_perks 
+FROM v2_save_data_perks 
 WHERE save_id = ?
 ORDER BY perk_id
 `, sd.ID)
@@ -286,7 +286,7 @@ ORDER BY perk_id
 	// 9) perks_credit
 	rows, err = r.db.QueryxContext(ctx, `
 SELECT perk_id, credits 
-FROM save_data_v2_perks_credit 
+FROM v2_save_data_perks_credit 
 WHERE save_id = ?
 ORDER BY perk_id
 `, sd.ID)
