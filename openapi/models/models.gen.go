@@ -68,13 +68,13 @@ type GameData struct {
 type RankingEntry struct {
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 	UserId    *string    `json:"user_id,omitempty"`
-	Value     *int       `json:"value,omitempty"`
+	Value     *int64     `json:"value,omitempty"`
 }
 
 // SaveDataV2 defines model for SaveDataV2.
 type SaveDataV2 struct {
 	BallChain      *int            `db:"ball_chain" json:"ball_chain,omitempty"`
-	BallGet        *int            `db:"ball_get" json:"ball_get,omitempty"`
+	BallGet        *int64          `db:"ball_get" json:"ball_get,omitempty"`
 	BstpRwd        *int            `db:"bstp_rwd" json:"bstp_rwd,omitempty"`
 	BstpStep       *int            `db:"bstp_step" json:"bstp_step,omitempty"`
 	BuyShbi        *int            `db:"buy_shbi" json:"buy_shbi,omitempty"`
@@ -90,9 +90,9 @@ type SaveDataV2 struct {
 	Firstboot      *string         `json:"firstboot,omitempty"`
 	HideRecord     *int            `db:"hide_record" json:"hide_record,omitempty"`
 	JackGet        *int            `db:"jack_get" json:"jack_get,omitempty"`
-	JackStartmax   *int            `db:"jack_startmax" json:"jack_startmax,omitempty"`
+	JackStartmax   *int64          `db:"jack_startmax" json:"jack_startmax,omitempty"`
 	JackTotalmax   *int            `db:"jack_totalmax" json:"jack_totalmax,omitempty"`
-	JackTotalmaxV2 *float64        `db:"jack_totalmax_v2" json:"jack_totalmax_v2,omitempty"`
+	JackTotalmaxV2 *int64          `db:"jack_totalmax_v2" json:"jack_totalmax_v2,omitempty"`
 	JackspGetAll   *float64        `db:"jacksp_get_all" json:"jacksp_get_all,omitempty"`
 	JackspGetT0    *float64        `db:"jacksp_get_t0" json:"jacksp_get_t0,omitempty"`
 	JackspGetT1    *float64        `db:"jacksp_get_t1" json:"jacksp_get_t1,omitempty"`
@@ -105,7 +105,7 @@ type SaveDataV2 struct {
 	LPerksCredit   *[]int64        `json:"l_perks_credit,omitempty" table:"save_data_v2_perks_credit"`
 	Lastsave       *string         `json:"lastsave,omitempty"`
 	Legacy         *int            `db:"legacy" json:"legacy,omitempty"`
-	MedalGet       *int            `db:"medal_get" json:"medal_get,omitempty"`
+	MedalGet       *int64          `db:"medal_get" json:"medal_get,omitempty"`
 	MedalIn        *int            `db:"medal_in" json:"medal_in,omitempty"`
 	PalballGet     *float64        `db:"palball_get" json:"palball_get,omitempty"`
 	PallotLotT0    *float64        `db:"pallot_lot_t0" json:"pallot_lot_t0,omitempty"`
@@ -114,18 +114,18 @@ type SaveDataV2 struct {
 	PallotLotT3    *float64        `db:"pallot_lot_t3" json:"pallot_lot_t3,omitempty"`
 	Playtime       *int64          `json:"playtime,omitempty"`
 	RmshbiGet      *int            `db:"rmshbi_get" json:"rmshbi_get,omitempty"`
-	SlotGetfev     *int            `db:"slot_getfev" json:"slot_getfev,omitempty"`
-	SlotHit        *int            `db:"slot_hit" json:"slot_hit,omitempty"`
-	SlotStart      *int            `db:"slot_start" json:"slot_start,omitempty"`
-	SlotStartfev   *int            `db:"slot_startfev" json:"slot_startfev,omitempty"`
+	SlotGetfev     *int64          `db:"slot_getfev" json:"slot_getfev,omitempty"`
+	SlotHit        *int64          `db:"slot_hit" json:"slot_hit,omitempty"`
+	SlotStart      *int64          `db:"slot_start" json:"slot_start,omitempty"`
+	SlotStartfev   *int64          `db:"slot_startfev" json:"slot_startfev,omitempty"`
 	SpUse          *int            `db:"sp_use" json:"sp_use,omitempty"`
 	SqrGet         *int            `db:"sqr_get" json:"sqr_get,omitempty"`
-	SqrStep        *int            `db:"sqr_step" json:"sqr_step,omitempty"`
+	SqrStep        *int64          `db:"sqr_step" json:"sqr_step,omitempty"`
 	TaskCnt        *float64        `db:"task_cnt" json:"task_cnt,omitempty"`
 	UltCombomax    *int            `db:"ult_combomax" json:"ult_combomax,omitempty"`
 	UltGet         *int            `db:"ult_get" json:"ult_get,omitempty"`
 	UltTotalmax    *int            `db:"ult_totalmax" json:"ult_totalmax,omitempty"`
-	UltTotalmaxV2  *float64        `db:"ult_totalmax_v2" json:"ult_totalmax_v2,omitempty"`
+	UltTotalmaxV2  *int64          `db:"ult_totalmax_v2" json:"ult_totalmax_v2,omitempty"`
 	Version        *int            `db:"version" json:"version,omitempty"`
 }
 

@@ -475,36 +475,44 @@ components:
           x-oapi-codegen-extra-tags: { db: 'medal_in' }
         medal_get:
           type: integer
+          format: int64
           x-oapi-codegen-extra-tags: { db: 'medal_get' }
         ball_get:
           type: integer
+          format: int64
           x-oapi-codegen-extra-tags: { db: 'ball_get' }
         ball_chain:
           type: integer
           x-oapi-codegen-extra-tags: { db: 'ball_chain' }
         slot_start:
           type: integer
+          format: int64
           x-oapi-codegen-extra-tags: { db: 'slot_start' }
         slot_startfev:
           type: integer
+          format: int64
           x-oapi-codegen-extra-tags: { db: 'slot_startfev' }
         slot_hit:
           type: integer
+          format: int64
           x-oapi-codegen-extra-tags: { db: 'slot_hit' }
         slot_getfev:
           type: integer
+          format: int64
           x-oapi-codegen-extra-tags: { db: 'slot_getfev' }
         sqr_get:
           type: integer
           x-oapi-codegen-extra-tags: { db: 'sqr_get' }
         sqr_step:
           type: integer
+          format: int64
           x-oapi-codegen-extra-tags: { db: 'sqr_step' }
         jack_get:
           type: integer
           x-oapi-codegen-extra-tags: { db: 'jack_get' }
         jack_startmax:
           type: integer
+          format: int64
           x-oapi-codegen-extra-tags: { db: 'jack_startmax' }
         jack_totalmax:
           type: integer
@@ -544,12 +552,12 @@ components:
           format: double
           x-oapi-codegen-extra-tags: { db: 'cpm_max' }
         jack_totalmax_v2:
-          type: number
-          format: double
+          type: integer
+          format: int64
           x-oapi-codegen-extra-tags: { db: 'jack_totalmax_v2' }
         ult_totalmax_v2:
-          type: number
-          format: double
+          type: integer
+          format: int64
           x-oapi-codegen-extra-tags: { db: 'ult_totalmax_v2' }
         palball_get:
           type: number
@@ -649,7 +657,7 @@ components:
       type: object
       properties:
         user_id: { type: string }
-        value: { type: integer }
+        value: { type: integer, format: int64 }
         created_at: { type: string, format: date-time }
 
     StatisticsV2:

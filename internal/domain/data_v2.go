@@ -19,17 +19,17 @@ type SaveData struct {
 	Credit                     int64     `db:"credit"`
 	CreditAll                  int64     `db:"credit_all"`
 	MedalIn                    int       `db:"medal_in"`
-	MedalGet                   int       `db:"medal_get"`
-	BallGet                    int       `db:"ball_get"`
+	MedalGet                   int64     `db:"medal_get"`
+	BallGet                    int64     `db:"ball_get"`
 	BallChain                  int       `db:"ball_chain"`
-	SlotStart                  int       `db:"slot_start"`
-	SlotStartFev               int       `db:"slot_startfev"`
-	SlotHit                    int       `db:"slot_hit"`
-	SlotGetFev                 int       `db:"slot_getfev"`
+	SlotStart                  int64     `db:"slot_start"`
+	SlotStartFev               int64     `db:"slot_startfev"`
+	SlotHit                    int64     `db:"slot_hit"`
+	SlotGetFev                 int64     `db:"slot_getfev"`
 	SqrGet                     int       `db:"sqr_get"`
-	SqrStep                    int       `db:"sqr_step"`
+	SqrStep                    int64     `db:"sqr_step"`
 	JackGet                    int       `db:"jack_get"`
-	JackStartMax               int       `db:"jack_startmax"`
+	JackStartMax               int64     `db:"jack_startmax"`
 	JackTotalMax               int       `db:"jack_totalmax"`
 	UltGet                     int       `db:"ult_get"`
 	UltComboMax                int       `db:"ult_combomax"`
@@ -45,8 +45,8 @@ type SaveData struct {
 	SpUse                      int       `db:"sp_use"`
 	HideRecord                 int       `db:"hide_record"`
 	CpMMax                     float64   `db:"cpm_max"`
-	JackTotalMaxV2             int       `db:"jack_totalmax_v2"`
-	UltimateTotalMaxV2         int       `db:"ult_totalmax_v2"`
+	JackTotalMaxV2             int64     `db:"jack_totalmax_v2"`
+	UltimateTotalMaxV2         int64     `db:"ult_totalmax_v2"`
 	PalettaBallGet             int       `db:"palball_get"`
 	PalettaLotteryAttemptTier0 int       `db:"pallot_lot_t0"`
 	PalettaLotteryAttemptTier1 int       `db:"pallot_lot_t1"`
@@ -88,17 +88,17 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		Credit                     *int64         `json:"credit"`
 		CreditAll                  *int64         `json:"credit_all"`
 		MedalIn                    *int           `json:"medal_in"`
-		MedalGet                   *int           `json:"medal_get"`
-		BallGet                    *int           `json:"ball_get"`
+		MedalGet                   *int64         `json:"medal_get"`
+		BallGet                    *int64         `json:"ball_get"`
 		BallChain                  *int           `json:"ball_chain"`
-		SlotStart                  *int           `json:"slot_start"`
-		SlotStartFev               *int           `json:"slot_startfev"`
-		SlotHit                    *int           `json:"slot_hit"`
-		SlotGetFev                 *int           `json:"slot_getfev"`
+		SlotStart                  *int64         `json:"slot_start"`
+		SlotStartFev               *int64         `json:"slot_startfev"`
+		SlotHit                    *int64         `json:"slot_hit"`
+		SlotGetFev                 *int64         `json:"slot_getfev"`
 		SqrGet                     *int           `json:"sqr_get"`
-		SqrStep                    *int           `json:"sqr_step"`
+		SqrStep                    *int64         `json:"sqr_step"`
 		JackGet                    *int           `json:"jack_get"`
-		JackStartMax               *int           `json:"jack_startmax"`
+		JackStartMax               *int64         `json:"jack_startmax"`
 		JackTotalMax               *int           `json:"jack_totalmax"`
 		UltGet                     *int           `json:"ult_get"`
 		UltComboMax                *int           `json:"ult_combomax"`
@@ -114,8 +114,8 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		SpUse                      *int           `json:"sp_use"`
 		HideRecord                 *int           `json:"hide_record"`
 		CpMMax                     *float64       `json:"cpm_max"`
-		JackTotalMaxV2             *int           `json:"jack_totalmax_v2"`
-		UltimateTotalMaxV2         *int           `json:"ult_totalmax_v2"`
+		JackTotalMaxV2             *int64         `json:"jack_totalmax_v2"`
+		UltimateTotalMaxV2         *int64         `json:"ult_totalmax_v2"`
 		PalettaBallGet             *int           `json:"palball_get"`
 		PalettaLotteryAttemptTier0 *float64       `json:"pallot_lot_t0"`
 		PalettaLotteryAttemptTier1 *float64       `json:"pallot_lot_t1"`
@@ -163,17 +163,17 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		Credit:                     safeInt64(m.Credit),
 		CreditAll:                  safeInt64(m.CreditAll),
 		MedalIn:                    safeInt(m.MedalIn),
-		MedalGet:                   safeInt(m.MedalGet),
-		BallGet:                    safeInt(m.BallGet),
+		MedalGet:                   safeInt64(m.MedalGet),
+		BallGet:                    safeInt64(m.BallGet),
 		BallChain:                  safeInt(m.BallChain),
-		SlotStart:                  safeInt(m.SlotStart),
-		SlotStartFev:               safeInt(m.SlotStartFev),
-		SlotHit:                    safeInt(m.SlotHit),
-		SlotGetFev:                 safeInt(m.SlotGetFev),
+		SlotStart:                  safeInt64(m.SlotStart),
+		SlotStartFev:               safeInt64(m.SlotStartFev),
+		SlotHit:                    safeInt64(m.SlotHit),
+		SlotGetFev:                 safeInt64(m.SlotGetFev),
 		SqrGet:                     safeInt(m.SqrGet),
-		SqrStep:                    safeInt(m.SqrStep),
+		SqrStep:                    safeInt64(m.SqrStep),
 		JackGet:                    safeInt(m.JackGet),
-		JackStartMax:               safeInt(m.JackStartMax),
+		JackStartMax:               safeInt64(m.JackStartMax),
 		JackTotalMax:               safeInt(m.JackTotalMax),
 		UltGet:                     safeInt(m.UltGet),
 		UltComboMax:                safeInt(m.UltComboMax),
@@ -189,8 +189,8 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		SpUse:                      safeInt(m.SpUse),
 		HideRecord:                 safeInt(m.HideRecord),
 		CpMMax:                     safeFloat64(m.CpMMax),
-		JackTotalMaxV2:             safeInt(m.JackTotalMaxV2),
-		UltimateTotalMaxV2:         safeInt(m.UltimateTotalMaxV2),
+		JackTotalMaxV2:             safeInt64(m.JackTotalMaxV2),
+		UltimateTotalMaxV2:         safeInt64(m.UltimateTotalMaxV2),
 		PalettaBallGet:             safeInt(m.PalettaBallGet),
 		PalettaLotteryAttemptTier0: int(safeFloat64(m.PalettaLotteryAttemptTier0)),
 		PalettaLotteryAttemptTier1: int(safeFloat64(m.PalettaLotteryAttemptTier1)),
@@ -251,8 +251,8 @@ func (sd *SaveData) ToModel() *models.SaveDataV2 {
 		spUse          = sd.SpUse
 		hideRecord     = sd.HideRecord
 		cpmMax         = sd.CpMMax
-		jackTotalmaxV2 = float64(sd.JackTotalMaxV2)
-		ultTotalmaxV2  = float64(sd.UltimateTotalMaxV2)
+		jackTotalmaxV2 = sd.JackTotalMaxV2
+		ultTotalmaxV2  = sd.UltimateTotalMaxV2
 		palballGet     = float64(sd.PalettaBallGet)
 		pallotLotT0    = float64(sd.PalettaLotteryAttemptTier0)
 		pallotLotT1    = float64(sd.PalettaLotteryAttemptTier1)
