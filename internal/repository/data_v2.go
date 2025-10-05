@@ -195,12 +195,12 @@ WHERE save_id = ?
 	}
 	rows.Close()
 
-	// 5) achievements
+	// 5) achievements - v3_user_latest_save_data_achievements から取得
 	rows, err = r.db.QueryxContext(ctx, `
 SELECT achievement_id 
-FROM v2_save_data_achievements 
-WHERE save_id = ?
-`, sd.ID)
+FROM v3_user_latest_save_data_achievements 
+WHERE user_id = ?
+`, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -807,59 +807,4 @@ JOIN save_data_v2 AS sd
 
 	fmt.Printf("[REPO-DEBUG] GetStatisticsV3 SUCCESS - total_medals=%d\n", totalMedals)
 	return stats, nil
-}
-
-// GetAchievementRates returns achievement acquisition rates
-func (r *Repository) GetAchievementRates(ctx context.Context) (*models.AchievementRates, error) {
-	// 最適化されたクエリ：1回のクエリで総ユーザー数と各実績の取得者数を取得
-	rows, err := r.db.QueryxContext(ctx, `
-WITH users_with_achievements AS (
-    SELECT DISTINCT sd.user_id
-    FROM save_data_v2_achievements a
-    JOIN save_data_v2 sd ON a.save_id = sd.id
-)
-SELECT 
-    achievement_id,
-    COUNT(DISTINCT sd.user_id) as user_count,
-    (SELECT COUNT(*) FROM users_with_achievements) as total_users
-FROM save_data_v2_achievements a
-JOIN save_data_v2 sd ON a.save_id = sd.id
-GROUP BY achievement_id
-`)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	achievementRates := make(map[string]struct {
-		Count *int     `json:"count,omitempty"`
-		Rate  *float32 `json:"rate,omitempty"`
-	})
-
-	var totalUsers int
-	for rows.Next() {
-		var achievementID string
-		var userCount int
-		if err := rows.Scan(&achievementID, &userCount, &totalUsers); err != nil {
-			return nil, err
-		}
-
-		rate := float32(0.0)
-		if totalUsers > 0 {
-			rate = float32(userCount) / float32(totalUsers)
-		}
-
-		achievementRates[achievementID] = struct {
-			Count *int     `json:"count,omitempty"`
-			Rate  *float32 `json:"rate,omitempty"`
-		}{
-			Count: &userCount,
-			Rate:  &rate,
-		}
-	}
-
-	return &models.AchievementRates{
-		TotalUsers:       &totalUsers,
-		AchievementRates: &achievementRates,
-	}, nil
 }

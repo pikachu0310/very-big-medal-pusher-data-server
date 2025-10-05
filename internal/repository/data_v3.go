@@ -365,8 +365,8 @@ func (r *Repository) insertNewAchievements(ctx context.Context, tx *sqlx.Tx, use
 
 			// v3_user_latest_save_data_achievements に追加
 			if _, err := tx.ExecContext(ctx, `
-				INSERT INTO v3_user_latest_save_data_achievements (user_id, achievement_id, first_achieved_at) 
-				VALUES (?,?,CURRENT_TIMESTAMP)
+				INSERT INTO v3_user_latest_save_data_achievements (user_id, achievement_id) 
+				VALUES (?,?)
 			`, userID, achievementID); err != nil {
 				return err
 			}
@@ -374,4 +374,53 @@ func (r *Repository) insertNewAchievements(ctx context.Context, tx *sqlx.Tx, use
 	}
 
 	return nil
+}
+
+// GetAchievementRates returns achievement acquisition rates
+func (r *Repository) GetAchievementRates(ctx context.Context) (*models.AchievementRates, error) {
+	// 最適化されたクエリ：v3_user_latest_save_data_achievements を使用
+	rows, err := r.db.QueryxContext(ctx, `
+SELECT 
+    achievement_id,
+    COUNT(DISTINCT user_id) as user_count,
+    (SELECT COUNT(DISTINCT user_id) FROM v3_user_latest_save_data_achievements) as total_users
+FROM v3_user_latest_save_data_achievements
+GROUP BY achievement_id
+`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	achievementRates := make(map[string]struct {
+		Count *int     `json:"count,omitempty"`
+		Rate  *float32 `json:"rate,omitempty"`
+	})
+
+	var totalUsers int
+	for rows.Next() {
+		var achievementID string
+		var userCount int
+		if err := rows.Scan(&achievementID, &userCount, &totalUsers); err != nil {
+			return nil, err
+		}
+
+		rate := float32(0.0)
+		if totalUsers > 0 {
+			rate = float32(userCount) / float32(totalUsers)
+		}
+
+		achievementRates[achievementID] = struct {
+			Count *int     `json:"count,omitempty"`
+			Rate  *float32 `json:"rate,omitempty"`
+		}{
+			Count: &userCount,
+			Rate:  &rate,
+		}
+	}
+
+	return &models.AchievementRates{
+		TotalUsers:       &totalUsers,
+		AchievementRates: &achievementRates,
+	}, nil
 }
