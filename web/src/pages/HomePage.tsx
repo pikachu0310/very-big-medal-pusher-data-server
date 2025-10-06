@@ -1,4 +1,4 @@
-import { Title, Text, Paper, Stack } from '@mantine/core';
+import { Title, Text, Paper } from '@mantine/core';
 import { Layout } from '../components/Layout';
 
 function HomePage() {
