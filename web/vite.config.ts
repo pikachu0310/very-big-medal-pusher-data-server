@@ -27,6 +27,9 @@ export default defineConfig({
       credentials: true,
     },
   },
+  preview: {
+    allowedHosts: true,
+  },
   resolve: {
     alias: {
       '@tabler/icons-react': '@tabler/icons-react/dist/esm/icons/index.mjs',
