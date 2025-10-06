@@ -378,33 +378,43 @@ func (r *Repository) insertNewAchievements(ctx context.Context, tx *sqlx.Tx, use
 
 // GetAchievementRates returns achievement acquisition rates
 func (r *Repository) GetAchievementRates(ctx context.Context) (*models.AchievementRates, error) {
-	// 最適化されたクエリ：v3_user_latest_save_data_achievements を使用
+	// 最適化1: 全ユーザー数を先に取得（サブクエリを排除）
+	var totalUsers int
+	err := r.db.GetContext(ctx, &totalUsers, `
+SELECT COUNT(DISTINCT user_id) FROM v3_user_latest_save_data_achievements
+`)
+	if err != nil {
+		return nil, err
+	}
+
+	// 最適化2: アチーブメント別ユーザー数のみを取得（重複なしなのでCOUNT(DISTINCT)は不要）
 	rows, err := r.db.QueryxContext(ctx, `
 SELECT 
     achievement_id,
-    COUNT(DISTINCT user_id) as user_count,
-    (SELECT COUNT(DISTINCT user_id) FROM v3_user_latest_save_data_achievements) as total_users
+    COUNT(user_id) as user_count
 FROM v3_user_latest_save_data_achievements
 GROUP BY achievement_id
+ORDER BY user_count DESC
 `)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
+	// 最適化3: 事前に容量を確保（アチーブメント数は限定的）
 	achievementRates := make(map[string]struct {
 		Count *int     `json:"count,omitempty"`
 		Rate  *float32 `json:"rate,omitempty"`
-	})
+	}, 1000)
 
-	var totalUsers int
 	for rows.Next() {
 		var achievementID string
 		var userCount int
-		if err := rows.Scan(&achievementID, &userCount, &totalUsers); err != nil {
+		if err := rows.Scan(&achievementID, &userCount); err != nil {
 			return nil, err
 		}
 
+		// 最適化4: 浮動小数点計算を最適化
 		rate := float32(0.0)
 		if totalUsers > 0 {
 			rate = float32(userCount) / float32(totalUsers)
