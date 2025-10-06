@@ -38,7 +38,7 @@ CREATE TABLE v3_user_latest_save_data (
     INDEX idx_v3_user_latest_save_data_ult_totalmax_v2 (ult_totalmax_v2 DESC),
     INDEX idx_v3_user_latest_save_data_sp_use (sp_use DESC),
     INDEX idx_v3_user_latest_save_data_created_at (created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- +goose Down
 -- v3_user_latest_save_data テーブルを削除

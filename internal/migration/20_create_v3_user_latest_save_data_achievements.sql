@@ -13,7 +13,7 @@ CREATE TABLE v3_user_latest_save_data_achievements (
     INDEX idx_v3_user_latest_achievements_user_id (user_id),
     INDEX idx_v3_user_latest_achievements_achievement_id (achievement_id),
     INDEX idx_v3_achievements_achievement_user (achievement_id, user_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- +goose Down
 -- v3_user_latest_save_data_achievements テーブルを削除
