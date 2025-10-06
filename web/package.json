@@ -1,0 +1,41 @@
+{
+  "name": "very-big-medal-pusher-frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview --host"
+  },
+  "dependencies": {
+    "@mantine/core": "^8.2.2",
+    "@mantine/dates": "^8.2.2",
+    "@mantine/hooks": "^8.2.2",
+    "@mantine/modals": "^8.2.2",
+    "@mantine/notifications": "^8.2.2",
+    "@tabler/icons-react": "^3.34.1",
+    "@tailwindcss/container-queries": "^0.1.1",
+    "@tailwindcss/vite": "^4.1.11",
+    "clsx": "^2.1.1",
+    "jotai": "^2.12.5",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-router": "^7.7.1",
+    "swr": "^2.3.4"
+  },
+  "devDependencies": {
+    "@react-router/dev": "^7.7.1",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react-swc": "^3.11.0",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "postcss-preset-mantine": "^1.18.0",
+    "postcss-simple-vars": "^7.0.1",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.9.2",
+    "vite": "^6.0.0",
+    "vite-tsconfig-paths": "^5.1.4"
+  }
+}

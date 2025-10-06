@@ -44,6 +44,8 @@ go run golang.org/x/tools/cmd/gonew@latest github.com/pikachu0310/very-big-medal
 
 ### 開発環境の実行
 
+#### バックエンドの起動
+
 ```sh
 docker compose watch
 ```
@@ -54,6 +56,20 @@ Compose Watchにより、ソースコードの変更を検知して自動で再�
 
 - <http://localhost:8080/> (API)
 - <http://localhost:8081/> (DBの管理画面)
+
+#### フロントエンドの起動
+
+```sh
+cd web
+npm install  # 初回のみ
+npm run dev
+```
+
+フロントエンドが起動したら、以下のURLにアクセスできます。
+
+- <http://localhost:3000/> (フロントエンド)
+
+フロントエンドの詳細については [web/README.md](./web/README.md) を参照してください。
 
 ### テストの実行
 
@@ -106,6 +122,9 @@ make test-integration
   - DBの立ち上げには[ory/dockertest](https://github.com/ory/dockertest)を使っている
   - 短期開発段階では時間があれば書く程度で良い
   - Tips: 外部サービス(traQ, Twitterなど)へのアクセスが発生する場合は[golang/mock](https://github.com/golang/mock)などを使ってモック(テスト用処理)を作ると良い
+- `web/`: フロントエンド実装
+  - React + TypeScript + Vite を使用
+  - 詳細は [web/README.md](./web/README.md) を参照
 
 ## 長期開発に向けた改善点
 
