@@ -8,6 +8,8 @@ export default defineConfig({
   plugins: [react(), tsconfigPaths(), tailwindcss()],
   server: {
     port: 3000,
+    host: '0.0.0.0',
+    allowedHosts: true,
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
@@ -28,6 +30,8 @@ export default defineConfig({
     },
   },
   preview: {
+    port: 4173,
+    host: '0.0.0.0',
     allowedHosts: true,
   },
   resolve: {
