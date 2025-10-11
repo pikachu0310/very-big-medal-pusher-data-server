@@ -80,23 +80,6 @@ function HomePage() {
     fetchGlobalStats();
   }, []);
 
-  const parseUrl = (url: string) => {
-    try {
-      const urlObj = new URL(url);
-      const pathParts = urlObj.pathname.split('/');
-      const username = pathParts[pathParts.length - 2]; // /api/v3/users/{username}/data
-      const sig = urlObj.searchParams.get('sig');
-      
-      if (!username || !sig) {
-        throw new Error('URLの形式が正しくありません');
-      }
-      
-      return { username, sig };
-    } catch (err) {
-      throw new Error('URLの形式が正しくありません');
-    }
-  };
-
   const handleLoadPersonalData = async () => {
     if (!dataUrl.trim()) {
       setError('URLを入力してください');
@@ -105,25 +88,38 @@ function HomePage() {
 
     setIsLoadingPersonal(true);
     setError('');
+    setPersonalStats(null);
     
     try {
-      // URLからユーザー名とsigを取得
-      parseUrl(dataUrl);
+      // 入力されたURLをそのまま使用してAPIリクエスト
+      const response = await fetch(dataUrl);
       
-      // 仮実装：実際のAPIコールは未実装
-      setError('⚠️ 個人統計情報の取得機能は仮実装です。サーバー側の実装が必要です。');
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('データが見つかりません。URLを確認してください。');
+        } else if (response.status === 401) {
+          throw new Error('署名認証に失敗しました。URLが正しいか確認してください。');
+        } else {
+          throw new Error(`データの取得に失敗しました（ステータスコード: ${response.status}）`);
+        }
+      }
       
-      // 仮のデータを表示
+      const data = await response.json();
+      
+      // APIから取得したデータをセット
       setPersonalStats({
-        playtime: 1525926,
-        medal_get: 31225857,
-        cpm_max: 94599880.2367724,
-        credit: 622925277,
-        ball_get: 4244994,
-        slot_hit: 2743937
+        playtime: data.playtime,
+        medal_get: data.medal_get,
+        cpm_max: data.cpm_max,
+        credit: data.credit,
+        ball_get: data.ball_get,
+        slot_hit: data.slot_hit,
+        ult_get: data.ult_get,
+        jack_get: data.jack_get
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'エラーが発生しました');
+      setPersonalStats(null);
     } finally {
       setIsLoadingPersonal(false);
     }
@@ -145,28 +141,29 @@ function HomePage() {
   const renderRankingTable = (data: RankingEntry[], title: string, type: string) => (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Title order={4} mb="md">{title}</Title>
-      <Table>
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th>順位</Table.Th>
-            <Table.Th>ユーザー名</Table.Th>
-            <Table.Th>値</Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
-          {data.slice(0, 10).map((entry, index) => (
-            <Table.Tr key={`${entry.user_id}-${index}`}>
-              <Table.Td>
-                <Badge color={index < 3 ? ['gold', 'silver', 'bronze'][index] : 'gray'}>
-                  {index + 1}位
-                </Badge>
-              </Table.Td>
-              <Table.Td>{entry.user_id}</Table.Td>
-              <Table.Td>{formatRankingValue(entry.value, type)}</Table.Td>
+      <Text size="sm" c="dimmed" mb="sm">総エントリー数: {data.length}件</Text>
+      <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+        <Table>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>順位</Table.Th>
+              <Table.Th>値</Table.Th>
             </Table.Tr>
-          ))}
-        </Table.Tbody>
-      </Table>
+          </Table.Thead>
+          <Table.Tbody>
+            {data.map((entry, index) => (
+              <Table.Tr key={`${index}`}>
+                <Table.Td>
+                  <Badge color={index < 3 ? ['gold', 'silver', 'bronze'][index] : 'gray'}>
+                    {index + 1}位
+                  </Badge>
+                </Table.Td>
+                <Table.Td>{formatRankingValue(entry.value, type)}</Table.Td>
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        </Table>
+      </div>
     </Card>
   );
 
