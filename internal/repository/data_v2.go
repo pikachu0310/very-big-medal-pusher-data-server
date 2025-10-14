@@ -36,9 +36,9 @@ INSERT INTO v2_save_data (
     hide_record, cpm_max, jack_totalmax_v2, ult_totalmax_v2,
     palball_get, pallot_lot_t0, pallot_lot_t1, pallot_lot_t2, pallot_lot_t3,
     jacksp_get_all, jacksp_get_t0, jacksp_get_t1, jacksp_get_t2, jacksp_get_t3,
-    jacksp_startmax, jacksp_totalmax, task_cnt, buy_shbi,
+    jacksp_startmax, jacksp_totalmax, task_cnt, totem_altars, totem_altars_credit, buy_shbi,
     firstboot, lastsave, playtime
-) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
 		sd.UserId, sd.Legacy, sd.Version,
 		sd.Credit, sd.CreditAll, sd.MedalIn, sd.MedalGet,
 		sd.BallGet, sd.BallChain, sd.SlotStart, sd.SlotStartFev,
@@ -49,7 +49,7 @@ INSERT INTO v2_save_data (
 		sd.HideRecord, sd.CpMMax, sd.JackTotalMaxV2, sd.UltimateTotalMaxV2,
 		sd.PalettaBallGet, sd.PalettaLotteryAttemptTier0, sd.PalettaLotteryAttemptTier1, sd.PalettaLotteryAttemptTier2, sd.PalettaLotteryAttemptTier3,
 		sd.JackpotSuperGetTotal, sd.JackpotSuperGetTier0, sd.JackpotSuperGetTier1, sd.JackpotSuperGetTier2, sd.JackpotSuperGetTier3,
-		sd.JackpotSuperStartMax, sd.JackpotSuperTotalMax, sd.TaskCompleteCount, sd.BuyShbi,
+		sd.JackpotSuperStartMax, sd.JackpotSuperTotalMax, sd.TaskCompleteCount, sd.TotemAltarUnlockCount, sd.TotemAltarUnlockUsedCredits, sd.BuyShbi,
 		sd.FirstBoot, sd.LastSave, sd.Playtime,
 	)
 	if err != nil {
@@ -109,6 +109,27 @@ INSERT INTO v2_save_data (
 	// perks_credit
 	for i, credits := range sd.LPerkUsedCredits {
 		if _, err := tx.ExecContext(ctx, `INSERT INTO v2_save_data_perks_credit(save_id, perk_id, credits) VALUES(?,?,?)`, saveID, i, credits); err != nil {
+			return err
+		}
+	}
+
+	// totems
+	for i, level := range sd.LTotemLevels {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO v2_save_data_totems(save_id, totem_id, level) VALUES(?,?,?)`, saveID, i, level); err != nil {
+			return err
+		}
+	}
+
+	// totems_credit
+	for i, credits := range sd.LTotemUsedCredits {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO v2_save_data_totems_credit(save_id, totem_id, credits) VALUES(?,?,?)`, saveID, i, credits); err != nil {
+			return err
+		}
+	}
+
+	// totems_placement
+	for i, totemID := range sd.LTotemPlacements {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO v2_save_data_totems_placement(save_id, placement_idx, totem_id) VALUES(?,?,?)`, saveID, i, totemID); err != nil {
 			return err
 		}
 	}
@@ -311,7 +332,85 @@ ORDER BY perk_id
 	}
 	rows.Close()
 
-	fmt.Printf("[REPO-DEBUG] GetLatestSave SUCCESS - user_id=%s, achievements=%d, perks=%d\n", userID, len(sd.LAchieve), len(sd.LPerkLevels))
+	// 10) totems
+	rows, err = r.db.QueryxContext(ctx, `
+SELECT totem_id, level 
+FROM v2_save_data_totems 
+WHERE save_id = ?
+ORDER BY totem_id
+`, sd.ID)
+	if err != nil {
+		return nil, err
+	}
+	sd.LTotemLevels = make([]int, 0, 100)
+	for rows.Next() {
+		var totemID int
+		var level int
+		if err := rows.Scan(&totemID, &level); err != nil {
+			return nil, err
+		}
+		for len(sd.LTotemLevels) <= totemID && len(sd.LTotemLevels) < 100 {
+			sd.LTotemLevels = append(sd.LTotemLevels, 0)
+		}
+		if totemID < len(sd.LTotemLevels) {
+			sd.LTotemLevels[totemID] = level
+		}
+	}
+	rows.Close()
+
+	// 11) totems_credit
+	rows, err = r.db.QueryxContext(ctx, `
+SELECT totem_id, credits 
+FROM v2_save_data_totems_credit 
+WHERE save_id = ?
+ORDER BY totem_id
+`, sd.ID)
+	if err != nil {
+		return nil, err
+	}
+	sd.LTotemUsedCredits = make([]int64, 0, 100)
+	for rows.Next() {
+		var totemID int
+		var credits int64
+		if err := rows.Scan(&totemID, &credits); err != nil {
+			return nil, err
+		}
+		for len(sd.LTotemUsedCredits) <= totemID && len(sd.LTotemUsedCredits) < 100 {
+			sd.LTotemUsedCredits = append(sd.LTotemUsedCredits, 0)
+		}
+		if totemID < len(sd.LTotemUsedCredits) {
+			sd.LTotemUsedCredits[totemID] = credits
+		}
+	}
+	rows.Close()
+
+	// 12) totems_placement
+	rows, err = r.db.QueryxContext(ctx, `
+SELECT placement_idx, totem_id 
+FROM v2_save_data_totems_placement 
+WHERE save_id = ?
+ORDER BY placement_idx
+`, sd.ID)
+	if err != nil {
+		return nil, err
+	}
+	sd.LTotemPlacements = make([]int, 0, 100)
+	for rows.Next() {
+		var placementIdx int
+		var totemID int
+		if err := rows.Scan(&placementIdx, &totemID); err != nil {
+			return nil, err
+		}
+		for len(sd.LTotemPlacements) <= placementIdx && len(sd.LTotemPlacements) < 100 {
+			sd.LTotemPlacements = append(sd.LTotemPlacements, 0)
+		}
+		if placementIdx < len(sd.LTotemPlacements) {
+			sd.LTotemPlacements[placementIdx] = totemID
+		}
+	}
+	rows.Close()
+
+	fmt.Printf("[REPO-DEBUG] GetLatestSave SUCCESS - user_id=%s, achievements=%d, perks=%d, totems=%d\n", userID, len(sd.LAchieve), len(sd.LPerkLevels), len(sd.LTotemLevels))
 	return &sd, nil
 }
 

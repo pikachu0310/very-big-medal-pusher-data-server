@@ -693,6 +693,13 @@ components:
           type: number
           format: double
           x-oapi-codegen-extra-tags: { db: 'task_cnt' }
+        totem_altars:
+          type: integer
+          x-oapi-codegen-extra-tags: { db: 'totem_altars' }
+        totem_altars_credit:
+          type: integer
+          format: int64
+          x-oapi-codegen-extra-tags: { db: 'totem_altars_credit' }
         dc_palball_get:
           type: object
           additionalProperties: { type: integer }
@@ -711,6 +718,20 @@ components:
             type: integer
             format: int64
           x-oapi-codegen-extra-tags: { table: 'save_data_v2_perks_credit' }
+        l_totems:
+          type: array
+          items: { type: integer }
+          x-oapi-codegen-extra-tags: { table: 'save_data_v2_totems' }
+        l_totems_credit:
+          type: array
+          items:
+            type: integer
+            format: int64
+          x-oapi-codegen-extra-tags: { table: 'save_data_v2_totems_credit' }
+        l_totems_set:
+          type: array
+          items: { type: integer }
+          x-oapi-codegen-extra-tags: { table: 'save_data_v2_totems_placement' }
         firstboot:
           type: string
         lastsave:
