@@ -18,16 +18,55 @@ import {
 } from '@mantine/core';
 import { IconAlertCircle, IconDownload, IconTrophy, IconUsers } from '@tabler/icons-react';
 
-// 個人統計情報の型定義
+// 個人統計情報の型定義（SaveDataV2の全フィールド）
 interface PersonalStats {
-  playtime?: number;
-  medal_get?: number;
-  cpm_max?: number;
+  legacy?: number;
+  version?: number;
   credit?: number;
+  credit_all?: number;
+  medal_in?: number;
+  medal_get?: number;
   ball_get?: number;
+  ball_chain?: number;
+  slot_start?: number;
+  slot_startfev?: number;
   slot_hit?: number;
-  ult_get?: number;
+  slot_getfev?: number;
+  sqr_get?: number;
+  sqr_step?: number;
   jack_get?: number;
+  jack_startmax?: number;
+  jack_totalmax?: number;
+  ult_get?: number;
+  ult_combomax?: number;
+  ult_totalmax?: number;
+  rmshbi_get?: number;
+  buy_shbi?: number;
+  bstp_step?: number;
+  bstp_rwd?: number;
+  buy_total?: number;
+  sp_use?: number;
+  hide_record?: number;
+  cpm_max?: number;
+  jack_totalmax_v2?: number;
+  ult_totalmax_v2?: number;
+  palball_get?: number;
+  pallot_lot_t0?: number;
+  pallot_lot_t1?: number;
+  pallot_lot_t2?: number;
+  pallot_lot_t3?: number;
+  jacksp_get_all?: number;
+  jacksp_get_t0?: number;
+  jacksp_get_t1?: number;
+  jacksp_get_t2?: number;
+  jacksp_get_t3?: number;
+  jacksp_startmax?: number;
+  jacksp_totalmax?: number;
+  task_cnt?: number;
+  firstboot?: string;
+  lastsave?: string;
+  playtime?: number;
+  l_achieve?: string[];
 }
 
 // ランキングエントリの型定義
@@ -106,17 +145,8 @@ function HomePage() {
       
       const data = await response.json();
       
-      // APIから取得したデータをセット
-      setPersonalStats({
-        playtime: data.playtime,
-        medal_get: data.medal_get,
-        cpm_max: data.cpm_max,
-        credit: data.credit,
-        ball_get: data.ball_get,
-        slot_hit: data.slot_hit,
-        ult_get: data.ult_get,
-        jack_get: data.jack_get
-      });
+      // APIから取得したデータを全てセット
+      setPersonalStats(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'エラーが発生しました');
       setPersonalStats(null);
@@ -154,7 +184,7 @@ function HomePage() {
             {data.map((entry, index) => (
               <Table.Tr key={`${index}`}>
                 <Table.Td>
-                  <Badge color={index < 3 ? ['gold', 'silver', 'bronze'][index] : 'gray'}>
+                  <Badge color={index === 0 ? 'yellow' : index === 1 ? 'gray' : index === 2 ? 'orange' : 'blue'}>
                     {index + 1}位
                   </Badge>
                 </Table.Td>
@@ -168,17 +198,19 @@ function HomePage() {
   );
 
   return (
-    <Stack gap="xl">
+    <Stack gap="xl" pt={0}>
       {/* ロゴセクション */}
-      <Center>
+      <Center mt={0} pt={0} mb={0}>
         <img 
           src="/MPG_logo.png" 
           alt="MPG Logo" 
           className="logo-container"
           style={{ 
-            maxWidth: '500px', 
+            maxWidth: '700px', 
+            width: '100%',
             height: 'auto',
-            marginBottom: '2rem'
+            marginBottom: '0.5rem',
+            marginTop: '0'
           }} 
         />
       </Center>
@@ -239,51 +271,371 @@ function HomePage() {
             )}
 
             {personalStats && (
-              <Grid mt="xl">
-                <Grid.Col span={{ base: 12, md: 6 }}>
-                  <Card shadow="sm" padding="lg" radius="md" withBorder>
-                    <Text size="lg" fw={500} mb="sm" c="dimmed">
-                      プレイ時間
-                    </Text>
-                    <Text size="xl" fw={700} c="blue">
-                      {personalStats.playtime ? `${Math.floor(personalStats.playtime / 3600)}時間` : 'N/A'}
-                    </Text>
-                  </Card>
-                </Grid.Col>
-                
-                <Grid.Col span={{ base: 12, md: 6 }}>
-                  <Card shadow="sm" padding="lg" radius="md" withBorder>
-                    <Text size="lg" fw={500} mb="sm" c="dimmed">
-                      獲得メダル数
-                    </Text>
-                    <Text size="xl" fw={700} c="green">
-                      {personalStats.medal_get?.toLocaleString() || 'N/A'}
-                    </Text>
-                  </Card>
-                </Grid.Col>
-                
-                <Grid.Col span={{ base: 12, md: 6 }}>
-                  <Card shadow="sm" padding="lg" radius="md" withBorder>
-                    <Text size="lg" fw={500} mb="sm" c="dimmed">
-                      最高CPM
-                    </Text>
-                    <Text size="xl" fw={700} c="orange">
-                      {personalStats.cpm_max?.toLocaleString() || 'N/A'}
-                    </Text>
-                  </Card>
-                </Grid.Col>
-                
-                <Grid.Col span={{ base: 12, md: 6 }}>
-                  <Card shadow="sm" padding="lg" radius="md" withBorder>
-                    <Text size="lg" fw={500} mb="sm" c="dimmed">
-                      クレジット
-                    </Text>
-                    <Text size="xl" fw={700} c="purple">
-                      {personalStats.credit?.toLocaleString() || 'N/A'}
-                    </Text>
-                  </Card>
-                </Grid.Col>
-              </Grid>
+              <Stack gap="lg" mt="xl">
+                {/* 基本情報 */}
+                <div>
+                  <Title order={3} mb="md">基本情報</Title>
+                  <Grid>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">プレイ時間</Text>
+                        <Text size="lg" fw={700} c="blue">
+                          {personalStats.playtime ? `${Math.floor(personalStats.playtime / 3600)}時間 ${Math.floor((personalStats.playtime % 3600) / 60)}分` : 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">バージョン</Text>
+                        <Text size="lg" fw={700}>{personalStats.version || 'N/A'}</Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">実績数</Text>
+                        <Text size="lg" fw={700} c="yellow">
+                          {personalStats.l_achieve?.length || 0}個
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                  </Grid>
+                </div>
+
+                {/* メダル・クレジット関連 */}
+                <div>
+                  <Title order={3} mb="md">メダル・クレジット</Title>
+                  <Grid>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">クレジット</Text>
+                        <Text size="lg" fw={700} c="green">
+                          {personalStats.credit?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">累計クレジット</Text>
+                        <Text size="lg" fw={700} c="green">
+                          {personalStats.credit_all?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">投入メダル</Text>
+                        <Text size="lg" fw={700}>
+                          {personalStats.medal_in?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">獲得メダル</Text>
+                        <Text size="lg" fw={700} c="teal">
+                          {personalStats.medal_get?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                  </Grid>
+                </div>
+
+                {/* ボール関連 */}
+                <div>
+                  <Title order={3} mb="md">ボール</Title>
+                  <Grid>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">獲得ボール</Text>
+                        <Text size="lg" fw={700} c="orange">
+                          {personalStats.ball_get?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">最大ボールチェーン</Text>
+                        <Text size="lg" fw={700} c="orange">
+                          {personalStats.ball_chain || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                  </Grid>
+                </div>
+
+                {/* スロット関連 */}
+                <div>
+                  <Title order={3} mb="md">スロット</Title>
+                  <Grid>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">スロット開始回数</Text>
+                        <Text size="lg" fw={700}>
+                          {personalStats.slot_start?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">スロットヒット回数</Text>
+                        <Text size="lg" fw={700} c="pink">
+                          {personalStats.slot_hit?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">フィーバー開始回数</Text>
+                        <Text size="lg" fw={700}>
+                          {personalStats.slot_startfev?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">フィーバー獲得回数</Text>
+                        <Text size="lg" fw={700}>
+                          {personalStats.slot_getfev?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                  </Grid>
+                </div>
+
+                {/* すごろく関連 */}
+                <div>
+                  <Title order={3} mb="md">すごろく</Title>
+                  <Grid>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">すごろく獲得</Text>
+                        <Text size="lg" fw={700}>
+                          {personalStats.sqr_get?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">すごろく歩数</Text>
+                        <Text size="lg" fw={700}>
+                          {personalStats.sqr_step?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                  </Grid>
+                </div>
+
+                {/* ジャックポット関連 */}
+                <div>
+                  <Title order={3} mb="md">ジャックポット</Title>
+                  <Grid>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">ジャックポット獲得</Text>
+                        <Text size="lg" fw={700} c="yellow">
+                          {personalStats.jack_get?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">ジャックポットスタート最大</Text>
+                        <Text size="lg" fw={700} c="yellow">
+                          {personalStats.jack_startmax?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">ジャックポット合計最大 v2</Text>
+                        <Text size="lg" fw={700} c="yellow">
+                          {personalStats.jack_totalmax_v2?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                  </Grid>
+                </div>
+
+                {/* ジャックポットSP関連 */}
+                <div>
+                  <Title order={3} mb="md">ジャックポットSP</Title>
+                  <Grid>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">ジャックポットSP合計獲得</Text>
+                        <Text size="lg" fw={700} c="grape">
+                          {personalStats.jacksp_get_all?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">ジャックポットSPスタート最大</Text>
+                        <Text size="lg" fw={700} c="grape">
+                          {personalStats.jacksp_startmax?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">ジャックポットSP合計最大</Text>
+                        <Text size="lg" fw={700} c="grape">
+                          {personalStats.jacksp_totalmax?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                  </Grid>
+                </div>
+
+                {/* ウルティメイト関連 */}
+                <div>
+                  <Title order={3} mb="md">ウルティメイト</Title>
+                  <Grid>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">ウルティメイト獲得</Text>
+                        <Text size="lg" fw={700} c="red">
+                          {personalStats.ult_get?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">ウルティメイトコンボ最大</Text>
+                        <Text size="lg" fw={700} c="red">
+                          {personalStats.ult_combomax?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">ウルティメイト合計最大 v2</Text>
+                        <Text size="lg" fw={700} c="red">
+                          {personalStats.ult_totalmax_v2?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                  </Grid>
+                </div>
+
+                {/* パルボール関連 */}
+                <div>
+                  <Title order={3} mb="md">パルボール</Title>
+                  <Grid>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">パルボール獲得</Text>
+                        <Text size="lg" fw={700} c="violet">
+                          {personalStats.palball_get?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">パルロット T0</Text>
+                        <Text size="lg" fw={700}>
+                          {personalStats.pallot_lot_t0?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">パルロット T1</Text>
+                        <Text size="lg" fw={700}>
+                          {personalStats.pallot_lot_t1?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">パルロット T2</Text>
+                        <Text size="lg" fw={700}>
+                          {personalStats.pallot_lot_t2?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">パルロット T3</Text>
+                        <Text size="lg" fw={700}>
+                          {personalStats.pallot_lot_t3?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                  </Grid>
+                </div>
+
+                {/* その他の統計 */}
+                <div>
+                  <Title order={3} mb="md">その他</Title>
+                  <Grid>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">最高CPM</Text>
+                        <Text size="lg" fw={700} c="cyan">
+                          {personalStats.cpm_max?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">SP使用回数</Text>
+                        <Text size="lg" fw={700}>
+                          {personalStats.sp_use?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">シルベ購入</Text>
+                        <Text size="lg" fw={700}>
+                          {personalStats.buy_shbi?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">虹メダルシルベ獲得</Text>
+                        <Text size="lg" fw={700}>
+                          {personalStats.rmshbi_get?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">購入合計</Text>
+                        <Text size="lg" fw={700}>
+                          {personalStats.buy_total?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">バトルパス歩数</Text>
+                        <Text size="lg" fw={700}>
+                          {personalStats.bstp_step?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">バトルパス報酬</Text>
+                        <Text size="lg" fw={700}>
+                          {personalStats.bstp_rwd?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+                      <Card shadow="sm" padding="md" radius="md" withBorder>
+                        <Text size="sm" c="dimmed">タスクカウント</Text>
+                        <Text size="lg" fw={700}>
+                          {personalStats.task_cnt?.toLocaleString() || 'N/A'}
+                        </Text>
+                      </Card>
+                    </Grid.Col>
+                  </Grid>
+                </div>
+              </Stack>
             )}
           </Paper>
         </Tabs.Panel>
@@ -318,7 +670,7 @@ function HomePage() {
                   </Grid.Col>
                   
                   <Grid.Col span={{ base: 12, md: 6 }}>
-                    {renderRankingTable(globalStats.cpm_max, 'CPMランキング', 'cpm_max')}
+                    {renderRankingTable(globalStats.cpm_max, 'CPM最大ランキング', 'cpm_max')}
                   </Grid.Col>
                   
                   <Grid.Col span={{ base: 12, md: 6 }}>
@@ -326,7 +678,27 @@ function HomePage() {
                   </Grid.Col>
                   
                   <Grid.Col span={{ base: 12, md: 6 }}>
+                    {renderRankingTable(globalStats.golden_palball_get, 'ゴールデンパルボール獲得ランキング', 'golden_palball_get')}
+                  </Grid.Col>
+                  
+                  <Grid.Col span={{ base: 12, md: 6 }}>
+                    {renderRankingTable(globalStats.max_chain_rainbow, 'レインボーチェーン最大ランキング', 'max_chain_rainbow')}
+                  </Grid.Col>
+                  
+                  <Grid.Col span={{ base: 12, md: 6 }}>
+                    {renderRankingTable(globalStats.jack_totalmax_v2, 'ジャックポット合計最大ランキング', 'jack_totalmax_v2')}
+                  </Grid.Col>
+                  
+                  <Grid.Col span={{ base: 12, md: 6 }}>
                     {renderRankingTable(globalStats.ult_combomax, 'ウルティメイトコンボ最大ランキング', 'ult_combomax')}
+                  </Grid.Col>
+                  
+                  <Grid.Col span={{ base: 12, md: 6 }}>
+                    {renderRankingTable(globalStats.ult_totalmax_v2, 'ウルティメイト合計最大ランキング', 'ult_totalmax_v2')}
+                  </Grid.Col>
+                  
+                  <Grid.Col span={{ base: 12, md: 6 }}>
+                    {renderRankingTable(globalStats.sp_use, 'スペシャル使用回数ランキング', 'sp_use')}
                   </Grid.Col>
                 </Grid>
               </Stack>

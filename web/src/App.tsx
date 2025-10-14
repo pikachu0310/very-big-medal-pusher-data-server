@@ -6,7 +6,7 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 function App() {
   return (
     <Box style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Container size="lg" style={{ flex: 1, padding: '2rem 1rem' }}>
+      <Container size="lg" style={{ flex: 1, padding: '1rem 1rem 2rem 1rem' }}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
@@ -28,7 +28,7 @@ function App() {
             プライバシーポリシー
           </Anchor>
           {' | '}
-          © 2025 Very Big Medal Pusher
+          © 2025 Massive Medal Pusher
         </Text>
       </Box>
     </Box>
