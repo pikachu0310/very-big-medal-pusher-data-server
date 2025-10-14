@@ -1,27 +1,37 @@
-import { AppShell } from '@mantine/core';
-import { Routes, Route } from 'react-router';
-import { Navigation } from './components/Navigation';
+import { Container, Box, Text, Anchor } from '@mantine/core';
+import { Link, Route, Routes } from 'react-router';
 import HomePage from './pages/HomePage';
-import StatsPage from './pages/StatsPage';
-import SettingsPage from './pages/SettingsPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 
 function App() {
   return (
-    <AppShell
-      navbar={{ width: 300, breakpoint: 'sm' }}
-      padding="md"
-    >
-      <AppShell.Navbar>
-        <Navigation />
-      </AppShell.Navbar>
-      <AppShell.Main>
+    <Box style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Container size="lg" style={{ flex: 1, padding: '1rem 1rem 2rem 1rem' }}>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/stats" element={<StatsPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
         </Routes>
-      </AppShell.Main>
-    </AppShell>
+      </Container>
+      
+      {/* フッター */}
+      <Box
+        component="footer"
+        style={{
+          padding: '1rem',
+          textAlign: 'center',
+          borderTop: '1px solid #e9ecef',
+          marginTop: 'auto'
+        }}
+      >
+        <Text size="xs" c="dimmed">
+          <Anchor component={Link} to="/privacy" size="xs" c="dimmed" underline="hover">
+            プライバシーポリシー
+          </Anchor>
+          {' | '}
+          © 2025 Massive Medal Pusher
+        </Text>
+      </Box>
+    </Box>
   );
 }
 

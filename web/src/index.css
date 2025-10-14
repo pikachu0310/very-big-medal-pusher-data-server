@@ -1,5 +1,62 @@
 @import '@mantine/core/styles.css';
 @import '@mantine/notifications/styles.css';
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400..700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* traQing風のシンプルなデザイン */
+body {
+  background: #fafafa;
+  min-height: 100vh;
+  font-family: "Noto Sans JP", sans-serif;
+  color: #49535b;
+}
+
+/* カードのスタイル */
+.mantine-Paper-root {
+  background: white;
+  border: 1px solid #e5e7eb;
+}
+
+/* ボタンのスタイル */
+.mantine-Button-root {
+  background: #3b82f6;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.mantine-Button-root:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+/* 入力フィールドのスタイル */
+.mantine-TextInput-input {
+  border: 1px solid #d1d5db;
+  transition: all 0.2s ease;
+}
+
+.mantine-TextInput-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* カードのホバーエフェクト */
+.mantine-Card-root {
+  transition: all 0.2s ease;
+}
+
+.mantine-Card-root:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ロゴのスタイル */
+.logo-container {
+  transition: all 0.2s ease;
+}
+
+.logo-container:hover {
+  transform: scale(1.02);
+}

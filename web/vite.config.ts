@@ -6,8 +6,11 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), tsconfigPaths(), tailwindcss()],
+  publicDir: 'public',
   server: {
     port: 3000,
+    host: '0.0.0.0',
+    allowedHosts: true,
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
@@ -26,6 +29,11 @@ export default defineConfig({
       allowedHeaders: 'Content-Type, Cookie',
       credentials: true,
     },
+  },
+  preview: {
+    port: 4173,
+    host: '0.0.0.0',
+    allowedHosts: true,
   },
   resolve: {
     alias: {
