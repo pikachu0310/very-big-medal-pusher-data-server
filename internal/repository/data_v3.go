@@ -148,8 +148,8 @@ INSERT INTO v2_save_data (
 	_, err = tx.ExecContext(ctx, `
 INSERT INTO v3_user_latest_save_data (
     user_id, version, credit_all, playtime, save_id, achievements_count, jacksp_startmax, golden_palball_get,
-    cpm_max, max_chain_rainbow, jack_totalmax_v2, ult_combomax, ult_totalmax_v2, sp_use
-) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+    cpm_max, max_chain_rainbow, jack_totalmax_v2, ult_combomax, ult_totalmax_v2, sp_use, hide_record
+) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 ON DUPLICATE KEY UPDATE
     version = VALUES(version),
     credit_all = VALUES(credit_all),
@@ -164,9 +164,10 @@ ON DUPLICATE KEY UPDATE
     ult_combomax = VALUES(ult_combomax),
     ult_totalmax_v2 = VALUES(ult_totalmax_v2),
     sp_use = VALUES(sp_use),
+    hide_record = VALUES(hide_record),
     updated_at = CURRENT_TIMESTAMP`,
 		sd.UserId, sd.Version, sd.CreditAll, sd.Playtime, saveID, achievementsCount, sd.JackpotSuperStartMax, goldenPalballGet,
-		sd.CpMMax, maxChainRainbow, sd.JackTotalMaxV2, sd.UltComboMax, sd.UltimateTotalMaxV2, sd.SpUse,
+		sd.CpMMax, maxChainRainbow, sd.JackTotalMaxV2, sd.UltComboMax, sd.UltimateTotalMaxV2, sd.SpUse, sd.HideRecord,
 	)
 	if err != nil {
 		return err
@@ -209,6 +210,7 @@ SELECT
   achievements_count AS value,
   created_at
 FROM v3_user_latest_save_data
+WHERE hide_record = 0
 ORDER BY achievements_count DESC, created_at ASC
 LIMIT 1000
 `); err != nil {
@@ -223,6 +225,7 @@ SELECT
   jacksp_startmax AS value,
   created_at
 FROM v3_user_latest_save_data
+WHERE hide_record = 0
 ORDER BY jacksp_startmax DESC, created_at ASC
 LIMIT 1000
 `); err != nil {
@@ -237,6 +240,7 @@ SELECT
   golden_palball_get AS value,
   created_at
 FROM v3_user_latest_save_data
+WHERE hide_record = 0
 ORDER BY golden_palball_get DESC, created_at ASC
 LIMIT 1000
 `); err != nil {
@@ -251,6 +255,7 @@ SELECT
   CAST(cpm_max AS SIGNED) AS value,
   created_at
 FROM v3_user_latest_save_data
+WHERE hide_record = 0
 ORDER BY cpm_max DESC, created_at ASC
 LIMIT 1000
 `); err != nil {
@@ -265,6 +270,7 @@ SELECT
   max_chain_rainbow AS value,
   created_at
 FROM v3_user_latest_save_data
+WHERE hide_record = 0
 ORDER BY max_chain_rainbow DESC, created_at ASC
 LIMIT 1000
 `); err != nil {
@@ -279,6 +285,7 @@ SELECT
   jack_totalmax_v2 AS value,
   created_at
 FROM v3_user_latest_save_data
+WHERE hide_record = 0
 ORDER BY jack_totalmax_v2 DESC, created_at ASC
 LIMIT 1000
 `); err != nil {
@@ -293,6 +300,7 @@ SELECT
   ult_combomax AS value,
   created_at
 FROM v3_user_latest_save_data
+WHERE hide_record = 0
 ORDER BY ult_combomax DESC, created_at ASC
 LIMIT 1000
 `); err != nil {
@@ -307,6 +315,7 @@ SELECT
   ult_totalmax_v2 AS value,
   created_at
 FROM v3_user_latest_save_data
+WHERE hide_record = 0
 ORDER BY ult_totalmax_v2 DESC, created_at ASC
 LIMIT 1000
 `); err != nil {
@@ -321,6 +330,7 @@ SELECT
   sp_use AS value,
   created_at
 FROM v3_user_latest_save_data
+WHERE hide_record = 0
 ORDER BY sp_use DESC, created_at ASC
 LIMIT 1000
 `); err != nil {
@@ -335,6 +345,7 @@ LIMIT 1000
 SELECT
   COALESCE(SUM(credit_all), 0) AS total_medals
 FROM v3_user_latest_save_data
+WHERE hide_record = 0
 `
 		if err := r.db.GetContext(ctx, &totalMedals, q); err != nil {
 			return nil, err
