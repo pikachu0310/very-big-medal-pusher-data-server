@@ -177,7 +177,7 @@ WHERE save_id = ?
 	rows.Close()
 
 	// 3) ball_get
-	sd.DCBallGet = make(map[string]int)
+	sd.DCBallGet = make(map[string]int64)
 	rows, err = r.db.QueryxContext(ctx, `
 SELECT ball_id, count 
 FROM v2_save_data_ball_get 
@@ -188,7 +188,7 @@ WHERE save_id = ?
 	}
 	for rows.Next() {
 		var id string
-		var cnt int
+		var cnt int64
 		if err := rows.Scan(&id, &cnt); err != nil {
 			return nil, err
 		}

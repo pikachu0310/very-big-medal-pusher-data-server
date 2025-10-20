@@ -745,7 +745,7 @@ components:
           x-oapi-codegen-extra-tags: { table: 'save_data_v2_medal_get' }
         dc_ball_get:
           type: object
-          additionalProperties: { type: integer }
+          additionalProperties: { type: integer, format: int64 }
           x-oapi-codegen-extra-tags: { table: 'save_data_v2_ball_get' }
         dc_ball_chain:
           type: object

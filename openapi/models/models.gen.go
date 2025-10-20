@@ -73,65 +73,65 @@ type RankingEntry struct {
 
 // SaveDataV2 defines model for SaveDataV2.
 type SaveDataV2 struct {
-	BallChain         *int            `db:"ball_chain" json:"ball_chain,omitempty"`
-	BallGet           *int64          `db:"ball_get" json:"ball_get,omitempty"`
-	BstpRwd           *int            `db:"bstp_rwd" json:"bstp_rwd,omitempty"`
-	BstpStep          *int            `db:"bstp_step" json:"bstp_step,omitempty"`
-	BuyShbi           *int            `db:"buy_shbi" json:"buy_shbi,omitempty"`
-	BuyTotal          *int            `db:"buy_total" json:"buy_total,omitempty"`
-	CpmMax            *float64        `db:"cpm_max" json:"cpm_max,omitempty"`
-	Credit            *int64          `db:"credit" json:"credit,omitempty"`
-	CreditAll         *int64          `db:"credit_all" json:"credit_all,omitempty"`
-	DcBallChain       *map[string]int `json:"dc_ball_chain,omitempty" table:"save_data_v2_ball_chain"`
-	DcBallGet         *map[string]int `json:"dc_ball_get,omitempty" table:"save_data_v2_ball_get"`
-	DcMedalGet        *map[string]int `json:"dc_medal_get,omitempty" table:"save_data_v2_medal_get"`
-	DcPalballGet      *map[string]int `json:"dc_palball_get,omitempty" table:"save_data_v2_palball_get"`
-	DcPalballJp       *map[string]int `json:"dc_palball_jp,omitempty" table:"save_data_v2_palball_jp"`
-	Firstboot         *string         `json:"firstboot,omitempty"`
-	HideRecord        *int            `db:"hide_record" json:"hide_record,omitempty"`
-	JackGet           *int            `db:"jack_get" json:"jack_get,omitempty"`
-	JackStartmax      *int64          `db:"jack_startmax" json:"jack_startmax,omitempty"`
-	JackTotalmax      *int            `db:"jack_totalmax" json:"jack_totalmax,omitempty"`
-	JackTotalmaxV2    *int64          `db:"jack_totalmax_v2" json:"jack_totalmax_v2,omitempty"`
-	JackspGetAll      *float64        `db:"jacksp_get_all" json:"jacksp_get_all,omitempty"`
-	JackspGetT0       *float64        `db:"jacksp_get_t0" json:"jacksp_get_t0,omitempty"`
-	JackspGetT1       *float64        `db:"jacksp_get_t1" json:"jacksp_get_t1,omitempty"`
-	JackspGetT2       *float64        `db:"jacksp_get_t2" json:"jacksp_get_t2,omitempty"`
-	JackspGetT3       *float64        `db:"jacksp_get_t3" json:"jacksp_get_t3,omitempty"`
-	JackspStartmax    *float64        `db:"jacksp_startmax" json:"jacksp_startmax,omitempty"`
-	JackspTotalmax    *float64        `db:"jacksp_totalmax" json:"jacksp_totalmax,omitempty"`
-	LAchieve          *[]string       `json:"l_achieve,omitempty" table:"save_data_v2_achievements"`
-	LPerks            *[]int          `json:"l_perks,omitempty" table:"save_data_v2_perks"`
-	LPerksCredit      *[]int64        `json:"l_perks_credit,omitempty" table:"save_data_v2_perks_credit"`
-	LTotems           *[]int          `json:"l_totems,omitempty" table:"save_data_v2_totems"`
-	LTotemsCredit     *[]int64        `json:"l_totems_credit,omitempty" table:"save_data_v2_totems_credit"`
-	LTotemsSet        *[]int          `json:"l_totems_set,omitempty" table:"save_data_v2_totems_placement"`
-	Lastsave          *string         `json:"lastsave,omitempty"`
-	Legacy            *int            `db:"legacy" json:"legacy,omitempty"`
-	MedalGet          *int64          `db:"medal_get" json:"medal_get,omitempty"`
-	MedalIn           *int            `db:"medal_in" json:"medal_in,omitempty"`
-	PalballGet        *float64        `db:"palball_get" json:"palball_get,omitempty"`
-	PallotLotT0       *float64        `db:"pallot_lot_t0" json:"pallot_lot_t0,omitempty"`
-	PallotLotT1       *float64        `db:"pallot_lot_t1" json:"pallot_lot_t1,omitempty"`
-	PallotLotT2       *float64        `db:"pallot_lot_t2" json:"pallot_lot_t2,omitempty"`
-	PallotLotT3       *float64        `db:"pallot_lot_t3" json:"pallot_lot_t3,omitempty"`
-	Playtime          *int64          `json:"playtime,omitempty"`
-	RmshbiGet         *int            `db:"rmshbi_get" json:"rmshbi_get,omitempty"`
-	SlotGetfev        *int64          `db:"slot_getfev" json:"slot_getfev,omitempty"`
-	SlotHit           *int64          `db:"slot_hit" json:"slot_hit,omitempty"`
-	SlotStart         *int64          `db:"slot_start" json:"slot_start,omitempty"`
-	SlotStartfev      *int64          `db:"slot_startfev" json:"slot_startfev,omitempty"`
-	SpUse             *int            `db:"sp_use" json:"sp_use,omitempty"`
-	SqrGet            *int            `db:"sqr_get" json:"sqr_get,omitempty"`
-	SqrStep           *int64          `db:"sqr_step" json:"sqr_step,omitempty"`
-	TaskCnt           *float64        `db:"task_cnt" json:"task_cnt,omitempty"`
-	TotemAltars       *int            `db:"totem_altars" json:"totem_altars,omitempty"`
-	TotemAltarsCredit *int64          `db:"totem_altars_credit" json:"totem_altars_credit,omitempty"`
-	UltCombomax       *int            `db:"ult_combomax" json:"ult_combomax,omitempty"`
-	UltGet            *int            `db:"ult_get" json:"ult_get,omitempty"`
-	UltTotalmax       *int            `db:"ult_totalmax" json:"ult_totalmax,omitempty"`
-	UltTotalmaxV2     *int64          `db:"ult_totalmax_v2" json:"ult_totalmax_v2,omitempty"`
-	Version           *int            `db:"version" json:"version,omitempty"`
+	BallChain         *int              `db:"ball_chain" json:"ball_chain,omitempty"`
+	BallGet           *int64            `db:"ball_get" json:"ball_get,omitempty"`
+	BstpRwd           *int              `db:"bstp_rwd" json:"bstp_rwd,omitempty"`
+	BstpStep          *int              `db:"bstp_step" json:"bstp_step,omitempty"`
+	BuyShbi           *int              `db:"buy_shbi" json:"buy_shbi,omitempty"`
+	BuyTotal          *int              `db:"buy_total" json:"buy_total,omitempty"`
+	CpmMax            *float64          `db:"cpm_max" json:"cpm_max,omitempty"`
+	Credit            *int64            `db:"credit" json:"credit,omitempty"`
+	CreditAll         *int64            `db:"credit_all" json:"credit_all,omitempty"`
+	DcBallChain       *map[string]int   `json:"dc_ball_chain,omitempty" table:"save_data_v2_ball_chain"`
+	DcBallGet         *map[string]int64 `json:"dc_ball_get,omitempty" table:"save_data_v2_ball_get"`
+	DcMedalGet        *map[string]int   `json:"dc_medal_get,omitempty" table:"save_data_v2_medal_get"`
+	DcPalballGet      *map[string]int   `json:"dc_palball_get,omitempty" table:"save_data_v2_palball_get"`
+	DcPalballJp       *map[string]int   `json:"dc_palball_jp,omitempty" table:"save_data_v2_palball_jp"`
+	Firstboot         *string           `json:"firstboot,omitempty"`
+	HideRecord        *int              `db:"hide_record" json:"hide_record,omitempty"`
+	JackGet           *int              `db:"jack_get" json:"jack_get,omitempty"`
+	JackStartmax      *int64            `db:"jack_startmax" json:"jack_startmax,omitempty"`
+	JackTotalmax      *int              `db:"jack_totalmax" json:"jack_totalmax,omitempty"`
+	JackTotalmaxV2    *int64            `db:"jack_totalmax_v2" json:"jack_totalmax_v2,omitempty"`
+	JackspGetAll      *float64          `db:"jacksp_get_all" json:"jacksp_get_all,omitempty"`
+	JackspGetT0       *float64          `db:"jacksp_get_t0" json:"jacksp_get_t0,omitempty"`
+	JackspGetT1       *float64          `db:"jacksp_get_t1" json:"jacksp_get_t1,omitempty"`
+	JackspGetT2       *float64          `db:"jacksp_get_t2" json:"jacksp_get_t2,omitempty"`
+	JackspGetT3       *float64          `db:"jacksp_get_t3" json:"jacksp_get_t3,omitempty"`
+	JackspStartmax    *float64          `db:"jacksp_startmax" json:"jacksp_startmax,omitempty"`
+	JackspTotalmax    *float64          `db:"jacksp_totalmax" json:"jacksp_totalmax,omitempty"`
+	LAchieve          *[]string         `json:"l_achieve,omitempty" table:"save_data_v2_achievements"`
+	LPerks            *[]int            `json:"l_perks,omitempty" table:"save_data_v2_perks"`
+	LPerksCredit      *[]int64          `json:"l_perks_credit,omitempty" table:"save_data_v2_perks_credit"`
+	LTotems           *[]int            `json:"l_totems,omitempty" table:"save_data_v2_totems"`
+	LTotemsCredit     *[]int64          `json:"l_totems_credit,omitempty" table:"save_data_v2_totems_credit"`
+	LTotemsSet        *[]int            `json:"l_totems_set,omitempty" table:"save_data_v2_totems_placement"`
+	Lastsave          *string           `json:"lastsave,omitempty"`
+	Legacy            *int              `db:"legacy" json:"legacy,omitempty"`
+	MedalGet          *int64            `db:"medal_get" json:"medal_get,omitempty"`
+	MedalIn           *int              `db:"medal_in" json:"medal_in,omitempty"`
+	PalballGet        *float64          `db:"palball_get" json:"palball_get,omitempty"`
+	PallotLotT0       *float64          `db:"pallot_lot_t0" json:"pallot_lot_t0,omitempty"`
+	PallotLotT1       *float64          `db:"pallot_lot_t1" json:"pallot_lot_t1,omitempty"`
+	PallotLotT2       *float64          `db:"pallot_lot_t2" json:"pallot_lot_t2,omitempty"`
+	PallotLotT3       *float64          `db:"pallot_lot_t3" json:"pallot_lot_t3,omitempty"`
+	Playtime          *int64            `json:"playtime,omitempty"`
+	RmshbiGet         *int              `db:"rmshbi_get" json:"rmshbi_get,omitempty"`
+	SlotGetfev        *int64            `db:"slot_getfev" json:"slot_getfev,omitempty"`
+	SlotHit           *int64            `db:"slot_hit" json:"slot_hit,omitempty"`
+	SlotStart         *int64            `db:"slot_start" json:"slot_start,omitempty"`
+	SlotStartfev      *int64            `db:"slot_startfev" json:"slot_startfev,omitempty"`
+	SpUse             *int              `db:"sp_use" json:"sp_use,omitempty"`
+	SqrGet            *int              `db:"sqr_get" json:"sqr_get,omitempty"`
+	SqrStep           *int64            `db:"sqr_step" json:"sqr_step,omitempty"`
+	TaskCnt           *float64          `db:"task_cnt" json:"task_cnt,omitempty"`
+	TotemAltars       *int              `db:"totem_altars" json:"totem_altars,omitempty"`
+	TotemAltarsCredit *int64            `db:"totem_altars_credit" json:"totem_altars_credit,omitempty"`
+	UltCombomax       *int              `db:"ult_combomax" json:"ult_combomax,omitempty"`
+	UltGet            *int              `db:"ult_get" json:"ult_get,omitempty"`
+	UltTotalmax       *int              `db:"ult_totalmax" json:"ult_totalmax,omitempty"`
+	UltTotalmaxV2     *int64            `db:"ult_totalmax_v2" json:"ult_totalmax_v2,omitempty"`
+	Version           *int              `db:"version" json:"version,omitempty"`
 }
 
 // StatisticsV2 defines model for StatisticsV2.
