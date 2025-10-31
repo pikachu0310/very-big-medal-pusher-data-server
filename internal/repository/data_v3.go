@@ -27,7 +27,7 @@ INSERT INTO v2_save_data (
     slot_hit, slot_getfev, sqr_get, sqr_step,
     jack_get, jack_startmax, jack_totalmax,
     ult_get, ult_combomax, ult_totalmax,
-    rmshbi_get, bstp_step, bstp_rwd, buy_total, sp_use,
+    rmshbi_get, bstp_step, bstp_rwd, buy_total, skill_point, blackbox, blackbox_total, sp_use,
     hide_record, cpm_max, jack_totalmax_v2, ult_totalmax_v2,
     palball_get, pallot_lot_t0, pallot_lot_t1, pallot_lot_t2, pallot_lot_t3,
     jacksp_get_all, jacksp_get_t0, jacksp_get_t1, jacksp_get_t2, jacksp_get_t3,
@@ -40,7 +40,7 @@ INSERT INTO v2_save_data (
 		sd.SlotHit, sd.SlotGetFev, sd.SqrGet, sd.SqrStep,
 		sd.JackGet, sd.JackStartMax, sd.JackTotalMax,
 		sd.UltGet, sd.UltComboMax, sd.UltTotalMax,
-		sd.RmShbiGet, sd.BstpStep, sd.BstpRwd, sd.BuyTotal, sd.SpUse,
+		sd.RmShbiGet, sd.BstpStep, sd.BstpRwd, sd.BuyTotal, sd.SkillPoint, sd.BlackBox, sd.BlackBoxTotal, sd.SpUse,
 		sd.HideRecord, sd.CpMMax, sd.JackTotalMaxV2, sd.UltimateTotalMaxV2,
 		sd.PalettaBallGet, sd.PalettaLotteryAttemptTier0, sd.PalettaLotteryAttemptTier1, sd.PalettaLotteryAttemptTier2, sd.PalettaLotteryAttemptTier3,
 		sd.JackpotSuperGetTotal, sd.JackpotSuperGetTier0, sd.JackpotSuperGetTier1, sd.JackpotSuperGetTier2, sd.JackpotSuperGetTier3,
@@ -148,8 +148,8 @@ INSERT INTO v2_save_data (
 	_, err = tx.ExecContext(ctx, `
 INSERT INTO v3_user_latest_save_data (
     user_id, version, credit_all, playtime, save_id, achievements_count, jacksp_startmax, golden_palball_get,
-    cpm_max, max_chain_rainbow, jack_totalmax_v2, ult_combomax, ult_totalmax_v2, sp_use, hide_record
-) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+    cpm_max, max_chain_rainbow, jack_totalmax_v2, ult_combomax, ult_totalmax_v2, blackbox_total, sp_use, hide_record
+) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 ON DUPLICATE KEY UPDATE
     version = VALUES(version),
     credit_all = VALUES(credit_all),
@@ -163,11 +163,12 @@ ON DUPLICATE KEY UPDATE
     jack_totalmax_v2 = VALUES(jack_totalmax_v2),
     ult_combomax = VALUES(ult_combomax),
     ult_totalmax_v2 = VALUES(ult_totalmax_v2),
+    blackbox_total = VALUES(blackbox_total),
     sp_use = VALUES(sp_use),
     hide_record = VALUES(hide_record),
     updated_at = CURRENT_TIMESTAMP`,
 		sd.UserId, sd.Version, sd.CreditAll, sd.Playtime, saveID, achievementsCount, sd.JackpotSuperStartMax, goldenPalballGet,
-		sd.CpMMax, maxChainRainbow, sd.JackTotalMaxV2, sd.UltComboMax, sd.UltimateTotalMaxV2, sd.SpUse, sd.HideRecord,
+		sd.CpMMax, maxChainRainbow, sd.JackTotalMaxV2, sd.UltComboMax, sd.UltimateTotalMaxV2, sd.BlackBoxTotal, sd.SpUse, sd.HideRecord,
 	)
 	if err != nil {
 		return err
@@ -322,8 +323,23 @@ LIMIT 1000
 		return nil, err
 	}
 
-	// 9) sp_use
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_9 - sp_use\n")
+	// 9) blackbox_total
+	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_9 - blackbox_total\n")
+	if err := addRanking(&stats.BlackboxTotal, `
+SELECT
+  user_id,
+  blackbox_total AS value,
+  created_at
+FROM v3_user_latest_save_data
+WHERE hide_record = 0
+ORDER BY blackbox_total DESC, created_at ASC
+LIMIT 1000
+`); err != nil {
+		return nil, err
+	}
+
+	// 10) sp_use
+	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_10 - sp_use\n")
 	if err := addRanking(&stats.SpUse, `
 SELECT
   user_id,

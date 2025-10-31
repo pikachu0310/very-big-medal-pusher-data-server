@@ -1,11 +1,11 @@
 -- +goose Up
 ALTER TABLE v2_save_data
     /* Save Version 12 - Totem System */
-    ADD COLUMN totem_altars INT NOT NULL DEFAULT 0 AFTER task_cnt,
-    ADD COLUMN totem_altars_credit BIGINT NOT NULL DEFAULT 0 AFTER totem_altars;
+    ADD COLUMN IF NOT EXISTS totem_altars INT NOT NULL DEFAULT 0 AFTER task_cnt,
+    ADD COLUMN IF NOT EXISTS totem_altars_credit BIGINT NOT NULL DEFAULT 0 AFTER totem_altars;
 
 -- トーテムレベルテーブルを作成
-CREATE TABLE v2_save_data_totems
+CREATE TABLE IF NOT EXISTS v2_save_data_totems
 (
     save_id     INT NOT NULL,
     totem_id    INT NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE v2_save_data_totems
   DEFAULT CHARSET = utf8mb4;
 
 -- トーテムごとの消費クレジットテーブルを作成
-CREATE TABLE v2_save_data_totems_credit
+CREATE TABLE IF NOT EXISTS v2_save_data_totems_credit
 (
     save_id     INT    NOT NULL,
     totem_id    INT    NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE v2_save_data_totems_credit
   DEFAULT CHARSET = utf8mb4;
 
 -- セット中のトーテムIDリストテーブルを作成
-CREATE TABLE v2_save_data_totems_placement
+CREATE TABLE IF NOT EXISTS v2_save_data_totems_placement
 (
     save_id       INT NOT NULL,
     placement_idx INT NOT NULL,
@@ -46,6 +46,6 @@ DROP TABLE IF EXISTS v2_save_data_totems_credit;
 DROP TABLE IF EXISTS v2_save_data_totems;
 
 ALTER TABLE v2_save_data
-    DROP COLUMN totem_altars_credit,
-    DROP COLUMN totem_altars;
+    DROP COLUMN IF EXISTS totem_altars_credit,
+    DROP COLUMN IF EXISTS totem_altars;
 

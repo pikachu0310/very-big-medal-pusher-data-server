@@ -184,7 +184,7 @@ CREATE TABLE `v2_save_data_ball_chain` (
 CREATE TABLE `v2_save_data_ball_get` (
   `save_id` int(11) NOT NULL,
   `ball_id` varchar(255) NOT NULL,
-  `count` int(11) NOT NULL,
+  `count` bigint(20) NOT NULL,
   PRIMARY KEY (`save_id`,`ball_id`),
   KEY `idx_save_data_v2_ball_get_save` (`save_id`),
   CONSTRAINT `v2_save_data_ball_get_ibfk_1` FOREIGN KEY (`save_id`) REFERENCES `v2_save_data` (`id`) ON DELETE CASCADE

@@ -42,6 +42,9 @@ type SaveData struct {
 	BstpStep                    int       `db:"bstp_step"`
 	BstpRwd                     int       `db:"bstp_rwd"`
 	BuyTotal                    int       `db:"buy_total"`
+	SkillPoint                  int       `db:"skill_point"`
+	BlackBox                    int       `db:"blackbox"`
+	BlackBoxTotal               int64     `db:"blackbox_total"`
 	SpUse                       int       `db:"sp_use"`
 	HideRecord                  int       `db:"hide_record"`
 	CpMMax                      float64   `db:"cpm_max"`
@@ -116,6 +119,9 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		BstpStep                    *int             `json:"bstp_step"`
 		BstpRwd                     *int             `json:"bstp_rwd"`
 		BuyTotal                    *int             `json:"buy_total"`
+		SkillPoint                  *float64         `json:"sp"`
+		BlackBox                    *float64         `json:"bbox"`
+		BlackBoxTotal               *float64         `json:"bbox_all"`
 		SpUse                       *int             `json:"sp_use"`
 		HideRecord                  *int             `json:"hide_record"`
 		CpMMax                      *float64         `json:"cpm_max"`
@@ -196,6 +202,9 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		BstpStep:                    safeInt(m.BstpStep),
 		BstpRwd:                     safeInt(m.BstpRwd),
 		BuyTotal:                    safeInt(m.BuyTotal),
+		SkillPoint:                  int(safeFloat64(m.SkillPoint)),
+		BlackBox:                    int(safeFloat64(m.BlackBox)),
+		BlackBoxTotal:               int64(safeFloat64(m.BlackBoxTotal)),
 		SpUse:                       safeInt(m.SpUse),
 		HideRecord:                  safeInt(m.HideRecord),
 		CpMMax:                      safeFloat64(m.CpMMax),
@@ -263,6 +272,9 @@ func (sd *SaveData) ToModel() *models.SaveDataV2 {
 		bstpStep          = sd.BstpStep
 		bstpRwd           = sd.BstpRwd
 		buyTotal          = sd.BuyTotal
+		sp                = float64(sd.SkillPoint)
+		bbox              = float64(sd.BlackBox)
+		bboxAll           = float64(sd.BlackBoxTotal)
 		spUse             = sd.SpUse
 		hideRecord        = sd.HideRecord
 		cpmMax            = sd.CpMMax
@@ -314,6 +326,9 @@ func (sd *SaveData) ToModel() *models.SaveDataV2 {
 		BstpStep:          &bstpStep,
 		BstpRwd:           &bstpRwd,
 		BuyTotal:          &buyTotal,
+		Sp:                &sp,
+		Bbox:              &bbox,
+		BboxAll:           &bboxAll,
 		SpUse:             &spUse,
 		HideRecord:        &hideRecord,
 		CpmMax:            &cpmMax,

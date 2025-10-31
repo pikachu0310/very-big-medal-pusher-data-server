@@ -75,6 +75,8 @@ type RankingEntry struct {
 type SaveDataV2 struct {
 	BallChain         *int              `db:"ball_chain" json:"ball_chain,omitempty"`
 	BallGet           *int64            `db:"ball_get" json:"ball_get,omitempty"`
+	Bbox              *float64          `db:"blackbox" json:"bbox,omitempty"`
+	BboxAll           *float64          `db:"blackbox_total" json:"bbox_all,omitempty"`
 	BstpRwd           *int              `db:"bstp_rwd" json:"bstp_rwd,omitempty"`
 	BstpStep          *int              `db:"bstp_step" json:"bstp_step,omitempty"`
 	BuyShbi           *int              `db:"buy_shbi" json:"buy_shbi,omitempty"`
@@ -121,6 +123,7 @@ type SaveDataV2 struct {
 	SlotHit           *int64            `db:"slot_hit" json:"slot_hit,omitempty"`
 	SlotStart         *int64            `db:"slot_start" json:"slot_start,omitempty"`
 	SlotStartfev      *int64            `db:"slot_startfev" json:"slot_startfev,omitempty"`
+	Sp                *float64          `db:"skill_point" json:"sp,omitempty"`
 	SpUse             *int              `db:"sp_use" json:"sp_use,omitempty"`
 	SqrGet            *int              `db:"sqr_get" json:"sqr_get,omitempty"`
 	SqrStep           *int64            `db:"sqr_step" json:"sqr_step,omitempty"`
@@ -164,6 +167,7 @@ type StatisticsV3 struct {
 // StatisticsV4 defines model for StatisticsV4.
 type StatisticsV4 struct {
 	AchievementsCount *[]RankingEntry `json:"achievements_count,omitempty"`
+	BlackboxTotal     *[]RankingEntry `json:"blackbox_total,omitempty"`
 	CpmMax            *[]RankingEntry `json:"cpm_max,omitempty"`
 	GoldenPalballGet  *[]RankingEntry `json:"golden_palball_get,omitempty"`
 	JackTotalmaxV2    *[]RankingEntry `json:"jack_totalmax_v2,omitempty"`

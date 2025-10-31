@@ -623,6 +623,18 @@ components:
         buy_total:
           type: integer
           x-oapi-codegen-extra-tags: { db: 'buy_total' }
+        sp:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'skill_point' }
+        bbox:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'blackbox' }
+        bbox_all:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'blackbox_total' }
         sp_use:
           type: integer
           x-oapi-codegen-extra-tags: { db: 'sp_use' }
@@ -882,6 +894,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RankingEntry'
+        blackbox_total:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankingEntry'
         sp_use:
           type: array
           items:
@@ -889,4 +905,3 @@ components:
         total_medals:
           type: integer
           description: 全ユーザーのメダル合計
-

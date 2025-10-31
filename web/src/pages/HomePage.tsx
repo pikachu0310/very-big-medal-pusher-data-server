@@ -86,6 +86,7 @@ interface GlobalStats {
   jack_totalmax_v2: RankingEntry[];
   ult_combomax: RankingEntry[];
   ult_totalmax_v2: RankingEntry[];
+  blackbox_total: RankingEntry[];
   sp_use: RankingEntry[];
   total_medals: number;
 }
@@ -158,6 +159,8 @@ function HomePage() {
   const formatRankingValue = (value: number, type: string) => {
     switch (type) {
       case 'achievements_count':
+        return `${value}個`;
+      case 'blackbox_total':
         return `${value}個`;
       case 'cpm_max':
         return value.toLocaleString();
@@ -692,9 +695,13 @@ function HomePage() {
                   <Grid.Col span={{ base: 12, md: 6 }}>
                     {renderRankingTable(globalStats.ult_combomax, 'ウルティメイトコンボ最大ランキング', 'ult_combomax')}
                   </Grid.Col>
-                  
+                
                   <Grid.Col span={{ base: 12, md: 6 }}>
                     {renderRankingTable(globalStats.ult_totalmax_v2, 'ウルティメイト合計最大ランキング', 'ult_totalmax_v2')}
+                  </Grid.Col>
+                  
+                  <Grid.Col span={{ base: 12, md: 6 }}>
+                    {renderRankingTable(globalStats.blackbox_total, 'ブラックボックス総獲得ランキング', 'blackbox_total')}
                   </Grid.Col>
                   
                   <Grid.Col span={{ base: 12, md: 6 }}>
