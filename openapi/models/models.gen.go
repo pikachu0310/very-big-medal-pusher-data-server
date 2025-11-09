@@ -33,6 +33,26 @@ type AchievementRates struct {
 	TotalUsers *int `json:"total_users,omitempty"`
 }
 
+// CreditAllDistributionBucket defines model for CreditAllDistributionBucket.
+type CreditAllDistributionBucket struct {
+	// RangeMax 範囲の最大値 (含む)
+	RangeMax int64 `json:"rangeMax"`
+
+	// RangeMin 範囲の最小値 (含む)
+	RangeMin int64 `json:"rangeMin"`
+
+	// Users 範囲内のユーザー数
+	Users int64 `json:"users"`
+}
+
+// CreditAllDistributionResponse defines model for CreditAllDistributionResponse.
+type CreditAllDistributionResponse struct {
+	Distribution []CreditAllDistributionBucket `json:"distribution"`
+
+	// Users 集計対象のユーザー数 (hide_record = 0)
+	Users int64 `json:"users"`
+}
+
 // GameData defines model for GameData.
 type GameData struct {
 	RMedal           *int       `db:"R_medal" json:"R_medal,omitempty"`

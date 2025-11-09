@@ -449,6 +449,21 @@ paths:
                 $ref: '#/components/schemas/AchievementRates'
         '500': { description: サーバー内部エラー }
 
+  /credit-all-distribution:
+    get:
+      tags: [ v4 ]
+      summary: credit_all の桁数分布を取得
+      description: >
+        v3_user_latest_save_data の最新セーブデータから `credit_all` の桁数ごとの範囲でユーザー数を集計します。
+      responses:
+        '200':
+          description: credit_all の桁数分布
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditAllDistributionResponse'
+        '500': { description: サーバー内部エラー }
+
 components:
   schemas:
     # v1 schema
@@ -865,6 +880,36 @@ components:
                 format: float
                 description: 取得率（0.0-1.0）
           description: 実績IDごとの取得率データ
+
+    CreditAllDistributionResponse:
+      type: object
+      required: [ users, distribution ]
+      properties:
+        users:
+          type: integer
+          format: int64
+          description: 集計対象のユーザー数 (hide_record = 0)
+        distribution:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreditAllDistributionBucket'
+
+    CreditAllDistributionBucket:
+      type: object
+      required: [ rangeMin, rangeMax, users ]
+      properties:
+        rangeMin:
+          type: integer
+          format: int64
+          description: 範囲の最小値 (含む)
+        rangeMax:
+          type: integer
+          format: int64
+          description: 範囲の最大値 (含む)
+        users:
+          type: integer
+          format: int64
+          description: 範囲内のユーザー数
 
     # v4 schema
     StatisticsV4:
