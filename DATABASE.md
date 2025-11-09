@@ -1,9 +1,7 @@
 # 現状のDB定義と接続方法
-## データベース定義の調査結果
 
-### 接続方法
+## 接続方法(Docker Compose経由での接続)
 
-#### Docker Compose経由での接続
 ```bash
 # コンテナに直接接続
 docker exec myapp_db mariadb -u root -ppass
@@ -15,23 +13,14 @@ docker exec myapp_db mariadb -u root -ppass app
 docker exec myapp_db mariadb -u root -ppass -e "SHOW DATABASES;"
 ```
 
-#### 外部からの接続
-```bash
-# ホストから接続（ポート3306が公開されている場合）
-mariadb -h localhost -P 3306 -u root -ppass
-
-# 特定のデータベースに接続
-mariadb -h localhost -P 3306 -u root -ppass app
-```
-
-#### Adminer（Web管理ツール）
+## Adminer（Web管理ツール）
 - **URL**: http://localhost:8081
 - **サーバー**: `db`
 - **ユーザー名**: `root`
 - **パスワード**: `pass`
 - **データベース**: `app`
 
-### Docker Compose設定
+## Docker Compose設定
 - **コンテナ名**: `myapp_db`
 - **イメージ**: `mariadb:latest`
 - **バージョン**: `11.7.2-MariaDB-ubu2404`
@@ -41,17 +30,26 @@ mariadb -h localhost -P 3306 -u root -ppass app
 - **文字セット**: `utf8mb4`
 - **照合順序**: `utf8mb4_unicode_ci`
 
-### 存在するデータベース
+## 存在するデータベース
 1. **app** (メインアプリケーションデータベース)
 2. **information_schema** (システム情報)
 3. **mysql** (システムデータベース)
 4. **performance_schema** (パフォーマンス情報)
 5. **sys** (システムビュー)
 
-### appデータベースのテーブル定義
+## appデータベースのテーブル定義
 
-#### 1. `v1_game_data` テーブル (v1 API用・非推奨)
-```sql
+-- goose_db_version
+CREATE TABLE `goose_db_version` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `version_id` bigint(20) NOT NULL,
+  `is_applied` tinyint(1) NOT NULL,
+  `tstamp` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+
+-- v1_game_data
 CREATE TABLE `v1_game_data` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` varchar(255) NOT NULL,
@@ -71,7 +69,7 @@ CREATE TABLE `v1_game_data` (
   `R_medal` int(11) NOT NULL,
   `total_play_time` int(11) NOT NULL,
   `fever` int(11) NOT NULL DEFAULT 0,
-  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `max_chain_item` int(11) NOT NULL DEFAULT 0,
   `max_chain_orange` int(11) NOT NULL DEFAULT 0,
   `max_chain_rainbow` int(11) NOT NULL DEFAULT 0,
@@ -83,11 +81,9 @@ CREATE TABLE `v1_game_data` (
   PRIMARY KEY (`id`),
   KEY `idx_game_data_user_created_at` (`user_id`,`created_at`),
   KEY `idx_game_data_user_total_play_time` (`user_id`,`total_play_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci
-```
+) ENGINE=InnoDB AUTO_INCREMENT=44001 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
-#### 2. `v2_save_data` テーブル (メインセーブデータ)
-```sql
+-- v2_save_data
 CREATE TABLE `v2_save_data` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` varchar(255) NOT NULL,
@@ -115,6 +111,9 @@ CREATE TABLE `v2_save_data` (
   `bstp_step` int(11) NOT NULL DEFAULT 0,
   `bstp_rwd` int(11) NOT NULL DEFAULT 0,
   `buy_total` int(11) NOT NULL DEFAULT 0,
+  `skill_point` int(11) NOT NULL DEFAULT 0,
+  `blackbox` int(11) NOT NULL DEFAULT 0,
+  `blackbox_total` bigint(20) NOT NULL DEFAULT 0,
   `sp_use` int(11) NOT NULL DEFAULT 0,
   `hide_record` int(11) NOT NULL DEFAULT 0,
   `cpm_max` double NOT NULL DEFAULT 0,
@@ -124,8 +123,8 @@ CREATE TABLE `v2_save_data` (
   `pallot_lot_t2` int(11) NOT NULL DEFAULT 0,
   `pallot_lot_t3` int(11) NOT NULL DEFAULT 0,
   `task_cnt` int(11) NOT NULL DEFAULT 0,
-  `totem_altars` int(11) NOT NULL DEFAULT 0,              -- Save Version 12
-  `totem_altars_credit` bigint(20) NOT NULL DEFAULT 0,     -- Save Version 12
+  `totem_altars` int(11) NOT NULL DEFAULT 0,
+  `totem_altars_credit` bigint(20) NOT NULL DEFAULT 0,
   `buy_shbi` int(11) NOT NULL DEFAULT 0,
   `firstboot` bigint(20) NOT NULL,
   `lastsave` bigint(20) NOT NULL,
@@ -150,11 +149,9 @@ CREATE TABLE `v2_save_data` (
   KEY `idx_save_data_v2_user` (`user_id`),
   KEY `idx_user_jt_created` (`user_id`,`jack_totalmax`,`created_at`),
   KEY `idx_user_id_id` (`user_id`,`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci
-```
+) ENGINE=InnoDB AUTO_INCREMENT=122532 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
-#### 3. `v2_save_data_achievements` テーブル (実績データ)
-```sql
+-- v2_save_data_achievements
 CREATE TABLE `v2_save_data_achievements` (
   `save_id` int(11) NOT NULL,
   `achievement_id` varchar(255) NOT NULL,
@@ -163,24 +160,21 @@ CREATE TABLE `v2_save_data_achievements` (
   KEY `idx_save_data_v2_achievements_achievement_id` (`achievement_id`),
   KEY `idx_save_data_v2_achievements_user_achievement` (`save_id`,`achievement_id`),
   CONSTRAINT `v2_save_data_achievements_ibfk_1` FOREIGN KEY (`save_id`) REFERENCES `v2_save_data` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci
-```
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
-#### 4. `v2_save_data_ball_chain` テーブル (ボールチェインデータ)
-```sql
+-- v2_save_data_ball_chain
 CREATE TABLE `v2_save_data_ball_chain` (
   `save_id` int(11) NOT NULL,
   `ball_id` varchar(255) NOT NULL,
   `chain_count` int(11) NOT NULL,
   PRIMARY KEY (`save_id`,`ball_id`),
   KEY `idx_save_data_v2_ball_chain_save` (`save_id`),
+  KEY `idx_bc_ballid_chaincnt_saveid` (`ball_id`,`chain_count`,`save_id`),
   KEY `idx_ball_chain_ballid_saveid_count` (`ball_id`,`save_id`,`chain_count`),
   CONSTRAINT `v2_save_data_ball_chain_ibfk_1` FOREIGN KEY (`save_id`) REFERENCES `v2_save_data` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci
-```
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
-#### 5. `v2_save_data_ball_get` テーブル (ボール取得データ)
-```sql
+-- v2_save_data_ball_get
 CREATE TABLE `v2_save_data_ball_get` (
   `save_id` int(11) NOT NULL,
   `ball_id` varchar(255) NOT NULL,
@@ -188,11 +182,9 @@ CREATE TABLE `v2_save_data_ball_get` (
   PRIMARY KEY (`save_id`,`ball_id`),
   KEY `idx_save_data_v2_ball_get_save` (`save_id`),
   CONSTRAINT `v2_save_data_ball_get_ibfk_1` FOREIGN KEY (`save_id`) REFERENCES `v2_save_data` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci
-```
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
-#### 6. `v2_save_data_medal_get` テーブル (メダル取得データ)
-```sql
+-- v2_save_data_medal_get
 CREATE TABLE `v2_save_data_medal_get` (
   `save_id` int(11) NOT NULL,
   `medal_id` varchar(255) NOT NULL,
@@ -200,11 +192,9 @@ CREATE TABLE `v2_save_data_medal_get` (
   PRIMARY KEY (`save_id`,`medal_id`),
   KEY `idx_save_data_v2_medal_get_save` (`save_id`),
   CONSTRAINT `v2_save_data_medal_get_ibfk_1` FOREIGN KEY (`save_id`) REFERENCES `v2_save_data` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci
-```
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
-#### 7. `v2_save_data_palball_get` テーブル (パレッタボール取得データ)
-```sql
+-- v2_save_data_palball_get
 CREATE TABLE `v2_save_data_palball_get` (
   `save_id` int(11) NOT NULL,
   `ball_id` varchar(255) NOT NULL,
@@ -212,11 +202,9 @@ CREATE TABLE `v2_save_data_palball_get` (
   PRIMARY KEY (`save_id`,`ball_id`),
   KEY `idx_save_data_v2_palball_get_save` (`save_id`),
   CONSTRAINT `v2_save_data_palball_get_ibfk_1` FOREIGN KEY (`save_id`) REFERENCES `v2_save_data` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci
-```
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
-#### 8. `v2_save_data_palball_jp` テーブル (パレッタボールジャックポットデータ)
-```sql
+-- v2_save_data_palball_jp
 CREATE TABLE `v2_save_data_palball_jp` (
   `save_id` int(11) NOT NULL,
   `ball_id` varchar(255) NOT NULL,
@@ -224,11 +212,9 @@ CREATE TABLE `v2_save_data_palball_jp` (
   PRIMARY KEY (`save_id`,`ball_id`),
   KEY `idx_save_data_v2_palball_jp_save` (`save_id`),
   CONSTRAINT `v2_save_data_palball_jp_ibfk_1` FOREIGN KEY (`save_id`) REFERENCES `v2_save_data` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci
-```
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
-#### 9. `v2_save_data_perks` テーブル (パークレベルデータ)
-```sql
+-- v2_save_data_perks
 CREATE TABLE `v2_save_data_perks` (
   `save_id` int(11) NOT NULL,
   `perk_id` int(11) NOT NULL,
@@ -236,11 +222,9 @@ CREATE TABLE `v2_save_data_perks` (
   PRIMARY KEY (`save_id`,`perk_id`),
   KEY `idx_save_data_v2_perks_save` (`save_id`),
   CONSTRAINT `v2_save_data_perks_ibfk_1` FOREIGN KEY (`save_id`) REFERENCES `v2_save_data` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci
-```
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
-#### 10. `v2_save_data_perks_credit` テーブル (パーク消費クレジットデータ)
-```sql
+-- v2_save_data_perks_credit
 CREATE TABLE `v2_save_data_perks_credit` (
   `save_id` int(11) NOT NULL,
   `perk_id` int(11) NOT NULL,
@@ -248,11 +232,9 @@ CREATE TABLE `v2_save_data_perks_credit` (
   PRIMARY KEY (`save_id`,`perk_id`),
   KEY `idx_save_data_v2_perks_credit_save` (`save_id`),
   CONSTRAINT `v2_save_data_perks_credit_ibfk_1` FOREIGN KEY (`save_id`) REFERENCES `v2_save_data` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci
-```
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
-#### 11. `v2_save_data_totems` テーブル (トーテムレベルデータ・Save Version 12)
-```sql
+-- v2_save_data_totems
 CREATE TABLE `v2_save_data_totems` (
   `save_id` int(11) NOT NULL,
   `totem_id` int(11) NOT NULL,
@@ -260,11 +242,9 @@ CREATE TABLE `v2_save_data_totems` (
   PRIMARY KEY (`save_id`,`totem_id`),
   KEY `idx_v2_save_data_totems_save` (`save_id`),
   CONSTRAINT `v2_save_data_totems_ibfk_1` FOREIGN KEY (`save_id`) REFERENCES `v2_save_data` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci
-```
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
-#### 12. `v2_save_data_totems_credit` テーブル (トーテム消費クレジットデータ・Save Version 12)
-```sql
+-- v2_save_data_totems_credit
 CREATE TABLE `v2_save_data_totems_credit` (
   `save_id` int(11) NOT NULL,
   `totem_id` int(11) NOT NULL,
@@ -272,11 +252,9 @@ CREATE TABLE `v2_save_data_totems_credit` (
   PRIMARY KEY (`save_id`,`totem_id`),
   KEY `idx_v2_save_data_totems_credit_save` (`save_id`),
   CONSTRAINT `v2_save_data_totems_credit_ibfk_1` FOREIGN KEY (`save_id`) REFERENCES `v2_save_data` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci
-```
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
-#### 13. `v2_save_data_totems_placement` テーブル (トーテム配置データ・Save Version 12)
-```sql
+-- v2_save_data_totems_placement
 CREATE TABLE `v2_save_data_totems_placement` (
   `save_id` int(11) NOT NULL,
   `placement_idx` int(11) NOT NULL,
@@ -284,11 +262,9 @@ CREATE TABLE `v2_save_data_totems_placement` (
   PRIMARY KEY (`save_id`,`placement_idx`),
   KEY `idx_v2_save_data_totems_placement_save` (`save_id`),
   CONSTRAINT `v2_save_data_totems_placement_ibfk_1` FOREIGN KEY (`save_id`) REFERENCES `v2_save_data` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci
-```
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
-#### 14. `v3_user_latest_save_data` テーブル (v3/v4 API用最新セーブデータキャッシュ)
-```sql
+-- v3_user_latest_save_data
 CREATE TABLE `v3_user_latest_save_data` (
   `user_id` varchar(255) NOT NULL,
   `save_id` int(11) NOT NULL,
@@ -303,7 +279,9 @@ CREATE TABLE `v3_user_latest_save_data` (
   `jack_totalmax_v2` int(11) NOT NULL DEFAULT 0,
   `ult_combomax` int(11) NOT NULL DEFAULT 0,
   `ult_totalmax_v2` int(11) NOT NULL DEFAULT 0,
+  `blackbox_total` bigint(20) NOT NULL DEFAULT 0,
   `sp_use` int(11) NOT NULL DEFAULT 0,
+  `hide_record` int(11) NOT NULL DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`user_id`),
@@ -317,12 +295,22 @@ CREATE TABLE `v3_user_latest_save_data` (
   KEY `idx_v3_user_latest_save_data_ult_combomax` (`ult_combomax` DESC),
   KEY `idx_v3_user_latest_save_data_ult_totalmax_v2` (`ult_totalmax_v2` DESC),
   KEY `idx_v3_user_latest_save_data_sp_use` (`sp_use` DESC),
-  KEY `idx_v3_user_latest_save_data_created_at` (`created_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-```
+  KEY `idx_v3_user_latest_save_data_created_at` (`created_at`),
+  KEY `idx_v3_latest_hide_record` (`hide_record`),
+  KEY `idx_v3_latest_achievements_hide` (`hide_record`,`achievements_count` DESC,`created_at`),
+  KEY `idx_v3_latest_jacksp_hide` (`hide_record`,`jacksp_startmax` DESC,`created_at`),
+  KEY `idx_v3_latest_golden_hide` (`hide_record`,`golden_palball_get` DESC,`created_at`),
+  KEY `idx_v3_latest_cpm_hide` (`hide_record`,`cpm_max` DESC,`created_at`),
+  KEY `idx_v3_latest_chain_hide` (`hide_record`,`max_chain_rainbow` DESC,`created_at`),
+  KEY `idx_v3_latest_jack_hide` (`hide_record`,`jack_totalmax_v2` DESC,`created_at`),
+  KEY `idx_v3_latest_ult_combo_hide` (`hide_record`,`ult_combomax` DESC,`created_at`),
+  KEY `idx_v3_latest_ult_total_hide` (`hide_record`,`ult_totalmax_v2` DESC,`created_at`),
+  KEY `idx_v3_latest_sp_hide` (`hide_record`,`sp_use` DESC,`created_at`),
+  KEY `idx_v3_user_latest_save_data_blackbox_total` (`blackbox_total` DESC),
+  KEY `idx_v3_latest_blackbox_total_hide` (`hide_record`,`blackbox_total` DESC,`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-#### 15. `v3_user_latest_save_data_achievements` テーブル (v3/v4 API用最新実績データキャッシュ)
-```sql
+-- v3_user_latest_save_data_achievements
 CREATE TABLE `v3_user_latest_save_data_achievements` (
   `user_id` varchar(255) NOT NULL,
   `achievement_id` varchar(255) NOT NULL,
@@ -331,22 +319,9 @@ CREATE TABLE `v3_user_latest_save_data_achievements` (
   PRIMARY KEY (`user_id`,`achievement_id`),
   KEY `idx_v3_user_latest_achievements_user_id` (`user_id`),
   KEY `idx_v3_achievements_achievement_user` (`achievement_id`,`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-```
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-#### 16. `goose_db_version` テーブル（マイグレーション管理）
-```sql
-CREATE TABLE `goose_db_version` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `version_id` bigint(20) NOT NULL,
-  `is_applied` tinyint(1) NOT NULL,
-  `tstamp` timestamp NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `id` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci
-```
-
-### テーブル統計情報 (2025-10-14現在)
+## テーブル統計情報 (2025-10-14現在)
 
 | テーブル名 | 行数 | データサイズ | インデックスサイズ | 照合順序 |
 |------------|------|--------------|-------------------|----------|
@@ -367,7 +342,7 @@ CREATE TABLE `goose_db_version` (
 | v3_user_latest_save_data_achievements | 2,505,741 | 139,056 KB | 223,328 KB | utf8mb4_unicode_ci |
 | goose_db_version | 20 | 16 KB | 16 KB | utf8mb4_uca1400_ai_ci |
 
-### 外部キー制約
+## 外部キー制約
 
 | 制約名 | テーブル | カラム | 参照先テーブル | 参照先カラム |
 |--------|----------|--------|----------------|--------------|
@@ -383,13 +358,7 @@ CREATE TABLE `goose_db_version` (
 | v2_save_data_totems_credit_ibfk_1 | v2_save_data_totems_credit | save_id | v2_save_data | id |
 | v2_save_data_totems_placement_ibfk_1 | v2_save_data_totems_placement | save_id | v2_save_data | id |
 
-### マイグレーション履歴
-
-現在適用済みのマイグレーション（goose_db_version テーブルより）：
-- バージョン 0-22: すべて適用済み
-- 最新マイグレーション: バージョン 22（2025-10-14 11:58:22 適用）
-
-### データベースの特徴
+## データベースの特徴
 - **メイン**: `v1_game_data`（v1 API用・非推奨）、`v2_save_data`（v2/v3/v4 API用）
 - **関連**: `v2_save_data_*` は `v2_save_data` に外部キー
 - **キャッシュ**: `v3_user_latest_save_data*` は v3/v4 API用の高速化テーブル
@@ -399,16 +368,9 @@ CREATE TABLE `goose_db_version` (
 - **照合順序**: utf8mb4_unicode_ci / utf8mb4_uca1400_ai_ci
 - **外部キー**: すべて ON DELETE CASCADE 設定
 
-### Save Version 12 の追加要素（2025-10-14）
-- `v2_save_data.totem_altars` - 解放済みの台座の数
-- `v2_save_data.totem_altars_credit` - 台座解放に消費したクレジット
-- `v2_save_data_totems` - トーテムレベルデータ
-- `v2_save_data_totems_credit` - トーテムごとの消費クレジット
-- `v2_save_data_totems_placement` - セット中のトーテムID
+## よく使用するクエリ例
 
-### よく使用するクエリ例
-
-#### データベース情報確認
+### データベース情報確認
 ```sql
 -- 全データベース一覧
 SHOW DATABASES;
@@ -424,7 +386,7 @@ SHOW CREATE TABLE table_name;
 SHOW INDEX FROM table_name;
 ```
 
-#### データ確認
+### データ確認
 ```sql
 -- レコード数確認
 SELECT COUNT(*) FROM table_name;
@@ -439,28 +401,11 @@ SELECT user_id, COUNT(*) as record_count FROM v2_save_data GROUP BY user_id;
 SELECT * FROM v3_user_latest_save_data ORDER BY created_at DESC LIMIT 10;
 ```
 
-#### マイグレーション確認
+### マイグレーション確認
 ```sql
 -- マイグレーション履歴確認
 SELECT * FROM goose_db_version ORDER BY version_id;
 
 -- 最新のマイグレーション確認
 SELECT MAX(version_id) as latest_version FROM goose_db_version;
-```
-
-#### トーテムデータ確認（Save Version 12）
-```sql
--- トーテムレベル確認
-SELECT s.user_id, t.totem_id, t.level
-FROM v2_save_data s
-JOIN v2_save_data_totems t ON s.id = t.save_id
-WHERE s.user_id = 'your_user_id'
-ORDER BY s.created_at DESC LIMIT 1;
-
--- トーテム配置確認
-SELECT s.user_id, tp.placement_idx, tp.totem_id
-FROM v2_save_data s
-JOIN v2_save_data_totems_placement tp ON s.id = tp.save_id
-WHERE s.user_id = 'your_user_id'
-ORDER BY s.created_at DESC, tp.placement_idx;
 ```
