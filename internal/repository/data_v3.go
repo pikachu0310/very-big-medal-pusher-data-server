@@ -29,8 +29,8 @@ INSERT INTO v2_save_data (
     ult_get, ult_combomax, ult_totalmax,
     rmshbi_get, bstp_step, bstp_rwd, buy_total, skill_point, blackbox, blackbox_total, sp_use,
     hide_record, cpm_max, jack_totalmax_v2, ult_totalmax_v2,
-    palball_get, pallot_lot_t0, pallot_lot_t1, pallot_lot_t2, pallot_lot_t3,
-    jacksp_get_all, jacksp_get_t0, jacksp_get_t1, jacksp_get_t2, jacksp_get_t3,
+    palball_get, pallot_lot_t0, pallot_lot_t1, pallot_lot_t2, pallot_lot_t3, pallot_lot_t4,
+    jacksp_get_all, jacksp_get_t0, jacksp_get_t1, jacksp_get_t2, jacksp_get_t3, jacksp_get_t4,
     jacksp_startmax, jacksp_totalmax, task_cnt, totem_altars, totem_altars_credit, buy_shbi,
     firstboot, lastsave, playtime
 	) VALUES (
@@ -42,8 +42,8 @@ INSERT INTO v2_save_data (
 	    ?, ?, ?,
 	    ?, ?, ?, ?, ?, ?, ?, ?,
 	    ?, ?, ?, ?,
-	    ?, ?, ?, ?, ?,
-	    ?, ?, ?, ?, ?,
+	    ?, ?, ?, ?, ?, ?,
+	    ?, ?, ?, ?, ?, ?,
 	    ?, ?, ?, ?, ?, ?,
 	    ?, ?, ?
 	)`,
@@ -55,8 +55,8 @@ INSERT INTO v2_save_data (
 		sd.UltGet, sd.UltComboMax, sd.UltTotalMax,
 		sd.RmShbiGet, sd.BstpStep, sd.BstpRwd, sd.BuyTotal, sd.SkillPoint, sd.BlackBox, sd.BlackBoxTotal, sd.SpUse,
 		sd.HideRecord, sd.CpMMax, sd.JackTotalMaxV2, sd.UltimateTotalMaxV2,
-		sd.PalettaBallGet, sd.PalettaLotteryAttemptTier0, sd.PalettaLotteryAttemptTier1, sd.PalettaLotteryAttemptTier2, sd.PalettaLotteryAttemptTier3,
-		sd.JackpotSuperGetTotal, sd.JackpotSuperGetTier0, sd.JackpotSuperGetTier1, sd.JackpotSuperGetTier2, sd.JackpotSuperGetTier3,
+		sd.PalettaBallGet, sd.PalettaLotteryAttemptTier0, sd.PalettaLotteryAttemptTier1, sd.PalettaLotteryAttemptTier2, sd.PalettaLotteryAttemptTier3, sd.PalettaLotteryAttemptTier4,
+		sd.JackpotSuperGetTotal, sd.JackpotSuperGetTier0, sd.JackpotSuperGetTier1, sd.JackpotSuperGetTier2, sd.JackpotSuperGetTier3, sd.JackpotSuperGetTier4,
 		sd.JackpotSuperStartMax, sd.JackpotSuperTotalMax, sd.TaskCompleteCount, sd.TotemAltarUnlockCount, sd.TotemAltarUnlockUsedCredits, sd.BuyShbi,
 		sd.FirstBoot, sd.LastSave, sd.Playtime,
 	)
