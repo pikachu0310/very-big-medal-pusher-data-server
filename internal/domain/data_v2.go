@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
@@ -159,7 +160,11 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		LTotemPlacements            []interface{}    `json:"l_totems_set"`
 		UserId                      *string          `json:"user_id"`
 	}
-	if err := json.Unmarshal([]byte(decoded), &m); err != nil {
+	normalized, err := normalizeNumericStrings([]byte(decoded))
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(normalized, &m); err != nil {
 		return nil, err
 	}
 
@@ -461,4 +466,126 @@ func parseUnixFromNumber(n *json.Number) int64 {
 		return 0
 	}
 	return i
+}
+
+var numericScalarFields = map[string]struct{}{
+	"legacy": {}, "version": {}, "credit": {}, "credit_all": {}, "medal_in": {}, "medal_get": {},
+	"ball_get": {}, "ball_chain": {}, "slot_start": {}, "slot_startfev": {}, "slot_hit": {},
+	"slot_getfev": {}, "sqr_get": {}, "sqr_step": {}, "jack_get": {}, "jack_startmax": {},
+	"jack_totalmax": {}, "ult_get": {}, "ult_combomax": {}, "ult_totalmax": {}, "rmshbi_get": {},
+	"buy_shbi": {}, "playtime": {}, "bstp_step": {}, "bstp_rwd": {}, "buy_total": {}, "sp": {},
+	"bbox": {}, "bbox_all": {}, "sp_use": {}, "hide_record": {}, "cpm_max": {}, "jack_totalmax_v2": {},
+	"ult_totalmax_v2": {}, "palball_get": {}, "pallot_lot_t0": {}, "pallot_lot_t1": {}, "pallot_lot_t2": {},
+	"pallot_lot_t3": {}, "pallot_lot_t4": {}, "jacksp_get_all": {}, "jacksp_get_t0": {},
+	"jacksp_get_t1": {}, "jacksp_get_t2": {}, "jacksp_get_t3": {}, "jacksp_get_t4": {}, "jacksp_startmax": {},
+	"jacksp_totalmax": {}, "task_cnt": {}, "totem_altars": {}, "totem_altars_credit": {},
+	"skill_point": {}, "blackbox": {}, "blackbox_total": {}, "firstboot": {}, "lastsave": {},
+}
+
+var numericArrayFields = map[string]struct{}{
+	"l_perks": {}, "l_perks_credit": {}, "l_totems": {}, "l_totems_credit": {}, "l_totems_set": {},
+}
+
+var numericMapFields = map[string]struct{}{
+	"dc_medal_get": {}, "dc_ball_get": {}, "dc_ball_chain": {}, "dc_palball_get": {}, "dc_palball_jp": {},
+}
+
+func normalizeNumericStrings(raw []byte) ([]byte, error) {
+	var payload map[string]interface{}
+	if err := json.Unmarshal(raw, &payload); err != nil {
+		return nil, err
+	}
+	if payload == nil {
+		return raw, nil
+	}
+
+	for key, val := range payload {
+		switch {
+		case isNumericScalarField(key):
+			if converted, ok := convertNumericValue(val); ok {
+				payload[key] = converted
+			}
+		case isNumericArrayField(key):
+			if arr, ok := val.([]interface{}); ok {
+				payload[key] = normalizeNumericSlice(arr)
+			}
+		case isNumericMapField(key):
+			if m, ok := val.(map[string]interface{}); ok {
+				payload[key] = normalizeNumericMap(m)
+			}
+		}
+	}
+
+	return json.Marshal(payload)
+}
+
+func isNumericScalarField(key string) bool {
+	_, ok := numericScalarFields[key]
+	return ok
+}
+
+func isNumericArrayField(key string) bool {
+	_, ok := numericArrayFields[key]
+	return ok
+}
+
+func isNumericMapField(key string) bool {
+	_, ok := numericMapFields[key]
+	return ok
+}
+
+func convertNumericValue(v interface{}) (interface{}, bool) {
+	switch val := v.(type) {
+	case string:
+		if num, ok := parseNumericString(val); ok {
+			return num, true
+		}
+	case []interface{}:
+		return normalizeNumericSlice(val), true
+	case map[string]interface{}:
+		return normalizeNumericMap(val), true
+	}
+	return v, false
+}
+
+func normalizeNumericSlice(values []interface{}) []interface{} {
+	for i, item := range values {
+		switch val := item.(type) {
+		case string:
+			if num, ok := parseNumericString(val); ok {
+				values[i] = num
+			}
+		case map[string]interface{}:
+			values[i] = normalizeNumericMap(val)
+		case []interface{}:
+			values[i] = normalizeNumericSlice(val)
+		}
+	}
+	return values
+}
+
+func normalizeNumericMap(values map[string]interface{}) map[string]interface{} {
+	for key, item := range values {
+		switch val := item.(type) {
+		case string:
+			if num, ok := parseNumericString(val); ok {
+				values[key] = num
+			}
+		case []interface{}:
+			values[key] = normalizeNumericSlice(val)
+		case map[string]interface{}:
+			values[key] = normalizeNumericMap(val)
+		}
+	}
+	return values
+}
+
+func parseNumericString(s string) (json.Number, bool) {
+	if strings.TrimSpace(s) == "" {
+		return "", false
+	}
+	if _, err := strconv.ParseFloat(s, 64); err != nil {
+		return "", false
+	}
+	return json.Number(s), true
 }
