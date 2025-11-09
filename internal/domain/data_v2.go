@@ -55,11 +55,13 @@ type SaveData struct {
 	PalettaLotteryAttemptTier1  int       `db:"pallot_lot_t1"`
 	PalettaLotteryAttemptTier2  int       `db:"pallot_lot_t2"`
 	PalettaLotteryAttemptTier3  int       `db:"pallot_lot_t3"`
+	PalettaLotteryAttemptTier4  int       `db:"pallot_lot_t4"`
 	JackpotSuperGetTotal        int       `db:"jacksp_get_all"`
 	JackpotSuperGetTier0        int       `db:"jacksp_get_t0"`
 	JackpotSuperGetTier1        int       `db:"jacksp_get_t1"`
 	JackpotSuperGetTier2        int       `db:"jacksp_get_t2"`
 	JackpotSuperGetTier3        int       `db:"jacksp_get_t3"`
+	JackpotSuperGetTier4        int       `db:"jacksp_get_t4"`
 	JackpotSuperStartMax        int64     `db:"jacksp_startmax"`
 	JackpotSuperTotalMax        int64     `db:"jacksp_totalmax"`
 	TaskCompleteCount           int       `db:"task_cnt"`
@@ -132,11 +134,13 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		PalettaLotteryAttemptTier1  *float64         `json:"pallot_lot_t1"`
 		PalettaLotteryAttemptTier2  *float64         `json:"pallot_lot_t2"`
 		PalettaLotteryAttemptTier3  *float64         `json:"pallot_lot_t3"`
+		PalettaLotteryAttemptTier4  *float64         `json:"pallot_lot_t4"`
 		JackpotSuperGetTotal        *int             `json:"jacksp_get_all"`
 		JackpotSuperGetTier0        *int             `json:"jacksp_get_t0"`
 		JackpotSuperGetTier1        *int             `json:"jacksp_get_t1"`
 		JackpotSuperGetTier2        *int             `json:"jacksp_get_t2"`
 		JackpotSuperGetTier3        *int             `json:"jacksp_get_t3"`
+		JackpotSuperGetTier4        *int             `json:"jacksp_get_t4"`
 		JackpotSuperStartMax        *int64           `json:"jacksp_startmax"`
 		JackpotSuperTotalMax        *int64           `json:"jacksp_totalmax"`
 		TaskCompleteCount           *float64         `json:"task_cnt"`
@@ -215,11 +219,13 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		PalettaLotteryAttemptTier1:  int(safeFloat64(m.PalettaLotteryAttemptTier1)),
 		PalettaLotteryAttemptTier2:  int(safeFloat64(m.PalettaLotteryAttemptTier2)),
 		PalettaLotteryAttemptTier3:  int(safeFloat64(m.PalettaLotteryAttemptTier3)),
+		PalettaLotteryAttemptTier4:  int(safeFloat64(m.PalettaLotteryAttemptTier4)),
 		JackpotSuperGetTotal:        safeInt(m.JackpotSuperGetTotal),
 		JackpotSuperGetTier0:        safeInt(m.JackpotSuperGetTier0),
 		JackpotSuperGetTier1:        safeInt(m.JackpotSuperGetTier1),
 		JackpotSuperGetTier2:        safeInt(m.JackpotSuperGetTier2),
 		JackpotSuperGetTier3:        safeInt(m.JackpotSuperGetTier3),
+		JackpotSuperGetTier4:        safeInt(m.JackpotSuperGetTier4),
 		JackpotSuperStartMax:        safeInt64(m.JackpotSuperStartMax),
 		JackpotSuperTotalMax:        safeInt64(m.JackpotSuperTotalMax),
 		TaskCompleteCount:           int(safeFloat64(m.TaskCompleteCount)),
@@ -285,11 +291,13 @@ func (sd *SaveData) ToModel() *models.SaveDataV2 {
 		pallotLotT1       = float64(sd.PalettaLotteryAttemptTier1)
 		pallotLotT2       = float64(sd.PalettaLotteryAttemptTier2)
 		pallotLotT3       = float64(sd.PalettaLotteryAttemptTier3)
+		pallotLotT4       = float64(sd.PalettaLotteryAttemptTier4)
 		jackspGetAll      = float64(sd.JackpotSuperGetTotal)
 		jackspGetT0       = float64(sd.JackpotSuperGetTier0)
 		jackspGetT1       = float64(sd.JackpotSuperGetTier1)
 		jackspGetT2       = float64(sd.JackpotSuperGetTier2)
 		jackspGetT3       = float64(sd.JackpotSuperGetTier3)
+		jackspGetT4       = float64(sd.JackpotSuperGetTier4)
 		jackspStartmax    = float64(sd.JackpotSuperStartMax)
 		jackspTotalmax    = float64(sd.JackpotSuperTotalMax)
 		taskCnt           = float64(sd.TaskCompleteCount)
@@ -339,11 +347,13 @@ func (sd *SaveData) ToModel() *models.SaveDataV2 {
 		PallotLotT1:       &pallotLotT1,
 		PallotLotT2:       &pallotLotT2,
 		PallotLotT3:       &pallotLotT3,
+		PallotLotT4:       &pallotLotT4,
 		JackspGetAll:      &jackspGetAll,
 		JackspGetT0:       &jackspGetT0,
 		JackspGetT1:       &jackspGetT1,
 		JackspGetT2:       &jackspGetT2,
 		JackspGetT3:       &jackspGetT3,
+		JackspGetT4:       &jackspGetT4,
 		JackspStartmax:    &jackspStartmax,
 		JackspTotalmax:    &jackspTotalmax,
 		TaskCnt:           &taskCnt,

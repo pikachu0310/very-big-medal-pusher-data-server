@@ -100,6 +100,7 @@ type SaveDataV2 struct {
 	JackspGetT1       *float64          `db:"jacksp_get_t1" json:"jacksp_get_t1,omitempty"`
 	JackspGetT2       *float64          `db:"jacksp_get_t2" json:"jacksp_get_t2,omitempty"`
 	JackspGetT3       *float64          `db:"jacksp_get_t3" json:"jacksp_get_t3,omitempty"`
+	JackspGetT4       *float64          `db:"jacksp_get_t4" json:"jacksp_get_t4,omitempty"`
 	JackspStartmax    *float64          `db:"jacksp_startmax" json:"jacksp_startmax,omitempty"`
 	JackspTotalmax    *float64          `db:"jacksp_totalmax" json:"jacksp_totalmax,omitempty"`
 	LAchieve          *[]string         `json:"l_achieve,omitempty" table:"save_data_v2_achievements"`
@@ -117,6 +118,7 @@ type SaveDataV2 struct {
 	PallotLotT1       *float64          `db:"pallot_lot_t1" json:"pallot_lot_t1,omitempty"`
 	PallotLotT2       *float64          `db:"pallot_lot_t2" json:"pallot_lot_t2,omitempty"`
 	PallotLotT3       *float64          `db:"pallot_lot_t3" json:"pallot_lot_t3,omitempty"`
+	PallotLotT4       *float64          `db:"pallot_lot_t4" json:"pallot_lot_t4,omitempty"`
 	Playtime          *int64            `json:"playtime,omitempty"`
 	RmshbiGet         *int              `db:"rmshbi_get" json:"rmshbi_get,omitempty"`
 	SlotGetfev        *int64            `db:"slot_getfev" json:"slot_getfev,omitempty"`

@@ -673,6 +673,10 @@ components:
           type: number
           format: double
           x-oapi-codegen-extra-tags: { db: 'pallot_lot_t3' }
+        pallot_lot_t4:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'pallot_lot_t4' }
         jacksp_get_all:
           type: number
           format: double
@@ -693,6 +697,10 @@ components:
           type: number
           format: double
           x-oapi-codegen-extra-tags: { db: 'jacksp_get_t3' }
+        jacksp_get_t4:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'jacksp_get_t4' }
         jacksp_startmax:
           type: number
           format: double
