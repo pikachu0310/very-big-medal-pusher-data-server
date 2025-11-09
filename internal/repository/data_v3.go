@@ -222,7 +222,7 @@ func (r *Repository) GetStatisticsV4(ctx context.Context) (*models.StatisticsV4,
 SELECT
   user_id,
   achievements_count AS value,
-  created_at
+  updated_at AS created_at
 FROM v3_user_latest_save_data
 WHERE hide_record = 0
 ORDER BY achievements_count DESC, created_at ASC
@@ -237,7 +237,7 @@ LIMIT 1000
 SELECT
   user_id,
   jacksp_startmax AS value,
-  created_at
+  updated_at AS created_at
 FROM v3_user_latest_save_data
 WHERE hide_record = 0
 ORDER BY jacksp_startmax DESC, created_at ASC
@@ -252,7 +252,7 @@ LIMIT 1000
 SELECT
   user_id,
   golden_palball_get AS value,
-  created_at
+  updated_at AS created_at
 FROM v3_user_latest_save_data
 WHERE hide_record = 0
 ORDER BY golden_palball_get DESC, created_at ASC
@@ -267,7 +267,7 @@ LIMIT 1000
 SELECT
   user_id,
   CAST(cpm_max AS SIGNED) AS value,
-  created_at
+  updated_at AS created_at
 FROM v3_user_latest_save_data
 WHERE hide_record = 0
 ORDER BY cpm_max DESC, created_at ASC
@@ -282,7 +282,7 @@ LIMIT 1000
 SELECT
   user_id,
   max_chain_rainbow AS value,
-  created_at
+  updated_at AS created_at
 FROM v3_user_latest_save_data
 WHERE hide_record = 0
 ORDER BY max_chain_rainbow DESC, created_at ASC
@@ -297,7 +297,7 @@ LIMIT 1000
 SELECT
   user_id,
   jack_totalmax_v2 AS value,
-  created_at
+  updated_at AS created_at
 FROM v3_user_latest_save_data
 WHERE hide_record = 0
 ORDER BY jack_totalmax_v2 DESC, created_at ASC
@@ -312,7 +312,7 @@ LIMIT 1000
 SELECT
   user_id,
   ult_combomax AS value,
-  created_at
+  updated_at AS created_at
 FROM v3_user_latest_save_data
 WHERE hide_record = 0
 ORDER BY ult_combomax DESC, created_at ASC
@@ -327,7 +327,7 @@ LIMIT 1000
 SELECT
   user_id,
   ult_totalmax_v2 AS value,
-  created_at
+  updated_at AS created_at
 FROM v3_user_latest_save_data
 WHERE hide_record = 0
 ORDER BY ult_totalmax_v2 DESC, created_at ASC
@@ -342,7 +342,7 @@ LIMIT 1000
 SELECT
   user_id,
   blackbox_total AS value,
-  created_at
+  updated_at AS created_at
 FROM v3_user_latest_save_data
 WHERE hide_record = 0
 ORDER BY blackbox_total DESC, created_at ASC
@@ -357,7 +357,7 @@ LIMIT 1000
 SELECT
   user_id,
   sp_use AS value,
-  created_at
+  updated_at AS created_at
 FROM v3_user_latest_save_data
 WHERE hide_record = 0
 ORDER BY sp_use DESC, created_at ASC

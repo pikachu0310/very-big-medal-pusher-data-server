@@ -5,7 +5,33 @@ import (
 	"fmt"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
 	"log"
+	"time"
 )
+
+type gameDataWithTimestamps struct {
+	models.GameData
+	UpdatedAt *time.Time `db:"updated_at"`
+}
+
+func normalizeGameData(records []gameDataWithTimestamps) []models.GameData {
+	result := make([]models.GameData, len(records))
+	for i, record := range records {
+		data := record.GameData
+		if record.UpdatedAt != nil {
+			data.CreatedAt = record.UpdatedAt
+		}
+		result[i] = data
+	}
+	return result
+}
+
+func normalizeSingleGameData(record gameDataWithTimestamps) models.GameData {
+	data := record.GameData
+	if record.UpdatedAt != nil {
+		data.CreatedAt = record.UpdatedAt
+	}
+	return data
+}
 
 func (r *Repository) InsertGameData(ctx context.Context, data models.GameData) error {
 	_, err := r.db.ExecContext(ctx, `
@@ -75,30 +101,31 @@ func (r *Repository) GetRankings(ctx context.Context, sortBy string, limit int) 
         INNER JOIN (
             SELECT
                 user_id,
-                MAX(created_at) AS max_created_at
+                MAX(updated_at) AS max_updated_at
             FROM
                 game_data
             GROUP BY
                 user_id
         ) AS latest
           ON gd.user_id = latest.user_id
-         AND gd.created_at = latest.max_created_at
+         AND gd.updated_at = latest.max_updated_at
         ORDER BY
             gd.%[1]s DESC
         LIMIT ?`, sortBy)
 
-	var rankings []models.GameData
+	var rankings []gameDataWithTimestamps
 	if err := r.db.SelectContext(ctx, &rankings, query, limit); err != nil {
 		return nil, fmt.Errorf("get rankings: %w", err)
 	}
-	return rankings, nil
+	return normalizeGameData(rankings), nil
 }
 
 func (r *Repository) GetUserGameData(ctx context.Context, userId string) (*models.GameData, error) {
-	var data models.GameData
-	if err := r.db.GetContext(ctx, &data, `SELECT * FROM game_data WHERE user_id = ? ORDER BY created_at DESC LIMIT 1`, userId); err != nil {
+	var record gameDataWithTimestamps
+	if err := r.db.GetContext(ctx, &record, `SELECT * FROM game_data WHERE user_id = ? ORDER BY updated_at DESC LIMIT 1`, userId); err != nil {
 		return nil, fmt.Errorf("get user game data: %w", err)
 	}
+	data := normalizeSingleGameData(record)
 	return &data, nil
 }
 
@@ -128,12 +155,12 @@ func (r *Repository) GetTotalMedals(ctx context.Context) (int, error) {
         SELECT IFNULL(SUM(gd.have_medal), 0)
         FROM game_data AS gd
         INNER JOIN (
-            SELECT user_id, MAX(created_at) AS max_created_at
+            SELECT user_id, MAX(updated_at) AS max_updated_at
             FROM game_data
             GROUP BY user_id
         ) AS latest
           ON gd.user_id = latest.user_id
-         AND gd.created_at = latest.max_created_at
+         AND gd.updated_at = latest.max_updated_at
     `
 	var total int
 	if err := r.db.QueryRowContext(ctx, q).Scan(&total); err != nil {
