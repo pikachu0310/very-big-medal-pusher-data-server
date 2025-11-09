@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -95,8 +96,8 @@ func ParseSaveData(raw string) (*SaveData, error) {
 	var m struct {
 		Legacy                      *int             `json:"legacy"`
 		Version                     *int             `json:"version"`
-		Credit                      *int64           `json:"credit"`
-		CreditAll                   *int64           `json:"credit_all"`
+		Credit                      json.RawMessage  `json:"credit"`
+		CreditAll                   json.RawMessage  `json:"credit_all"`
 		MedalIn                     *int             `json:"medal_in"`
 		MedalGet                    *int64           `json:"medal_get"`
 		BallGet                     *int64           `json:"ball_get"`
@@ -180,8 +181,8 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		UserId:                      safeString(m.UserId),
 		Legacy:                      safeInt(m.Legacy),
 		Version:                     safeInt(m.Version),
-		Credit:                      safeInt64(m.Credit),
-		CreditAll:                   safeInt64(m.CreditAll),
+		Credit:                      parseInt64Message(m.Credit),
+		CreditAll:                   parseInt64Message(m.CreditAll),
 		MedalIn:                     safeInt(m.MedalIn),
 		MedalGet:                    safeInt64(m.MedalGet),
 		BallGet:                     safeInt64(m.BallGet),
@@ -439,6 +440,40 @@ func parseInt64Array(arr []interface{}) []int64 {
 		}
 	}
 	return result
+}
+
+func parseInt64Message(raw json.RawMessage) int64 {
+	if len(raw) == 0 {
+		return 0
+	}
+	trimmed := bytes.TrimSpace(raw)
+	if len(trimmed) == 0 || bytes.Equal(trimmed, []byte("null")) {
+		return 0
+	}
+
+	var num json.Number
+	if err := json.Unmarshal(trimmed, &num); err == nil {
+		if i, err := num.Int64(); err == nil {
+			return i
+		}
+		if f, err := num.Float64(); err == nil {
+			return int64(f)
+		}
+	}
+
+	var s string
+	if err := json.Unmarshal(trimmed, &s); err == nil {
+		if s == "" {
+			return 0
+		}
+		if i, err := strconv.ParseInt(s, 10, 64); err == nil {
+			return i
+		}
+		if f, err := strconv.ParseFloat(s, 64); err == nil {
+			return int64(f)
+		}
+	}
+	return 0
 }
 
 func parseUnix(s *string) int64 {
