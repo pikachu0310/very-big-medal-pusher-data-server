@@ -22,7 +22,9 @@ tags:
     description: 現行API
 
 servers:
-  - url: https://push.trap.games
+  - url: https://push.trap.games/api
+  - url: https://push-test.trap.games/api
+  - url: http://localhost:8080/api
 
 paths:
   # v1 endpoints (従来)
