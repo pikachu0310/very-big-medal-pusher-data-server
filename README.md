@@ -1,137 +1,84 @@
-# go-backend-template with oapi-codegen
-このテンプレートは、[@ras0q さんのテンプレート](https://github.com/ras0q/go-backend-template)を改変し、
-何もしなくてもNeoShowcase上でデプロイできるようにしたテンプレートをさらに改変し、
-[oapi-codegen](https://github.com/deepmap/oapi-codegen)を用いてより安全/簡単/高速に開発できるようにした、`OpenAPI.yaml`の存在が前提のテンプレートです。
+# Very Big Medal Pusher Data Server
 
-`openapi/openapi.yaml`を書き換え、`tools/tools.go`からコードを生成し、`openapi/server.gen.go`の`ServerInterface`を`internal/handler/*.go`で実装する事で、より安全/簡単/高速にAPIを実装できます。
+VRChat ワールド「クソでっけぇプッシャーゲーム」向けのクラウドセーブ/API サーバーです。  
+クラウドセーブ送信・最新セーブ取得・ランキング/統計を提供し、`oapi-codegen` で型安全に実装されています。クライアント実装は `/mnt/h/github/VRCWorld-MassiveMedalPusher` の Udon# です。
 
-また、OpenAPIで定義された`Schemas`や、`Request Body` & `Response Body`が、`openapi/models/models.gen.go`にGoの構造体として生成されており、DBからGoの構造体に落とし込む際にも使えて便利です。
+## エンドポイントとドキュメント
+- ベース URL: `http://localhost:8080/api` / `https://push.trap.games/api` / `https://push-test.trap.games/api`
+- Swagger UI: `GET /swagger/index.html` (リダイレクト含む)
+- OpenAPI: `GET /api/openapi.yaml`
+- API バージョン: `v1/v2/v3` は互換維持のみ（非推奨）、`v4` が現行。`/ping` は `general` タグに集約。
 
-以下の様に、何もしなくても正常に動きます(MariaDBも自動で環境変数を見て繋がります)。
-
-![image](https://github.com/pikachu0310/very-big-medal-pusher-data-server/assets/17543997/dee159b2-598c-40ed-807a-9b5680f465a8)
-
-
-## このテンプレートについて
-
-ハッカソンなど短期間でWebアプリを開発する際のバックエンドのGo実装例です。
-学習コストと開発コストを抑えることを目的としています。
-
-## プロジェクト作成方法
-
-GitHubの `Use this template` ボタンからレポジトリを作成するか、以下の`gonew`コマンドで作成できます。
-
-```sh
-go run golang.org/x/tools/cmd/gonew@latest github.com/pikachu0310/very-big-medal-pusher-data-server {{ project_name }}
+## クイックスタート（ローカル）
+```bash
+docker compose watch   # API + MariaDB + Adminer
+# ブラウザ: http://localhost:8080/api , http://localhost:8081 (Adminer)
 ```
 
-※ GitHub Templateから作成した場合は別途モジュール名を変更することを推奨します。
-
-## 開発手順
-
-- 最低限[Docker](https://www.docker.com/)と[Docker Compose](https://docs.docker.com/compose/)が必要です。
-  - [Compose Watch](https://docs.docker.com/compose/file-watch/)を使うため、Docker Composeのバージョンは2.22以上にしてください。
-- linter, formatterには[golangci-lint](https://golangci-lint.run/)を使っています。
-  - VSCodeを使用する場合は`.vscode/settings.json`でlinterの設定を行ってください
-
-  ```json
-  {
-    "go.lintTool": "golangci-lint"
-  }
-  ```
-
-- makeコマンドのターゲット一覧とその説明は`make help`で確認できます
-
-### 開発環境の実行
-
-#### バックエンドの起動
-
-```sh
-docker compose watch
-```
-
-API、DB、DB管理画面が起動します。
-各コンテナが起動したら、以下のURLにアクセスすることができます。
-Compose Watchにより、ソースコードの変更を検知して自動で再起動します。
-
-- <http://localhost:8080/> (API)
-- <http://localhost:8081/> (DBの管理画面)
-
-#### フロントエンドの起動
-
-```sh
+フロントエンド（開発用ダッシュボード等）
+```bash
 cd web
-npm install  # 初回のみ
-npm run dev
+npm install   # 初回
+npm run dev   # http://localhost:3000
 ```
 
-フロントエンドが起動したら、以下のURLにアクセスできます。
-
-- <http://localhost:3000/> (フロントエンド)
-
-フロントエンドの詳細については [web/README.md](./web/README.md) を参照してください。
-
-### テストの実行
-
-全てのテスト
-
-```sh
-make test
+## 環境変数（主要）
+```bash
+SECRET_KEY=A                 # HMAC メイン
+SAVE=B                       # セーブ署名キー
+LOAD=C                       # ロード署名キー
+APP_ADDR=:8080
+DB_HOST=localhost DB_PORT=3306 DB_USER=root DB_PASSWORD=pass DB_NAME=app
+# NeoShowcase 環境では NS_MARIADB_* 系を自動検出
 ```
 
-単体テストのみ
+## 開発フロー（OpenAPI-first）
+1) `openapi/openapi.yaml` を編集  
+2) `make oapi` で `openapi/server.gen.go`, `openapi/models/models.gen.go` を再生成  
+3) ハンドラ実装：`internal/handler/`  
+4) DB 変更が必要なら `internal/migration/*.sql` を追加（Goose）  
+5) ドメイン/リポジトリ更新：`internal/domain/`, `internal/repository/`  
+6) `go test ./...`
 
-```sh
-make test-unit
+### よく使うコマンド
+```bash
+make oapi           # コード生成
+make test           # 全テスト
+make build          # バイナリ作成
+make lint           # golangci-lint --fix
 ```
 
-結合テストのみ
+## データベース
+- MariaDB 11 系。起動時に Goose で `internal/migration/*.sql` を Up 適用。
+- スキーマの正とするドキュメントは `DATABASE.md`（migration を踏まえた最新版）。その他のスキーマファイルは削除済み。
+- 主要テーブル：
+  - `v2_save_data` + サブテーブル（実績/メダル/ボール/パレット/トーテム/パーク）
+  - `v3_user_latest_save_data` (+ `_achievements`) … 最新セーブのランキング用集約
+  - `v1_game_data` … 旧版互換
 
-```sh
-make test-integration
-```
+### 新規カラム追加手順（サーバー）
+1. `openapi/openapi.yaml` に項目を追加（`x-oapi-codegen-extra-tags` で db カラム名を付与）。  
+2. `internal/migration/NN_description.sql` を作成し、既存 migration を確認して型/制約を揃える。  
+3. `make oapi` でコード再生成。  
+4. `internal/domain/data_v2.go`（パース/モデル変換）、`internal/repository/*.go`（Insert/Select）を更新。  
+5. 必要なら `DATABASE.md` のスキーマ表を更新。  
+6. `go test ./...` と動作確認。
 
-## 構成
+## アーキテクチャ概要
+- `main.go` : Echo 起動、Swagger 配信、Goose migration。  
+- `internal/handler/` : v1–v4 API（署名検証、Base64/URL decode、最新セーブ返却）。  
+- `internal/domain/` : SaveData パース/変換（Base64 または URL エンコード対応、long 対応カラム）。  
+- `internal/repository/` : sqlx で CRUD・ランキング取得。  
+- `internal/migration/` : Goose SQL（Up/Down）。  
+- `openapi/` : 生成コード。  
+- `tools/` : oapi-codegen 設定。  
+- `web/` : ダッシュボード/デバッグ UI。
 
-- `main.go`: エントリーポイント
-  - 依存ライブラリの初期化など最低限の処理のみを書く
-  - ルーティングの設定は`./internal/handler/handler.go`に書く
-  - 肥大化しそうなら`./internal/infrastructure/{pkgname}`を作って外部ライブラリの初期化処理を書くのもアリ
-- `internal/`: アプリ本体の主実装
-  - Tips: Goの仕様で`internal`パッケージは他プロジェクトから参照できない (<https://go.dev/doc/go1.4#internalpackages>)
-  - `handler/`: ルーティング
-    - 飛んできたリクエストを裁いてレスポンスを生成する
-    - DBアクセスは`repository/`で実装したメソッドを呼び出す
-    - Tips: リクエストのバリデーションがしたい場合は↓のどちらかを使うと良い
-      - [go-playground/validator](https://github.com/go-playground/validator)でタグベースのバリデーションをする
-      - [go-ozzo/ozzo-validation](https://github.com/go-ozzo/ozzo-validation)でコードベースのバリデーションをする
-  - `migration/`: DBマイグレーション
-    - DBのスキーマを定義する
-    - Tips: マイグレーションツールは[pressly/goose](https://github.com/pressly/goose)を使っている
-    - 初期化スキーマは`1_schema.sql`に記述し、運用開始後のスキーマ定義変更等は`2_add_user_age.sql`のように連番を振って記述する
-      - Tips: Goでは1.16から[embed](https://pkg.go.dev/embed)パッケージを使ってバイナリにファイルを文字列として埋め込むことができる
-  - `repository/`: DBアクセス
-    - DBへのアクセス処理
-      - 引数のバリデーションは`handler/`に任せる
-  - `pkg/`: 汎用パッケージ
-    - 複数パッケージから使いまわせるようにする
-    - 例: `pkg/config/`: アプリ・DBの設定
-    - Tips: 外部にパッケージを公開したい場合は`internal/`の外に出しても良い
-- `integration/`: 結合テスト
-  - `internal/`の実装から実際にデータが取得できるかテストする
-  - DBの立ち上げには[ory/dockertest](https://github.com/ory/dockertest)を使っている
-  - 短期開発段階では時間があれば書く程度で良い
-  - Tips: 外部サービス(traQ, Twitterなど)へのアクセスが発生する場合は[golang/mock](https://github.com/golang/mock)などを使ってモック(テスト用処理)を作ると良い
-- `web/`: フロントエンド実装
-  - React + TypeScript + Vite を使用
-  - 詳細は [web/README.md](./web/README.md) を参照
+## 運用メモ
+- 本番/ステージングの Swagger からも spec を参照可能（UI で prod/stg/local を切替）。  
+- セーブ送信は Base64URL、ロード応答は標準 Base64 + HMAC-SHA256 署名（LOAD シークレット）。  
+- v1–v3 は互換のみ。新規機能は v4 で実装。
 
-## 長期開発に向けた改善点
+## 関連リポジトリ
+- クライアント (VRChat/Udon#): `/mnt/h/github/VRCWorld-MassiveMedalPusher`
 
-- ドメインを書く (`internal/domain/`など)
-  - 現在は簡単のためにAPIスキーマとDBスキーマのみを書きこれらを直接やり取りしている
-  - 本来はアプリの仕様や概念をドメインとして書き、スキーマの変換にはドメインを経由させるべき
-- 単体テスト・結合テストのカバレッジを上げる
-  - カバレッジの可視化には[Codecov](https://codecov.io)(traPだと主流)や[Coveralls](https://coveralls.io)が便利
-- ログの出力を整備する
-  - ロギングライブラリは好みに合ったものを使うと良い
