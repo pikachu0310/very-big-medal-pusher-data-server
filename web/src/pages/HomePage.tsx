@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { 
-  Title, 
-  Text, 
-  Paper, 
-  TextInput, 
-  Button, 
-  Stack, 
-  Group, 
-  Card, 
-  Grid, 
+import {
+  Title,
+  Text,
+  Paper,
+  TextInput,
+  Button,
+  Stack,
+  Group,
+  Card,
+  Grid,
   Center,
   Loader,
   Alert,
@@ -20,7 +20,8 @@ import {
   Divider,
   Tooltip,
   ThemeIcon,
-  Highlight
+  Highlight,
+  Accordion
 } from '@mantine/core';
 import {
   IconAlertCircle,
@@ -33,7 +34,11 @@ import {
   IconBrandGithub,
   IconExternalLink,
   IconPlugConnected,
-  IconRocket
+  IconRocket,
+  IconSparkles,
+  IconMoodSmile,
+  IconBulb,
+  IconWand
 } from '@tabler/icons-react';
 
 // 個人統計情報の型定義（SaveDataV2の全フィールド）
@@ -118,6 +123,8 @@ function HomePage() {
   const [error, setError] = useState('');
   const [pingState, setPingState] = useState<'idle' | 'ok' | 'ng' | 'loading'>('idle');
   const [copyMessage, setCopyMessage] = useState<string>('');
+  const [randomMission, setRandomMission] = useState<string>('');
+  const [randomTip, setRandomTip] = useState<string>('');
   const twitterSearchUrl =
     'https://x.com/search?q=%28%23%E3%81%A7%E3%81%8B%E3%83%97%20OR%20%23VR%E3%81%A7%E3%81%8B%E3%83%97%29&f=live';
 
@@ -140,6 +147,17 @@ function HomePage() {
     };
 
     fetchGlobalStats();
+  }, []);
+
+  // Twitter ウィジェット読み込み
+  useEffect(() => {
+    const existing = document.getElementById('twitter-wjs');
+    if (existing) return;
+    const script = document.createElement('script');
+    script.id = 'twitter-wjs';
+    script.src = 'https://platform.twitter.com/widgets.js';
+    script.async = true;
+    document.body.appendChild(script);
   }, []);
 
   const handleLoadPersonalData = async () => {
@@ -215,6 +233,25 @@ function HomePage() {
     }
   };
 
+  const missions = [
+    'ジャックポットを1回以上引こう！',
+    'レインボーボールでコンボを狙え！',
+    'パレットボールを10回拾う',
+    'シャルベチャンスでフィーバー突入',
+    'スキルポイントを1回リセットしてみよう'
+  ];
+
+  const tips = [
+    'クラウドセーブはこまめに！ロードで復元が安心。',
+    'でかプ交流会に参加するとギミック講習が聞けるかも？',
+    'ランキングは v4/statistics から高速に取得されます。',
+    'ゴールデンパレットボール(100番)を狙うと実績が埋まるぞ。',
+    'ジャックポット中はチェインを切らさない立ち回りが大事！'
+  ];
+
+  const pickMission = () => setRandomMission(missions[Math.floor(Math.random() * missions.length)]);
+  const pickTip = () => setRandomTip(tips[Math.floor(Math.random() * tips.length)]);
+
   const renderRankingTable = (data: RankingEntry[], title: string, type: string) => (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Title order={4} mb="md">{title}</Title>
@@ -246,28 +283,43 @@ function HomePage() {
 
   return (
     <Stack gap="xl" pt={0}>
+      {/* ロゴを中央上部に */}
+      <Center mt={0} pt={0} mb={0}>
+        <img
+          src="/MPG_logo.png"
+          alt="MPG Logo"
+          style={{
+            maxWidth: '700px',
+            width: '100%',
+            height: 'auto',
+            marginBottom: '0.5rem',
+            marginTop: '0'
+          }}
+        />
+      </Center>
+
       {/* ヒーロー */}
-      <Card padding="xl" radius="md" shadow="sm" style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e7f5ff 100%)' }}>
+      <Card padding="xl" radius="md" shadow="sm" style={{ background: 'linear-gradient(135deg, #f1f3f5 0%, #e7f5ff 100%)' }}>
         <Stack gap="md">
           <Group justify="space-between" align="flex-start">
             <Stack gap={8}>
               <Highlight
-                highlight={['デカプ', 'Massive Medal Pusher']}
+                highlight={['Massive Medal Pusher']}
                 fw={700}
                 fz={14}
-                c="dimmed"
+                c="#1e1e1e"
                 highlightStyles={(theme) => ({
-                  backgroundColor: theme.colors.blue[0],
+                  backgroundColor: theme.colors.gray[1],
                   color: theme.colors.blue[7],
                 })}
               >
-                Massive Medal Pusher / デカプ クラウドセーブ・統計ハブ
+                Massive Medal Pusher / ページのタイトル
               </Highlight>
               <Title order={1} style={{ letterSpacing: '-0.02em' }}>
                 クソでっけぇプッシャーゲーム
               </Title>
-              <Text size="lg" c="dimmed">
-                セーブ共有・ランキング・最新情報をまとめた公式ミニポータル。クラウドセーブのURL確認や統計閲覧、コミュニティリンクを素早く開けます。
+              <Text size="lg" c="#1e1e1e">
+                セーブ共有・ランキング・最新情報をまとめた公式ポータル。プレイヤー向けリンクと遊び方ヒントを集約しました。
               </Text>
               <Group gap="sm">
                 <Button
@@ -348,114 +400,54 @@ function HomePage() {
         </Stack>
       </Card>
 
-      {/* クイックリンク & ツール */}
+      {/* 楽しむセクション */}
       <Grid gutter="md">
-        <Grid.Col span={{ base: 12, md: 6 }}>
+        <Grid.Col span={{ base: 12, md: 8 }}>
           <Card withBorder radius="md" padding="lg" shadow="sm">
             <Group justify="space-between" mb="sm">
-              <Title order={3}>クイックリンク</Title>
-              <Tooltip label="コピーできるよ" position="left">
-                <Badge color={copyMessage ? 'teal' : 'gray'}>{copyMessage || 'copy ready'}</Badge>
-              </Tooltip>
+              <Title order={3}>ミッション & ランダムTip</Title>
+              <Group gap="xs">
+                <Button size="xs" variant="light" leftSection={<IconSparkles size={14} />} onClick={pickMission}>
+                  ミッションを引く
+                </Button>
+                <Button size="xs" variant="light" leftSection={<IconBulb size={14} />} onClick={pickTip}>
+                  Tipを引く
+                </Button>
+              </Group>
             </Group>
             <Stack gap="sm">
-              <Group justify="space-between">
-                <Text>本番 API</Text>
-                <Group gap="xs">
-                  <Anchor href="https://push.trap.games/api" target="_blank" rel="noreferrer" c="blue">
-                    開く
-                  </Anchor>
-                  <ActionIcon variant="light" onClick={() => handleCopy('https://push.trap.games/api')}>
-                    <IconDownload size={16} />
-                  </ActionIcon>
+              <Paper shadow="xs" radius="md" p="md" withBorder style={{ background: '#f8f9fa' }}>
+                <Group gap="sm">
+                  <ThemeIcon variant="light" color="violet" radius="xl">
+                    <IconMoodSmile size={18} />
+                  </ThemeIcon>
+                  <Text fw={600}>今日のミッション</Text>
                 </Group>
-              </Group>
-              <Group justify="space-between">
-                <Text>テスト API</Text>
-                <Group gap="xs">
-                  <Anchor href="https://push-test.trap.games/api" target="_blank" rel="noreferrer" c="blue">
-                    開く
-                  </Anchor>
-                  <ActionIcon variant="light" onClick={() => handleCopy('https://push-test.trap.games/api')}>
-                    <IconDownload size={16} />
-                  </ActionIcon>
+                <Text mt="xs">{randomMission || 'ボタンを押して今日のミッションを取得しよう！'}</Text>
+              </Paper>
+              <Paper shadow="xs" radius="md" p="md" withBorder style={{ background: '#f8f9fa' }}>
+                <Group gap="sm">
+                  <ThemeIcon variant="light" color="yellow" radius="xl">
+                    <IconWand size={18} />
+                  </ThemeIcon>
+                  <Text fw={600}>ランダムTip</Text>
                 </Group>
-              </Group>
-              <Group justify="space-between">
-                <Text>ローカル API</Text>
-                <Group gap="xs">
-                  <Anchor href="http://localhost:8080/api" target="_blank" rel="noreferrer" c="blue">
-                    開く
-                  </Anchor>
-                  <ActionIcon variant="light" onClick={() => handleCopy('http://localhost:8080/api')}>
-                    <IconDownload size={16} />
-                  </ActionIcon>
-                </Group>
-              </Group>
-              <Divider />
-              <Group gap="sm">
-                <Button
-                  variant="gradient"
-                  gradient={{ from: 'indigo', to: 'cyan' }}
-                  component="a"
-                  href="/swagger/index.html"
-                  target="_blank"
-                  radius="md"
-                  leftSection={<IconExternalLink size={16} />}
-                >
-                  Swagger UI を開く
-                </Button>
-                <Button
-                  variant="subtle"
-                  component="a"
-                  href="/api/openapi.yaml"
-                  target="_blank"
-                  radius="md"
-                >
-                  OpenAPI を見る
-                </Button>
-              </Group>
+                <Text mt="xs">{randomTip || 'ボタンを押してヒントを取得しよう！'}</Text>
+              </Paper>
             </Stack>
           </Card>
         </Grid.Col>
-
-        <Grid.Col span={{ base: 12, md: 6 }}>
+        <Grid.Col span={{ base: 12, md: 4 }}>
           <Card withBorder radius="md" padding="lg" shadow="sm">
-            <Group justify="space-between" align="center">
-              <Title order={3}>サーバーヘルス</Title>
-              <Button
-                size="sm"
-                variant="light"
-                leftSection={<IconPlugConnected size={14} />}
-                loading={pingState === 'loading'}
-                onClick={handlePing}
-              >
-                ping
-              </Button>
-            </Group>
-            <Text size="sm" c="dimmed" mb="sm">
-              https://push.trap.games/api/ping
-            </Text>
-            <Group gap="sm">
-              <Badge color={pingState === 'ok' ? 'teal' : pingState === 'ng' ? 'red' : 'gray'} radius="sm">
-                {pingState === 'idle' && '未実行'}
-                {pingState === 'loading' && '確認中...'}
-                {pingState === 'ok' && '稼働中'}
-                {pingState === 'ng' && '疎通 NG'}
-              </Badge>
-            </Group>
-            <Divider my="md" />
-            <Group gap="xs">
-              <ThemeIcon size={34} radius="lg" variant="light" color="blue">
-                <IconBrandGithub size={18} />
-              </ThemeIcon>
-              <Stack gap={4}>
-                <Text fw={600} fz="sm">GitHub</Text>
-                <Anchor href="https://github.com/pikachu0310/very-big-medal-pusher-data-server" target="_blank" rel="noreferrer" c="blue">
-                  very-big-medal-pusher-data-server
-                </Anchor>
-              </Stack>
-            </Group>
+            <Title order={3} mb="sm">イベント・最新情報</Title>
+            <Stack gap="xs">
+              <Badge color="pink" variant="light">コミュニティ</Badge>
+              <Text>・毎週末「でかプ交流会」実施中（詳細はDiscordで告知）。</Text>
+              <Text>・グループに参加してプッシュ通知を受け取ろう。</Text>
+              <Badge color="indigo" variant="light" mt="sm">ワールドTips</Badge>
+              <Text>・ジャックポットの種は拾い忘れ注意！</Text>
+              <Text>・スキルポイントの割り振りで立ち回りが大きく変わるよ。</Text>
+            </Stack>
           </Card>
         </Grid.Col>
       </Grid>
@@ -975,13 +967,16 @@ function HomePage() {
         <Text size="sm" c="dimmed" mb="md">
           公式ハッシュタグの最新投稿をチェックできます。（読み込めない場合は上のボタンから直接開いてください）
         </Text>
-        <div style={{ border: '1px solid #e9ecef', borderRadius: 12, overflow: 'hidden', minHeight: 420 }}>
-          <iframe
-            title="x-stream"
-            src={`https://twitframe.com/show?url=${encodeURIComponent(twitterSearchUrl)}`}
-            style={{ width: '100%', height: '520px', border: 'none' }}
-            allow="clipboard-write; encrypted-media"
-          />
+        <div style={{ border: '1px solid #e9ecef', borderRadius: 12, overflow: 'hidden', minHeight: 420, padding: '0.5rem' }}>
+          <a
+            className="twitter-timeline"
+            data-theme="light"
+            data-height="520"
+            data-chrome="nofooter noborders transparent"
+            href={twitterSearchUrl}
+          >
+            Tweets by #でかプ
+          </a>
         </div>
       </Card>
 
@@ -1029,6 +1024,124 @@ function HomePage() {
           </Card>
         </Grid.Col>
       </Grid>
+
+      {/* 開発者向け（折りたたみ） */}
+      <Accordion variant="contained" radius="md">
+        <Accordion.Item value="dev">
+          <Accordion.Control>開発者向けツール</Accordion.Control>
+          <Accordion.Panel>
+            <Grid gutter="md">
+              <Grid.Col span={{ base: 12, md: 6 }}>
+                <Card withBorder radius="md" padding="lg" shadow="sm">
+                  <Group justify="space-between" mb="sm">
+                    <Title order={4}>クイックリンク</Title>
+                    <Tooltip label="コピーできるよ" position="left">
+                      <Badge color={copyMessage ? 'teal' : 'gray'}>{copyMessage || 'copy ready'}</Badge>
+                    </Tooltip>
+                  </Group>
+                  <Stack gap="sm">
+                    <Group justify="space-between">
+                      <Text>本番 API</Text>
+                      <Group gap="xs">
+                        <Anchor href="https://push.trap.games/api" target="_blank" rel="noreferrer" c="blue">
+                          開く
+                        </Anchor>
+                        <ActionIcon variant="light" onClick={() => handleCopy('https://push.trap.games/api')}>
+                          <IconDownload size={16} />
+                        </ActionIcon>
+                      </Group>
+                    </Group>
+                    <Group justify="space-between">
+                      <Text>テスト API</Text>
+                      <Group gap="xs">
+                        <Anchor href="https://push-test.trap.games/api" target="_blank" rel="noreferrer" c="blue">
+                          開く
+                        </Anchor>
+                        <ActionIcon variant="light" onClick={() => handleCopy('https://push-test.trap.games/api')}>
+                          <IconDownload size={16} />
+                        </ActionIcon>
+                      </Group>
+                    </Group>
+                    <Group justify="space-between">
+                      <Text>ローカル API</Text>
+                      <Group gap="xs">
+                        <Anchor href="http://localhost:8080/api" target="_blank" rel="noreferrer" c="blue">
+                          開く
+                        </Anchor>
+                        <ActionIcon variant="light" onClick={() => handleCopy('http://localhost:8080/api')}>
+                          <IconDownload size={16} />
+                        </ActionIcon>
+                      </Group>
+                    </Group>
+                    <Divider />
+                    <Group gap="sm">
+                      <Button
+                        variant="gradient"
+                        gradient={{ from: 'indigo', to: 'cyan' }}
+                        component="a"
+                        href="/swagger/index.html"
+                        target="_blank"
+                        radius="md"
+                        leftSection={<IconExternalLink size={16} />}
+                      >
+                        Swagger UI
+                      </Button>
+                      <Button
+                        variant="subtle"
+                        component="a"
+                        href="/api/openapi.yaml"
+                        target="_blank"
+                        radius="md"
+                      >
+                        OpenAPI
+                      </Button>
+                    </Group>
+                  </Stack>
+                </Card>
+              </Grid.Col>
+              <Grid.Col span={{ base: 12, md: 6 }}>
+                <Card withBorder radius="md" padding="lg" shadow="sm">
+                  <Group justify="space-between" align="center">
+                    <Title order={4}>サーバーヘルス</Title>
+                    <Button
+                      size="sm"
+                      variant="light"
+                      leftSection={<IconPlugConnected size={14} />}
+                      loading={pingState === 'loading'}
+                      onClick={handlePing}
+                    >
+                      ping
+                    </Button>
+                  </Group>
+                  <Text size="sm" c="dimmed" mb="sm">
+                    https://push.trap.games/api/ping
+                  </Text>
+                  <Group gap="sm">
+                    <Badge color={pingState === 'ok' ? 'teal' : pingState === 'ng' ? 'red' : 'gray'} radius="sm">
+                      {pingState === 'idle' && '未実行'}
+                      {pingState === 'loading' && '確認中...'}
+                      {pingState === 'ok' && '稼働中'}
+                      {pingState === 'ng' && '疎通 NG'}
+                    </Badge>
+                  </Group>
+                  <Divider my="md" />
+                  <Group gap="xs">
+                    <ThemeIcon size={34} radius="lg" variant="light" color="blue">
+                      <IconBrandGithub size={18} />
+                    </ThemeIcon>
+                    <Stack gap={4}>
+                      <Text fw={600} fz="sm">GitHub</Text>
+                      <Anchor href="https://github.com/pikachu0310/very-big-medal-pusher-data-server" target="_blank" rel="noreferrer" c="blue">
+                        very-big-medal-pusher-data-server
+                      </Anchor>
+                    </Stack>
+                  </Group>
+                </Card>
+              </Grid.Col>
+            </Grid>
+          </Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
     </Stack>
   );
 }

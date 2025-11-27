@@ -23,12 +23,16 @@ function App() {
           marginTop: 'auto'
         }}
       >
-        <Text size="xs" c="dimmed">
+        <Text size="xs" c="dimmed" style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
           <Anchor component={Link} to="/privacy" size="xs" c="dimmed" underline="hover">
             プライバシーポリシー
           </Anchor>
-          {' | '}
-          © 2025 Massive Medal Pusher
+          <Text span c="dimmed">|</Text>
+          <Anchor href="https://github.com/pikachu0310/very-big-medal-pusher-data-server" target="_blank" rel="noreferrer" size="xs" c="dimmed" underline="hover">
+            GitHub
+          </Anchor>
+          <Text span c="dimmed">|</Text>
+          <Text span c="dimmed">© 2025 Massive Medal Pusher</Text>
         </Text>
       </Box>
     </Box>
