@@ -14,9 +14,27 @@ import {
   Alert,
   Tabs,
   Table,
-  Badge
+  Badge,
+  ActionIcon,
+  Anchor,
+  Divider,
+  Tooltip,
+  ThemeIcon,
+  Highlight
 } from '@mantine/core';
-import { IconAlertCircle, IconDownload, IconTrophy, IconUsers } from '@tabler/icons-react';
+import {
+  IconAlertCircle,
+  IconDownload,
+  IconTrophy,
+  IconUsers,
+  IconBrandDiscord,
+  IconWorld,
+  IconBook2,
+  IconBrandGithub,
+  IconExternalLink,
+  IconPlugConnected,
+  IconRocket
+} from '@tabler/icons-react';
 
 // 個人統計情報の型定義（SaveDataV2の全フィールド）
 interface PersonalStats {
@@ -98,6 +116,10 @@ function HomePage() {
   const [personalStats, setPersonalStats] = useState<PersonalStats | null>(null);
   const [globalStats, setGlobalStats] = useState<GlobalStats | null>(null);
   const [error, setError] = useState('');
+  const [pingState, setPingState] = useState<'idle' | 'ok' | 'ng' | 'loading'>('idle');
+  const [copyMessage, setCopyMessage] = useState<string>('');
+  const twitterSearchUrl =
+    'https://x.com/search?q=%28%23%E3%81%A7%E3%81%8B%E3%83%97%20OR%20%23VR%E3%81%A7%E3%81%8B%E3%83%97%29&f=live';
 
   // グローバル統計情報を取得
   useEffect(() => {
@@ -156,6 +178,28 @@ function HomePage() {
     }
   };
 
+  const handlePing = async () => {
+    setPingState('loading');
+    try {
+      const res = await fetch('https://push.trap.games/api/ping');
+      setPingState(res.ok ? 'ok' : 'ng');
+    } catch (err) {
+      console.error(err);
+      setPingState('ng');
+    }
+  };
+
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyMessage('コピーしました！');
+      setTimeout(() => setCopyMessage(''), 2000);
+    } catch {
+      setCopyMessage('コピーに失敗しました');
+      setTimeout(() => setCopyMessage(''), 2000);
+    }
+  };
+
   const formatRankingValue = (value: number, type: string) => {
     switch (type) {
       case 'achievements_count':
@@ -202,21 +246,219 @@ function HomePage() {
 
   return (
     <Stack gap="xl" pt={0}>
-      {/* ロゴセクション */}
-      <Center mt={0} pt={0} mb={0}>
-        <img 
-          src="/MPG_logo.png" 
-          alt="MPG Logo" 
-          className="logo-container"
-          style={{ 
-            maxWidth: '700px', 
-            width: '100%',
-            height: 'auto',
-            marginBottom: '0.5rem',
-            marginTop: '0'
-          }} 
-        />
-      </Center>
+      {/* ヒーロー */}
+      <Card padding="xl" radius="md" shadow="sm" style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e7f5ff 100%)' }}>
+        <Stack gap="md">
+          <Group justify="space-between" align="flex-start">
+            <Stack gap={8}>
+              <Highlight
+                highlight={['デカプ', 'Massive Medal Pusher']}
+                fw={700}
+                fz={14}
+                c="dimmed"
+                highlightStyles={(theme) => ({
+                  backgroundColor: theme.colors.blue[0],
+                  color: theme.colors.blue[7],
+                })}
+              >
+                Massive Medal Pusher / デカプ クラウドセーブ・統計ハブ
+              </Highlight>
+              <Title order={1} style={{ letterSpacing: '-0.02em' }}>
+                クソでっけぇプッシャーゲーム
+              </Title>
+              <Text size="lg" c="dimmed">
+                セーブ共有・ランキング・最新情報をまとめた公式ミニポータル。クラウドセーブのURL確認や統計閲覧、コミュニティリンクを素早く開けます。
+              </Text>
+              <Group gap="sm">
+                <Button
+                  size="md"
+                  leftSection={<IconBrandDiscord size={18} />}
+                  component="a"
+                  href="https://discord.com/invite/CgnYyXecKm"
+                  target="_blank"
+                  rel="noreferrer"
+                  radius="md"
+                >
+                  公式Discordへ参加
+                </Button>
+                <Button
+                  size="md"
+                  variant="outline"
+                  leftSection={<IconBook2 size={18} />}
+                  component="a"
+                  href="https://wikiwiki.jp/vr_bigpusher/"
+                  target="_blank"
+                  rel="noreferrer"
+                  radius="md"
+                >
+                  公式Wikiを開く
+                </Button>
+              </Group>
+              <Group gap="sm">
+                <Button
+                  variant="light"
+                  size="sm"
+                  leftSection={<IconWorld size={16} />}
+                  component="a"
+                  href="https://vrchat.com/home/group/grp_5900a25d-0bb9-48d4-bab1-f3bd5c9a5e73"
+                  target="_blank"
+                  rel="noreferrer"
+                  radius="md"
+                >
+                  VRChatグループ
+                </Button>
+                <Button
+                  variant="light"
+                  size="sm"
+                  leftSection={<IconWorld size={16} />}
+                  component="a"
+                  href="https://vrchat.com/home/group/grp_f38ec6a3-0de5-499e-a85f-1038013bdd04"
+                  target="_blank"
+                  rel="noreferrer"
+                  radius="md"
+                >
+                  でかプ交流会
+                </Button>
+              </Group>
+            </Stack>
+            <img
+              src="/MPG_logo.png"
+              alt="MPG Logo"
+              style={{
+                maxWidth: '260px',
+                width: '35vw',
+                height: 'auto',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 8px 18px rgba(0,0,0,0.15))'
+              }}
+            />
+          </Group>
+          <Divider />
+          <Group gap="sm" wrap="wrap">
+            <Badge variant="dot" color="teal" size="lg" radius="sm" leftSection={<IconRocket size={14} />}>
+              v4 クラウドセーブ稼働中
+            </Badge>
+            <Badge variant="outline" color="blue" size="lg" radius="sm">
+              API: https://push.trap.games/api
+            </Badge>
+            <Badge variant="outline" color="gray" size="lg" radius="sm">
+              Swagger: /swagger/index.html
+            </Badge>
+          </Group>
+        </Stack>
+      </Card>
+
+      {/* クイックリンク & ツール */}
+      <Grid gutter="md">
+        <Grid.Col span={{ base: 12, md: 6 }}>
+          <Card withBorder radius="md" padding="lg" shadow="sm">
+            <Group justify="space-between" mb="sm">
+              <Title order={3}>クイックリンク</Title>
+              <Tooltip label="コピーできるよ" position="left">
+                <Badge color={copyMessage ? 'teal' : 'gray'}>{copyMessage || 'copy ready'}</Badge>
+              </Tooltip>
+            </Group>
+            <Stack gap="sm">
+              <Group justify="space-between">
+                <Text>本番 API</Text>
+                <Group gap="xs">
+                  <Anchor href="https://push.trap.games/api" target="_blank" rel="noreferrer" c="blue">
+                    開く
+                  </Anchor>
+                  <ActionIcon variant="light" onClick={() => handleCopy('https://push.trap.games/api')}>
+                    <IconDownload size={16} />
+                  </ActionIcon>
+                </Group>
+              </Group>
+              <Group justify="space-between">
+                <Text>テスト API</Text>
+                <Group gap="xs">
+                  <Anchor href="https://push-test.trap.games/api" target="_blank" rel="noreferrer" c="blue">
+                    開く
+                  </Anchor>
+                  <ActionIcon variant="light" onClick={() => handleCopy('https://push-test.trap.games/api')}>
+                    <IconDownload size={16} />
+                  </ActionIcon>
+                </Group>
+              </Group>
+              <Group justify="space-between">
+                <Text>ローカル API</Text>
+                <Group gap="xs">
+                  <Anchor href="http://localhost:8080/api" target="_blank" rel="noreferrer" c="blue">
+                    開く
+                  </Anchor>
+                  <ActionIcon variant="light" onClick={() => handleCopy('http://localhost:8080/api')}>
+                    <IconDownload size={16} />
+                  </ActionIcon>
+                </Group>
+              </Group>
+              <Divider />
+              <Group gap="sm">
+                <Button
+                  variant="gradient"
+                  gradient={{ from: 'indigo', to: 'cyan' }}
+                  component="a"
+                  href="/swagger/index.html"
+                  target="_blank"
+                  radius="md"
+                  leftSection={<IconExternalLink size={16} />}
+                >
+                  Swagger UI を開く
+                </Button>
+                <Button
+                  variant="subtle"
+                  component="a"
+                  href="/api/openapi.yaml"
+                  target="_blank"
+                  radius="md"
+                >
+                  OpenAPI を見る
+                </Button>
+              </Group>
+            </Stack>
+          </Card>
+        </Grid.Col>
+
+        <Grid.Col span={{ base: 12, md: 6 }}>
+          <Card withBorder radius="md" padding="lg" shadow="sm">
+            <Group justify="space-between" align="center">
+              <Title order={3}>サーバーヘルス</Title>
+              <Button
+                size="sm"
+                variant="light"
+                leftSection={<IconPlugConnected size={14} />}
+                loading={pingState === 'loading'}
+                onClick={handlePing}
+              >
+                ping
+              </Button>
+            </Group>
+            <Text size="sm" c="dimmed" mb="sm">
+              https://push.trap.games/api/ping
+            </Text>
+            <Group gap="sm">
+              <Badge color={pingState === 'ok' ? 'teal' : pingState === 'ng' ? 'red' : 'gray'} radius="sm">
+                {pingState === 'idle' && '未実行'}
+                {pingState === 'loading' && '確認中...'}
+                {pingState === 'ok' && '稼働中'}
+                {pingState === 'ng' && '疎通 NG'}
+              </Badge>
+            </Group>
+            <Divider my="md" />
+            <Group gap="xs">
+              <ThemeIcon size={34} radius="lg" variant="light" color="blue">
+                <IconBrandGithub size={18} />
+              </ThemeIcon>
+              <Stack gap={4}>
+                <Text fw={600} fz="sm">GitHub</Text>
+                <Anchor href="https://github.com/pikachu0310/very-big-medal-pusher-data-server" target="_blank" rel="noreferrer" c="blue">
+                  very-big-medal-pusher-data-server
+                </Anchor>
+              </Stack>
+            </Group>
+          </Card>
+        </Grid.Col>
+      </Grid>
 
       <Tabs defaultValue="personal" variant="outline">
         <Tabs.List>
@@ -713,6 +955,80 @@ function HomePage() {
           </Paper>
         </Tabs.Panel>
       </Tabs>
+
+      {/* Twitter セクション */}
+      <Card withBorder radius="md" padding="lg" shadow="sm">
+        <Group justify="space-between" mb="xs">
+          <Title order={3}>#でかプ / #VRでかプ リアルタイム</Title>
+          <Button
+            size="xs"
+            variant="light"
+            component="a"
+            href={twitterSearchUrl}
+            target="_blank"
+            rel="noreferrer"
+            leftSection={<IconExternalLink size={14} />}
+          >
+            Xで開く
+          </Button>
+        </Group>
+        <Text size="sm" c="dimmed" mb="md">
+          公式ハッシュタグの最新投稿をチェックできます。（読み込めない場合は上のボタンから直接開いてください）
+        </Text>
+        <div style={{ border: '1px solid #e9ecef', borderRadius: 12, overflow: 'hidden', minHeight: 420 }}>
+          <iframe
+            title="x-stream"
+            src={`https://twitframe.com/show?url=${encodeURIComponent(twitterSearchUrl)}`}
+            style={{ width: '100%', height: '520px', border: 'none' }}
+            allow="clipboard-write; encrypted-media"
+          />
+        </div>
+      </Card>
+
+      {/* リソース & FAQ */}
+      <Grid gutter="md">
+        <Grid.Col span={{ base: 12, md: 7 }}>
+          <Card withBorder radius="md" padding="lg" shadow="sm">
+            <Title order={3} mb="sm">ガイド & ヒント</Title>
+            <Stack gap="sm">
+              <Text>
+                <strong>クラウドセーブ手順:</strong> ワールド内パネルでセーブ → URL をコピーして本ページの「個人統計」に貼り付け → 最新統計を表示。
+              </Text>
+              <Text>
+                <strong>ロード確認:</strong> ワールド内「ロード確認モーダル」でセーブ差分を確認後にロード。改ざん防止のため HMAC 署名を必須化。
+              </Text>
+              <Text>
+                <strong>API で直接触る:</strong> Swagger UI から /v4/data, /v4/users/{'{user_id}'}/data を試せます。セーブは Base64URL、ロードは Base64 + 署名です。
+              </Text>
+              <Text>
+                <strong>ランキング反映:</strong> 最新セーブが v3_user_latest_save_data に集約され、v4/statistics が高速に返却されます。
+              </Text>
+            </Stack>
+          </Card>
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, md: 5 }}>
+          <Card withBorder radius="md" padding="lg" shadow="sm">
+            <Title order={3} mb="sm">コミュニティ・その他</Title>
+            <Stack gap="xs">
+              <Anchor href="https://discord.com/invite/CgnYyXecKm" target="_blank" rel="noreferrer" c="blue">
+                公式Discord (でかプ同好会 Discord支部)
+              </Anchor>
+              <Anchor href="https://wikiwiki.jp/vr_bigpusher/" target="_blank" rel="noreferrer" c="blue">
+                公式Wiki
+              </Anchor>
+              <Anchor href="https://vrchat.com/home/group/grp_5900a25d-0bb9-48d4-bab1-f3bd5c9a5e73" target="_blank" rel="noreferrer" c="blue">
+                VRChatグループ
+              </Anchor>
+              <Anchor href="https://vrchat.com/home/group/grp_f38ec6a3-0de5-499e-a85f-1038013bdd04" target="_blank" rel="noreferrer" c="blue">
+                でかプ交流会 ～ MMP Meeting
+              </Anchor>
+              <Anchor href="https://github.com/pikachu0310/very-big-medal-pusher-data-server" target="_blank" rel="noreferrer" c="dimmed">
+                GitHub (サーバー)
+              </Anchor>
+            </Stack>
+          </Card>
+        </Grid.Col>
+      </Grid>
     </Stack>
   );
 }
