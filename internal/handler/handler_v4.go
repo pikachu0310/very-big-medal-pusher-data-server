@@ -20,13 +20,21 @@ const (
 
 // GetV4Data は v4 エンドポイントでセーブデータを保存する
 func (h *Handler) GetV4Data(ctx echo.Context, params models.GetV4DataParams) error {
+	userID, err := decodeUserIDParam(params.UserId)
+	if err != nil {
+		return ctx.String(http.StatusBadRequest, "invalid user_id")
+	}
+	if userID == "" {
+		return ctx.String(http.StatusBadRequest, "missing user_id")
+	}
+
 	// クエリパラメータを正しい順序で構築して署名検証を行う
 	dataEncoded := strings.ReplaceAll(url.QueryEscape(params.Data), "+", "%20")
 	userIdEncoded := strings.ReplaceAll(url.QueryEscape(params.UserId), "+", "%20")
 	signingStr := "data=" + dataEncoded + "&user_id=" + userIdEncoded
 
 	// 署名検証
-	if !verifySignature(signingStr, params.Sig, generateUserSecretV4(params.UserId)) {
+	if !verifySignature(signingStr, params.Sig, generateUserSecretV4(userID)) {
 		return ctx.String(http.StatusUnauthorized, "invalid signature")
 	}
 
@@ -37,7 +45,7 @@ func (h *Handler) GetV4Data(ctx echo.Context, params models.GetV4DataParams) err
 	}
 
 	// 重複チェック
-	exists, err := h.repo.ExistsSameSave(ctx.Request().Context(), params.UserId, sd.Playtime)
+	exists, err := h.repo.ExistsSameSave(ctx.Request().Context(), userID, sd.Playtime)
 	if err != nil {
 		return ctx.String(http.StatusInternalServerError, err.Error())
 	}
@@ -46,7 +54,7 @@ func (h *Handler) GetV4Data(ctx echo.Context, params models.GetV4DataParams) err
 	}
 
 	// 保存（v2_save_data に保存し、v3_user_latest_save_data を更新）
-	sd.UserId = params.UserId
+	sd.UserId = userID
 	if err := h.repo.InsertSaveV4(ctx.Request().Context(), sd); err != nil {
 		return ctx.String(http.StatusInternalServerError, err.Error())
 	}
@@ -60,23 +68,35 @@ func (h *Handler) GetV4UsersUserIdData(
 	userId string,
 	params models.GetV4UsersUserIdDataParams,
 ) error {
+	decodedUserID, err := decodeUserIDParam(userId)
+	if err != nil {
+		return ctx.String(http.StatusBadRequest, "invalid user_id")
+	}
+	if decodedUserID == "" {
+		return ctx.String(http.StatusBadRequest, "missing user_id")
+	}
+
 	// 署名必須
 	if params.Sig == "" {
 		return ctx.String(http.StatusBadRequest, "missing signature")
 	}
-	if !verifyUserSignature(userId, params.Sig) {
+	if !verifyUserSignature(decodedUserID, params.Sig) {
 		return ctx.String(http.StatusUnauthorized, "invalid signature")
 	}
 
 	// 最新セーブデータ取得（v2_save_data を参照）
-	sd, err := h.repo.GetLatestSave(ctx.Request().Context(), userId)
+	sd, err := h.repo.GetLatestSave(ctx.Request().Context(), decodedUserID)
 	if err != nil {
 		return ctx.String(http.StatusNotFound, err.Error())
 	}
 
 	// OpenAPI モデル化 & 返却
 	model := sd.ToModel()
-	return ctx.JSON(http.StatusOK, model)
+	signed, err := buildSignedSaveData(model)
+	if err != nil {
+		return ctx.String(http.StatusInternalServerError, err.Error())
+	}
+	return ctx.JSON(http.StatusOK, signed)
 }
 
 // GetV4Statistics は v4 エンドポイントで最適化された統計データを返す

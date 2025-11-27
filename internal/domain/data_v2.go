@@ -2,10 +2,12 @@ package domain
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
@@ -27,9 +29,9 @@ type SaveData struct {
 	SlotStartFev                int64     `db:"slot_startfev"`
 	SlotHit                     int64     `db:"slot_hit"`
 	SlotGetFev                  int64     `db:"slot_getfev"`
-	SqrGet                      int       `db:"sqr_get"`
+	SqrGet                      int64     `db:"sqr_get"`
 	SqrStep                     int64     `db:"sqr_step"`
-	JackGet                     int       `db:"jack_get"`
+	JackGet                     int64     `db:"jack_get"`
 	JackStartMax                int64     `db:"jack_startmax"`
 	JackTotalMax                int       `db:"jack_totalmax"`
 	UltGet                      int       `db:"ult_get"`
@@ -40,13 +42,13 @@ type SaveData struct {
 	FirstBoot                   int64     `db:"firstboot"`
 	LastSave                    int64     `db:"lastsave"`
 	Playtime                    int64     `db:"playtime"`
-	BstpStep                    int       `db:"bstp_step"`
-	BstpRwd                     int       `db:"bstp_rwd"`
+	BstpStep                    int64     `db:"bstp_step"`
+	BstpRwd                     int64     `db:"bstp_rwd"`
 	BuyTotal                    int       `db:"buy_total"`
 	SkillPoint                  int       `db:"skill_point"`
 	BlackBox                    int       `db:"blackbox"`
 	BlackBoxTotal               int64     `db:"blackbox_total"`
-	SpUse                       int       `db:"sp_use"`
+	SpUse                       int64     `db:"sp_use"`
 	HideRecord                  int       `db:"hide_record"`
 	CpMMax                      float64   `db:"cpm_max"`
 	JackTotalMaxV2              int64     `db:"jack_totalmax_v2"`
@@ -88,7 +90,7 @@ type SaveData struct {
 // ParseSaveData decodes URL-encoded JSON into a minimal SaveData for insert.
 // It does *not* fill ID/CreatedAt/UpdatedAt — those come from the DB.
 func ParseSaveData(raw string) (*SaveData, error) {
-	decoded, err := url.QueryUnescape(raw)
+	decoded, err := decodeSavePayload(raw)
 	if err != nil {
 		return nil, err
 	}
@@ -106,9 +108,9 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		SlotStartFev                *int64           `json:"slot_startfev"`
 		SlotHit                     *int64           `json:"slot_hit"`
 		SlotGetFev                  *int64           `json:"slot_getfev"`
-		SqrGet                      *int             `json:"sqr_get"`
+		SqrGet                      json.RawMessage  `json:"sqr_get"`
 		SqrStep                     *int64           `json:"sqr_step"`
-		JackGet                     *int             `json:"jack_get"`
+		JackGet                     json.RawMessage  `json:"jack_get"`
 		JackStartMax                *int64           `json:"jack_startmax"`
 		JackTotalMax                *int             `json:"jack_totalmax"`
 		UltGet                      *int             `json:"ult_get"`
@@ -119,13 +121,13 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		FirstBoot                   *json.Number     `json:"firstboot"`
 		LastSave                    *json.Number     `json:"lastsave"`
 		Playtime                    *int64           `json:"playtime"`
-		BstpStep                    *int             `json:"bstp_step"`
-		BstpRwd                     *int             `json:"bstp_rwd"`
+		BstpStep                    json.RawMessage  `json:"bstp_step"`
+		BstpRwd                     json.RawMessage  `json:"bstp_rwd"`
 		BuyTotal                    *int             `json:"buy_total"`
 		SkillPoint                  *float64         `json:"sp"`
 		BlackBox                    *float64         `json:"bbox"`
 		BlackBoxTotal               *float64         `json:"bbox_all"`
-		SpUse                       *int             `json:"sp_use"`
+		SpUse                       json.RawMessage  `json:"sp_use"`
 		HideRecord                  *int             `json:"hide_record"`
 		CpMMax                      *float64         `json:"cpm_max"`
 		JackTotalMaxV2              *int64           `json:"jack_totalmax_v2"`
@@ -191,9 +193,9 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		SlotStartFev:                safeInt64(m.SlotStartFev),
 		SlotHit:                     safeInt64(m.SlotHit),
 		SlotGetFev:                  safeInt64(m.SlotGetFev),
-		SqrGet:                      safeInt(m.SqrGet),
+		SqrGet:                      parseInt64Message(m.SqrGet),
 		SqrStep:                     safeInt64(m.SqrStep),
-		JackGet:                     safeInt(m.JackGet),
+		JackGet:                     parseInt64Message(m.JackGet),
 		JackStartMax:                safeInt64(m.JackStartMax),
 		JackTotalMax:                safeInt(m.JackTotalMax),
 		UltGet:                      safeInt(m.UltGet),
@@ -204,13 +206,13 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		FirstBoot:                   parseUnixFromNumber(m.FirstBoot),
 		LastSave:                    parseUnixFromNumber(m.LastSave),
 		Playtime:                    safeInt64(m.Playtime),
-		BstpStep:                    safeInt(m.BstpStep),
-		BstpRwd:                     safeInt(m.BstpRwd),
+		BstpStep:                    parseInt64Message(m.BstpStep),
+		BstpRwd:                     parseInt64Message(m.BstpRwd),
 		BuyTotal:                    safeInt(m.BuyTotal),
 		SkillPoint:                  int(safeFloat64(m.SkillPoint)),
 		BlackBox:                    int(safeFloat64(m.BlackBox)),
 		BlackBoxTotal:               int64(safeFloat64(m.BlackBoxTotal)),
-		SpUse:                       safeInt(m.SpUse),
+		SpUse:                       parseInt64Message(m.SpUse),
 		HideRecord:                  safeInt(m.HideRecord),
 		CpMMax:                      safeFloat64(m.CpMMax),
 		JackTotalMaxV2:              safeInt64(m.JackTotalMaxV2),
@@ -245,6 +247,42 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		LTotemPlacements:            parseIntArray(m.LTotemPlacements),
 	}
 	return sd, nil
+}
+
+func decodeSavePayload(raw string) (string, error) {
+	if decoded, ok := tryDecodeBase64(raw); ok {
+		return decoded, nil
+	}
+	return url.QueryUnescape(raw)
+}
+
+func tryDecodeBase64(raw string) (string, bool) {
+	trimmed := strings.TrimSpace(raw)
+	if trimmed == "" {
+		return "", false
+	}
+	encodings := []*base64.Encoding{
+		base64.RawURLEncoding,
+		base64.URLEncoding,
+		base64.RawStdEncoding,
+		base64.StdEncoding,
+	}
+	for _, enc := range encodings {
+		decoded, err := enc.DecodeString(trimmed)
+		if err != nil {
+			continue
+		}
+		str := string(decoded)
+		if looksLikeJSON(str) {
+			return str, true
+		}
+	}
+	return "", false
+}
+
+func looksLikeJSON(s string) bool {
+	t := strings.TrimSpace(s)
+	return strings.HasPrefix(t, "{") || strings.HasPrefix(t, "[")
 }
 
 // ToModel converts a domain.SaveData into the OpenAPI model SaveDataV2.

@@ -97,8 +97,8 @@ type SaveDataV2 struct {
 	BallGet           *int64            `db:"ball_get" json:"ball_get,omitempty"`
 	Bbox              *float64          `db:"blackbox" json:"bbox,omitempty"`
 	BboxAll           *float64          `db:"blackbox_total" json:"bbox_all,omitempty"`
-	BstpRwd           *int              `db:"bstp_rwd" json:"bstp_rwd,omitempty"`
-	BstpStep          *int              `db:"bstp_step" json:"bstp_step,omitempty"`
+	BstpRwd           *int64            `db:"bstp_rwd" json:"bstp_rwd,omitempty"`
+	BstpStep          *int64            `db:"bstp_step" json:"bstp_step,omitempty"`
 	BuyShbi           *int              `db:"buy_shbi" json:"buy_shbi,omitempty"`
 	BuyTotal          *int              `db:"buy_total" json:"buy_total,omitempty"`
 	CpmMax            *float64          `db:"cpm_max" json:"cpm_max,omitempty"`
@@ -111,7 +111,7 @@ type SaveDataV2 struct {
 	DcPalballJp       *map[string]int   `json:"dc_palball_jp,omitempty" table:"save_data_v2_palball_jp"`
 	Firstboot         *string           `json:"firstboot,omitempty"`
 	HideRecord        *int              `db:"hide_record" json:"hide_record,omitempty"`
-	JackGet           *int              `db:"jack_get" json:"jack_get,omitempty"`
+	JackGet           *int64            `db:"jack_get" json:"jack_get,omitempty"`
 	JackStartmax      *int64            `db:"jack_startmax" json:"jack_startmax,omitempty"`
 	JackTotalmax      *int              `db:"jack_totalmax" json:"jack_totalmax,omitempty"`
 	JackTotalmaxV2    *int64            `db:"jack_totalmax_v2" json:"jack_totalmax_v2,omitempty"`
@@ -146,8 +146,8 @@ type SaveDataV2 struct {
 	SlotStart         *int64            `db:"slot_start" json:"slot_start,omitempty"`
 	SlotStartfev      *int64            `db:"slot_startfev" json:"slot_startfev,omitempty"`
 	Sp                *float64          `db:"skill_point" json:"sp,omitempty"`
-	SpUse             *int              `db:"sp_use" json:"sp_use,omitempty"`
-	SqrGet            *int              `db:"sqr_get" json:"sqr_get,omitempty"`
+	SpUse             *int64            `db:"sp_use" json:"sp_use,omitempty"`
+	SqrGet            *int64            `db:"sqr_get" json:"sqr_get,omitempty"`
 	SqrStep           *int64            `db:"sqr_step" json:"sqr_step,omitempty"`
 	TaskCnt           *float64          `db:"task_cnt" json:"task_cnt,omitempty"`
 	TotemAltars       *int              `db:"totem_altars" json:"totem_altars,omitempty"`
@@ -157,6 +157,15 @@ type SaveDataV2 struct {
 	UltTotalmax       *int              `db:"ult_totalmax" json:"ult_totalmax,omitempty"`
 	UltTotalmaxV2     *int64            `db:"ult_totalmax_v2" json:"ult_totalmax_v2,omitempty"`
 	Version           *int              `db:"version" json:"version,omitempty"`
+}
+
+// SignedSaveData Base64 でエンコードされたセーブデータと署名
+type SignedSaveData struct {
+	// Data Base64 エンコード済みのセーブデータ JSON（標準 Base64）
+	Data string `json:"data"`
+
+	// Sig HMAC-SHA256(data) による署名（LOAD シークレットを使用）
+	Sig string `json:"sig"`
 }
 
 // StatisticsV2 defines model for StatisticsV2.
@@ -268,8 +277,10 @@ type GetV3UsersUserIdDataParams struct {
 
 // GetV4DataParams defines parameters for GetV4Data.
 type GetV4DataParams struct {
-	// Data URL エンコード済み JSON セーブデータ
-	Data   string `form:"data" json:"data"`
+	// Data Base64URL エンコード済み JSON セーブデータ（後方互換で URL エンコードも可）
+	Data string `form:"data" json:"data"`
+
+	// UserId Base64URL エンコードされたユーザーID（従来の生文字列にも対応）
 	UserId string `form:"user_id" json:"user_id"`
 	Sig    string `form:"sig" json:"sig"`
 }

@@ -371,17 +371,20 @@ paths:
     get:
       tags: [ v4 ]
       summary: セーブデータを送信 (v4)
-      description: JSON 化したセーブデータを GET パラメータで送信して保存します。
+      description: >
+        Base64URL でエンコードした JSON セーブデータを GET パラメータで送信して保存します。
+        互換性のため、従来の URL エンコード済み JSON も受け付けます。
       parameters:
         - name: data
           in: query
           required: true
           schema: { type: string }
-          description: URL エンコード済み JSON セーブデータ
+          description: Base64URL エンコード済み JSON セーブデータ（後方互換で URL エンコードも可）
         - name: user_id
           in: query
           required: true
           schema: { type: string }
+          description: Base64URL エンコードされたユーザーID（従来の生文字列にも対応）
         - name: sig
           in: query
           required: true
@@ -397,7 +400,9 @@ paths:
     get:
       tags: [ v4 ]
       summary: ユーザーの最新セーブデータを取得 (v4・署名付き)
-      description: 指定ユーザーの最新セーブデータを返します。`sig` で HMAC 認証を行います。
+      description: >
+        指定ユーザーの最新セーブデータを返します。`sig` で HMAC 認証を行います。
+        ユーザーIDは Base64URL で指定してください（互換で平文も受け付け）。
       parameters:
         - name: user_id
           in: path
@@ -410,11 +415,11 @@ paths:
           schema: { type: string }
       responses:
         '200':
-          description: セーブデータ
+          description: 署名付きのエンコード済みセーブデータ
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SaveDataV2'
+                $ref: '#/components/schemas/SignedSaveData'
         '401': { description: 署名認証失敗 }
         '404': { description: データが見つかりません }
         '500': { description: サーバー内部エラー }
@@ -599,6 +604,7 @@ components:
           x-oapi-codegen-extra-tags: { db: 'slot_getfev' }
         sqr_get:
           type: integer
+          format: int64
           x-oapi-codegen-extra-tags: { db: 'sqr_get' }
         sqr_step:
           type: integer
@@ -606,6 +612,7 @@ components:
           x-oapi-codegen-extra-tags: { db: 'sqr_step' }
         jack_get:
           type: integer
+          format: int64
           x-oapi-codegen-extra-tags: { db: 'jack_get' }
         jack_startmax:
           type: integer
@@ -631,9 +638,11 @@ components:
           x-oapi-codegen-extra-tags: { db: 'buy_shbi' }
         bstp_step:
           type: integer
+          format: int64
           x-oapi-codegen-extra-tags: { db: 'bstp_step' }
         bstp_rwd:
           type: integer
+          format: int64
           x-oapi-codegen-extra-tags: { db: 'bstp_rwd' }
         buy_total:
           type: integer
@@ -652,6 +661,7 @@ components:
           x-oapi-codegen-extra-tags: { db: 'blackbox_total' }
         sp_use:
           type: integer
+          format: int64
           x-oapi-codegen-extra-tags: { db: 'sp_use' }
         hide_record:
           type: integer
@@ -790,6 +800,18 @@ components:
           type: array
           items: { type: string }
           x-oapi-codegen-extra-tags: { table: 'save_data_v2_achievements' }
+
+    SignedSaveData:
+      type: object
+      description: Base64 でエンコードされたセーブデータと署名
+      properties:
+        data:
+          type: string
+          description: Base64 エンコード済みのセーブデータ JSON（標準 Base64）
+        sig:
+          type: string
+          description: HMAC-SHA256(data) による署名（LOAD シークレットを使用）
+      required: [data, sig]
 
     RankingEntry:
       type: object
