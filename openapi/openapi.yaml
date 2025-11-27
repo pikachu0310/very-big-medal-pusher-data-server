@@ -6,6 +6,21 @@ info:
     VRChat用メダルプッシャーワールド「クソでっけぇプッシャーゲーム」のプレイデータを送信するAPI。
     — v1 と後方互換の v2 を提供します。
 
+tags:
+  - name: general
+    description: バージョン非依存のユーティリティエンドポイント
+  - name: v1
+    description: 旧API (非推奨)
+    deprecated: true
+  - name: v2
+    description: 旧API (非推奨)
+    deprecated: true
+  - name: v3
+    description: 旧API (非推奨)
+    deprecated: true
+  - name: v4
+    description: 現行API
+
 servers:
   - url: https://push.trap.games
 
@@ -126,8 +141,9 @@ paths:
 
   /ping:
     get:
-      tags: [ v1, v2, v3 ]
-      summary: ヘルスチェック
+      tags: [ general ]
+      summary: ヘルスチェック (汎用)
+      description: サーバー稼働確認用エンドポイントです。v3は非推奨のため general にまとめています。
       responses:
         '200': { description: サーバー稼働中 }
 
