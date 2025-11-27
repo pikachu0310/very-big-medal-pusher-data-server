@@ -130,6 +130,7 @@ function HomePage() {
   const [pingState, setPingState] = useState<'idle' | 'ok' | 'ng' | 'loading'>('idle');
   const [copyMessage, setCopyMessage] = useState<string>('');
   const twitterHashUrl = 'https://x.com/search?q=%23%E3%81%A7%E3%81%8B%E3%83%97%20OR%20%23VR%E3%81%A7%E3%81%8B%E3%83%97&f=live';
+  const [rawPayload, setRawPayload] = useState<string>('');
 
   useEffect(() => {
     const fetchGlobalStats = async () => {
@@ -149,16 +150,6 @@ function HomePage() {
     };
 
     fetchGlobalStats();
-  }, []);
-
-  useEffect(() => {
-    const existing = document.getElementById('twitter-wjs');
-    if (existing) return;
-    const script = document.createElement('script');
-    script.id = 'twitter-wjs';
-    script.src = 'https://platform.twitter.com/widgets.js';
-    script.async = true;
-    document.body.appendChild(script);
   }, []);
 
   const handleLoadPersonalData = async () => {
@@ -184,15 +175,30 @@ function HomePage() {
         }
       }
 
-      const data = await response.json();
+      const payload = await response.json();
 
-      setPersonalStats(data);
+      // v4 は { data: base64, sig: ... } で返るので data を decode
+      if (payload && payload.data) {
+        setRawPayload(payload.data);
+        const decoded = decodeBase64(payload.data);
+        const parsed = JSON.parse(decoded);
+        setPersonalStats(parsed);
+      } else {
+        setRawPayload('');
+        // 互換: 直接 SaveData が返る場合
+        setPersonalStats(payload);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'エラーが発生しました');
       setPersonalStats(null);
     } finally {
       setIsLoadingPersonal(false);
     }
+  };
+
+  const decodeBase64 = (b64: string) => {
+    const normalized = b64.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(b64.length / 4) * 4, '=');
+    return atob(normalized);
   };
 
   const handlePing = async () => {
@@ -236,7 +242,7 @@ function HomePage() {
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Title order={4} mb="md">{title}</Title>
       <Text size="sm" c="dimmed" mb="sm">総エントリー数: {data.length}件</Text>
-      <div style={{ maxHeight: '420px', overflowY: 'auto' }}>
+      <div style={{ maxHeight: '280px', overflowY: 'auto' }}>
         <Table>
           <Table.Thead>
             <Table.Tr>
@@ -263,6 +269,21 @@ function HomePage() {
 
   return (
     <Stack gap="xl" pt={0}>
+      {/* ロゴ */}
+      <Center mt={0} pt={0} mb={0}>
+        <img
+          src="/MPG_logo.png"
+          alt="MPG Logo"
+          style={{
+            maxWidth: '700px',
+            width: '100%',
+            height: 'auto',
+            marginBottom: '0.5rem',
+            marginTop: '0'
+          }}
+        />
+      </Center>
+
       {/* ヒーロー */}
       <Card padding="xl" radius="md" shadow="sm" style={{ background: 'linear-gradient(135deg, #e7f5ff 0%, #d0ebff 100%)' }}>
         <Stack gap="md">
@@ -289,8 +310,8 @@ function HomePage() {
                 href="https://discord.com/invite/CgnYyXecKm"
                 target="_blank"
                 rel="noreferrer"
-                variant="filled"
-                color="indigo"
+                variant="gradient"
+                gradient={{ from: 'grape', to: 'indigo' }}
                 fw={700}
                 c="white"
               >
@@ -307,7 +328,7 @@ function HomePage() {
                 target="_blank"
                 rel="noreferrer"
                 variant="filled"
-                color="cyan"
+                color="blue"
                 fw={700}
                 c="white"
               >
@@ -325,8 +346,9 @@ function HomePage() {
                 target="_blank"
                 rel="noreferrer"
                 variant="outline"
-                color="dark"
+                color="indigo"
                 fw={700}
+                c="indigo"
               >
                 VRChatグループ クソでっけぇプッシャーゲーム同好会
               </Button>
@@ -341,8 +363,9 @@ function HomePage() {
                 target="_blank"
                 rel="noreferrer"
                 variant="outline"
-                color="dark"
+                color="indigo"
                 fw={700}
+                c="indigo"
               >
                 でかプ交流会 ～ MMP Meeting
               </Button>
@@ -362,6 +385,22 @@ function HomePage() {
                 c="white"
               >
                 v4 クラウドセーブ稼働中（GitHub）
+              </Button>
+              <Button
+                mt="sm"
+                size="lg"
+                radius="md"
+                fullWidth
+                leftSection={<IconExternalLink size={20} />}
+                component="a"
+                href={twitterHashUrl}
+                target="_blank"
+                rel="noreferrer"
+                variant="light"
+                color="blue"
+                fw={700}
+              >
+                #でかプ / #VRでかプ リアルタイム
               </Button>
             </Grid.Col>
           </Grid>
@@ -384,7 +423,7 @@ function HomePage() {
               個人統計情報
             </Title>
             <Text size="sm" c="dimmed" mb="md" ta="center">
-              クラウドセーブで取得した URL を入力してください
+              クラウドセーブで取得した URL を入力してください（Base64 応答を自動復号します）
             </Text>
 
             <Stack gap="md">
@@ -419,16 +458,25 @@ function HomePage() {
                 </Center>
               )}
 
+              {rawPayload && (
+                <Card shadow="sm" padding="md" radius="md" withBorder>
+                  <Text size="sm" fw={600} mb="xs">受信データ (Base64)</Text>
+                  <Text size="xs" c="dimmed" style={{ wordBreak: 'break-all' }}>{rawPayload}</Text>
+                </Card>
+              )}
+
               {personalStats && (
                 <Card shadow="sm" padding="lg" radius="md" withBorder>
                   <Title order={4}>個人統計データ</Title>
-                  <Grid mt="md">
-                    <Grid.Col span={6}>バージョン: {personalStats.version ?? 'N/A'}</Grid.Col>
-                    <Grid.Col span={6}>クレジット総額: {personalStats.credit_all?.toLocaleString() ?? 'N/A'}</Grid.Col>
-                    <Grid.Col span={6}>プレイ時間: {personalStats.playtime?.toLocaleString() ?? 'N/A'}</Grid.Col>
-                    <Grid.Col span={6}>実績数: {personalStats.l_achieve?.length ?? 'N/A'}</Grid.Col>
-                    <Grid.Col span={6}>ジャックポット獲得: {personalStats.jack_get?.toLocaleString() ?? 'N/A'}</Grid.Col>
-                    <Grid.Col span={6}>すごろく進行: {personalStats.sqr_step?.toLocaleString() ?? 'N/A'}</Grid.Col>
+                  <Grid mt="md" gutter="sm">
+                    {Object.entries(personalStats).map(([key, val]) => (
+                      <Grid.Col span={{ base: 12, sm: 6 }} key={key}>
+                        <Text size="sm" fw={600}>{key}</Text>
+                        <Text size="sm" c="dimmed" style={{ wordBreak: 'break-all' }}>
+                          {Array.isArray(val) ? val.join(', ') : `${val ?? 'N/A'}`}
+                        </Text>
+                      </Grid.Col>
+                    ))}
                   </Grid>
                 </Card>
               )}
@@ -438,23 +486,7 @@ function HomePage() {
 
         <Tabs.Panel value="global" pt="md">
           <Paper p="xl" shadow="sm" radius="md">
-            <Group justify="space-between" mb="md" align="center">
-              <Title order={2}>グローバル統計</Title>
-              <Group gap="sm">
-                <Button
-                  size="xs"
-                  variant="light"
-                  leftSection={<IconExternalLink size={14} />}
-                  component="a"
-                  href="https://push.trap.games/api/v4/statistics"
-                  target="_blank"
-                  rel="noreferrer"
-                  color="blue"
-                >
-                  APIを見る
-                </Button>
-              </Group>
-            </Group>
+            <Title order={2} mb="md">グローバル統計</Title>
 
             {isLoadingGlobal && (
               <Center>
@@ -478,39 +510,6 @@ function HomePage() {
           </Paper>
         </Tabs.Panel>
       </Tabs>
-
-      {/* Twitter / X セクション */}
-      <Card withBorder radius="md" padding="lg" shadow="sm">
-        <Group justify="space-between" mb="xs">
-          <Title order={3}>#でかプ / #VRでかプ リアルタイム</Title>
-          <Button
-            size="xs"
-            variant="light"
-            component="a"
-            href={twitterHashUrl}
-            target="_blank"
-            rel="noreferrer"
-            leftSection={<IconExternalLink size={14} />}
-            color="blue"
-          >
-            Xで開く
-          </Button>
-        </Group>
-        <Text size="sm" c="dimmed" mb="md">
-          公式ハッシュタグの最新投稿をチェックできます。（読み込めない場合は上のボタンから直接開いてください）
-        </Text>
-        <div style={{ border: '1px solid #e9ecef', borderRadius: 12, overflow: 'hidden', minHeight: 420, padding: '0.5rem' }}>
-          <a
-            className="twitter-timeline"
-            data-theme="light"
-            data-height="520"
-            data-chrome="nofooter noborders transparent"
-            href={twitterHashUrl}
-          >
-            Tweets about #でかプ
-          </a>
-        </div>
-      </Card>
 
       {/* 開発者ツール */}
       <Grid gutter="md">
@@ -560,13 +559,15 @@ function HomePage() {
               <Group gap="sm">
                 <Button
                   variant="gradient"
-                  gradient={{ from: 'indigo', to: 'cyan' }}
+                  gradient={{ from: 'orange', to: 'red' }}
                   component="a"
                   href="/swagger/index.html"
                   target="_blank"
                   radius="md"
                   leftSection={<IconExternalLink size={16} />}
                   c="white"
+                  size="md"
+                  fw={700}
                 >
                   Swagger UI
                 </Button>
@@ -576,7 +577,9 @@ function HomePage() {
                   href="/api/openapi.yaml"
                   target="_blank"
                   radius="md"
-                  leftSection={<IconDownload size={16} />}
+                  leftSection={<IconDownload size={14} />}
+                  size="xs"
+                  color="gray"
                 >
                   OpenAPI をダウンロード
                 </Button>
@@ -588,7 +591,8 @@ function HomePage() {
                 target="_blank"
                 rel="noreferrer"
                 radius="md"
-                color="blue"
+                color="gray"
+                c="dark"
               >
                 DBにアクセス
               </Button>
@@ -602,6 +606,8 @@ function HomePage() {
               <Button
                 size="sm"
                 variant="light"
+                color="gray"
+                c="dark"
                 leftSection={<IconPlugConnected size={14} />}
                 loading={pingState === 'loading'}
                 onClick={handlePing}
