@@ -35,7 +35,6 @@ import {
   IconBrandGithub,
   IconExternalLink,
   IconPlugConnected,
-  IconRocket,
   IconCopy
 } from '@tabler/icons-react';
 
@@ -398,7 +397,7 @@ function HomePage() {
                 href="https://vrchat.com/home/group/grp_5900a25d-0bb9-48d4-bab1-f3bd5c9a5e73"
                 icon={<IconWorld size={20} />}
                 size="lg"
-                variant="outline"
+                variant="filled"
                 color="indigo"
               >
                 公式グループ クソでっけぇプッシャーゲーム同好会
@@ -408,7 +407,7 @@ function HomePage() {
                   href="https://vrchat.com/home/group/grp_f38ec6a3-0de5-499e-a85f-1038013bdd04"
                   icon={<IconWorld size={20} />}
                   size="lg"
-                  variant="outline"
+                  variant="filled"
                   color="indigo"
                 >
                   でかプ交流会 ～ MMP Meeting
@@ -426,20 +425,56 @@ function HomePage() {
                   #でかプ / #VRでかプ リアルタイム
                 </HeroButton>
               </Box>
-              <Box mt="sm">
-                <HeroButton
-                  href="https://github.com/pikachu0310/very-big-medal-pusher-data-server"
-                  icon={<IconRocket size={20} />}
-                  size="lg"
-                  variant="gradient"
-                  gradient={{ from: 'teal', to: 'blue' }}
-                >
-                  v4 クラウドセーブ稼働中（GitHub）
-                </HeroButton>
-              </Box>
             </Grid.Col>
           </Grid>
         </Stack>
+      </Card>
+
+      {/* 開発者向けリンク集 */}
+      <Card withBorder shadow="sm" radius="md" padding="md">
+        <Group gap="sm" grow>
+          <Button
+            variant="gradient"
+            gradient={{ from: 'orange', to: 'red' }}
+            component="a"
+            href="/swagger/index.html"
+            target="_blank"
+            rel="noreferrer"
+            radius="md"
+            leftSection={<IconExternalLink size={16} />}
+            c="white"
+            size="md"
+            fw={700}
+          >
+            SwaggerUI (API一覧)
+          </Button>
+          <Button
+            variant="light"
+            color="gray"
+            component="a"
+            href="https://push.trap.show/?server=mariadb.ns-system.svc.cluster.local&username=nsapp_c27d6f571f88ffff360fe2&db=nsapp_c27d6f571f88ffff360fe2"
+            target="_blank"
+            rel="noreferrer"
+            radius="md"
+            c="dark"
+            size="sm"
+          >
+            データベース
+          </Button>
+          <Button
+            variant="light"
+            color="gray"
+            component="a"
+            href="https://github.com/pikachu0310/very-big-medal-pusher-data-server"
+            target="_blank"
+            rel="noreferrer"
+            radius="md"
+            c="dark"
+            size="sm"
+          >
+            GitHub
+          </Button>
+        </Group>
       </Card>
 
       <Tabs defaultValue="personal" variant="outline">
@@ -525,9 +560,9 @@ function HomePage() {
               <Card shadow="sm" padding="lg" radius="md" withBorder mb="md">
                 <Group justify="space-between">
                   <Text fw={700}>世界の総メダル数</Text>
-                  <Badge color="yellow" variant="filled" radius="sm">
+                  <Text fw={800} fz="xl">
                     {globalStats.total_medals?.toLocaleString() ?? 'N/A'} 枚
-                  </Badge>
+                  </Text>
                 </Group>
               </Card>
             )}
