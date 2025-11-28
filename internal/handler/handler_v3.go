@@ -228,7 +228,7 @@ func (h *Handler) GetV3Statistics(ctx echo.Context) error {
 
 // GetV4AchievementsRates は v4 エンドポイントで実績取得率を返す
 func (h *Handler) GetV3AchievementsRates(ctx echo.Context) error {
-	rates, err := h.repo.GetAchievementRates(ctx.Request().Context())
+	rates, err := h.achievementRatesCache.Get(ctx.Request().Context(), achievementRatesCacheKey)
 	if err != nil {
 		return ctx.String(http.StatusInternalServerError, err.Error())
 	}

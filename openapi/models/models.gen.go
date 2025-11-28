@@ -5,6 +5,8 @@ package models
 
 import (
 	"time"
+
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 // Defines values for GetRankingsParamsSort.
@@ -31,6 +33,20 @@ type AchievementRates struct {
 
 	// TotalUsers 総ユーザー数
 	TotalUsers *int `json:"total_users,omitempty"`
+}
+
+// AchievementUnlockEntry defines model for AchievementUnlockEntry.
+type AchievementUnlockEntry struct {
+	AchievementId *string    `json:"achievement_id,omitempty"`
+	Playtime      *int       `json:"playtime,omitempty"`
+	SaveId        *int       `json:"save_id,omitempty"`
+	UnlockedAt    *time.Time `json:"unlocked_at,omitempty"`
+}
+
+// AchievementUnlockHistoryResponse defines model for AchievementUnlockHistoryResponse.
+type AchievementUnlockHistoryResponse struct {
+	Items *[]AchievementUnlockEntry `json:"items,omitempty"`
+	Total *int                      `json:"total,omitempty"`
 }
 
 // CreditAllDistributionBucket defines model for CreditAllDistributionBucket.
@@ -84,11 +100,36 @@ type GameData struct {
 	Version          *int       `json:"version,omitempty"`
 }
 
+// MedalTimeseriesBucket defines model for MedalTimeseriesBucket.
+type MedalTimeseriesBucket struct {
+	ActiveUsers *int                `json:"active_users,omitempty"`
+	AvgPlaytime *int                `json:"avg_playtime,omitempty"`
+	Date        *openapi_types.Date `json:"date,omitempty"`
+	TotalMedals *int                `json:"total_medals,omitempty"`
+}
+
+// MedalTimeseriesResponse defines model for MedalTimeseriesResponse.
+type MedalTimeseriesResponse struct {
+	Buckets *[]MedalTimeseriesBucket `json:"buckets,omitempty"`
+}
+
 // RankingEntry defines model for RankingEntry.
 type RankingEntry struct {
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 	UserId    *string    `json:"user_id,omitempty"`
 	Value     *int64     `json:"value,omitempty"`
+}
+
+// SaveActivityBucket defines model for SaveActivityBucket.
+type SaveActivityBucket struct {
+	HourStart   *time.Time `json:"hour_start,omitempty"`
+	Saves       *int       `json:"saves,omitempty"`
+	UniqueUsers *int       `json:"unique_users,omitempty"`
+}
+
+// SaveActivityResponse defines model for SaveActivityResponse.
+type SaveActivityResponse struct {
+	Buckets *[]SaveActivityBucket `json:"buckets,omitempty"`
 }
 
 // SaveDataV2 defines model for SaveDataV2.
@@ -157,6 +198,29 @@ type SaveDataV2 struct {
 	UltTotalmax       *int              `db:"ult_totalmax" json:"ult_totalmax,omitempty"`
 	UltTotalmaxV2     *int64            `db:"ult_totalmax_v2" json:"ult_totalmax_v2,omitempty"`
 	Version           *int              `db:"version" json:"version,omitempty"`
+}
+
+// SaveHistoryEntry defines model for SaveHistoryEntry.
+type SaveHistoryEntry struct {
+	BallGet        *int       `json:"ball_get,omitempty"`
+	BlackboxTotal  *int       `json:"blackbox_total,omitempty"`
+	CpmMax         *float64   `json:"cpm_max,omitempty"`
+	CreatedAt      *time.Time `json:"created_at,omitempty"`
+	CreditAll      *int       `json:"credit_all,omitempty"`
+	JackTotalmaxV2 *int       `json:"jack_totalmax_v2,omitempty"`
+	MedalGet       *int       `json:"medal_get,omitempty"`
+	Playtime       *int       `json:"playtime,omitempty"`
+	SaveId         *int       `json:"save_id,omitempty"`
+	SpUse          *int       `json:"sp_use,omitempty"`
+	UltTotalmaxV2  *int       `json:"ult_totalmax_v2,omitempty"`
+	UpdatedAt      *time.Time `json:"updated_at,omitempty"`
+	Version        *int       `json:"version,omitempty"`
+}
+
+// SaveHistoryResponse defines model for SaveHistoryResponse.
+type SaveHistoryResponse struct {
+	Items      *[]SaveHistoryEntry `json:"items,omitempty"`
+	NextBefore *time.Time          `json:"next_before,omitempty"`
 }
 
 // SignedSaveData Base64 でエンコードされたセーブデータと署名
@@ -285,8 +349,41 @@ type GetV4DataParams struct {
 	Sig    string `form:"sig" json:"sig"`
 }
 
+// GetV4StatisticsMedalsTimeseriesParams defines parameters for GetV4StatisticsMedalsTimeseries.
+type GetV4StatisticsMedalsTimeseriesParams struct {
+	// Days 取得する日数（1〜180）
+	Days *int `form:"days,omitempty" json:"days,omitempty"`
+}
+
+// GetV4StatisticsSavesActivityParams defines parameters for GetV4StatisticsSavesActivity.
+type GetV4StatisticsSavesActivityParams struct {
+	// Hours 集計対象時間（1〜720 時間）
+	Hours *int `form:"hours,omitempty" json:"hours,omitempty"`
+}
+
+// GetV4UsersUserIdAchievementsHistoryParams defines parameters for GetV4UsersUserIdAchievementsHistory.
+type GetV4UsersUserIdAchievementsHistoryParams struct {
+	// Sig HMAC-SHA256 署名
+	Sig string `form:"sig" json:"sig"`
+
+	// Limit 取得件数（最大2000件）
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
 // GetV4UsersUserIdDataParams defines parameters for GetV4UsersUserIdData.
 type GetV4UsersUserIdDataParams struct {
 	// Sig HMAC-SHA256 署名
 	Sig string `form:"sig" json:"sig"`
+}
+
+// GetV4UsersUserIdSavesParams defines parameters for GetV4UsersUserIdSaves.
+type GetV4UsersUserIdSavesParams struct {
+	// Sig HMAC-SHA256 署名（/v4/users/{user_id}/data と同一方式）
+	Sig string `form:"sig" json:"sig"`
+
+	// Limit 取得件数（最大100件）
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Before この日時より前のセーブを取得（ISO8601）
+	Before *time.Time `form:"before,omitempty" json:"before,omitempty"`
 }

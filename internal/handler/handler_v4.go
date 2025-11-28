@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -16,6 +17,9 @@ import (
 const (
 	// 統計データのキャッシュキー（v4用）
 	statisticsCacheV4Key = "v4_stats"
+
+	// 実績取得率のキャッシュキー
+	achievementRatesCacheKey = "v4_achievements_rates"
 )
 
 // GetV4Data は v4 エンドポイントでセーブデータを保存する
@@ -112,12 +116,150 @@ func (h *Handler) GetV4Statistics(ctx echo.Context) error {
 
 // GetV4AchievementsRates は v4 エンドポイントで実績取得率を返す
 func (h *Handler) GetV4AchievementsRates(ctx echo.Context) error {
-	rates, err := h.repo.GetAchievementRates(ctx.Request().Context())
+	rates, err := h.achievementRatesCache.Get(ctx.Request().Context(), achievementRatesCacheKey)
 	if err != nil {
 		return ctx.String(http.StatusInternalServerError, err.Error())
 	}
 
 	return ctx.JSON(http.StatusOK, rates)
+}
+
+// GetV4UsersUserIdSaves は v4 エンドポイントでユーザーのセーブ履歴を返す
+func (h *Handler) GetV4UsersUserIdSaves(
+	ctx echo.Context,
+	userId string,
+	params models.GetV4UsersUserIdSavesParams,
+) error {
+	decodedUserID, err := decodeUserIDParam(userId)
+	if err != nil {
+		return ctx.String(http.StatusBadRequest, "invalid user_id")
+	}
+	if decodedUserID == "" {
+		return ctx.String(http.StatusBadRequest, "missing user_id")
+	}
+
+	// 署名必須
+	if params.Sig == "" {
+		return ctx.String(http.StatusBadRequest, "missing signature")
+	}
+	if !verifyUserSignature(decodedUserID, params.Sig) {
+		return ctx.String(http.StatusUnauthorized, "invalid signature")
+	}
+
+	// limit/before の整形
+	limit := 20
+	if params.Limit != nil {
+		limit = *params.Limit
+	}
+	if limit < 1 {
+		limit = 1
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	entries, hasMore, err := h.repo.GetSaveHistory(ctx.Request().Context(), decodedUserID, limit, params.Before)
+	if err != nil {
+		return ctx.String(http.StatusInternalServerError, err.Error())
+	}
+
+	resp := models.SaveHistoryResponse{
+		Items: &entries,
+	}
+	if hasMore && len(entries) > 0 && entries[len(entries)-1].UpdatedAt != nil {
+		resp.NextBefore = entries[len(entries)-1].UpdatedAt
+	}
+
+	return ctx.JSON(http.StatusOK, resp)
+}
+
+// GetV4UsersUserIdAchievementsHistory は v4 エンドポイントでアチーブメント履歴を返す
+func (h *Handler) GetV4UsersUserIdAchievementsHistory(
+	ctx echo.Context,
+	userId string,
+	params models.GetV4UsersUserIdAchievementsHistoryParams,
+) error {
+	decodedUserID, err := decodeUserIDParam(userId)
+	if err != nil {
+		return ctx.String(http.StatusBadRequest, "invalid user_id")
+	}
+	if decodedUserID == "" {
+		return ctx.String(http.StatusBadRequest, "missing user_id")
+	}
+
+	if params.Sig == "" {
+		return ctx.String(http.StatusBadRequest, "missing signature")
+	}
+	if !verifyUserSignature(decodedUserID, params.Sig) {
+		return ctx.String(http.StatusUnauthorized, "invalid signature")
+	}
+
+	limit := 500
+	if params.Limit != nil {
+		limit = *params.Limit
+	}
+	if limit < 1 {
+		limit = 1
+	}
+	if limit > 2000 {
+		limit = 2000
+	}
+
+	entries, total, err := h.repo.GetAchievementUnlockHistory(ctx.Request().Context(), decodedUserID, limit)
+	if err != nil {
+		return ctx.String(http.StatusInternalServerError, err.Error())
+	}
+
+	resp := models.AchievementUnlockHistoryResponse{
+		Items: &entries,
+	}
+	if total >= 0 {
+		resp.Total = &total
+	}
+
+	return ctx.JSON(http.StatusOK, resp)
+}
+
+// GetV4StatisticsMedalsTimeseries は世界のメダル総量推移を返す
+func (h *Handler) GetV4StatisticsMedalsTimeseries(ctx echo.Context, params models.GetV4StatisticsMedalsTimeseriesParams) error {
+	days := 30
+	if params.Days != nil {
+		days = *params.Days
+	}
+	if days < 1 {
+		days = 1
+	}
+	if days > 180 {
+		days = 180
+	}
+
+	resp, err := h.medalTimeseriesCache.Get(ctx.Request().Context(), strconv.Itoa(days))
+	if err != nil {
+		return ctx.String(http.StatusInternalServerError, err.Error())
+	}
+
+	return ctx.JSON(http.StatusOK, resp)
+}
+
+// GetV4StatisticsSavesActivity はセーブ投稿の時間別推移を返す
+func (h *Handler) GetV4StatisticsSavesActivity(ctx echo.Context, params models.GetV4StatisticsSavesActivityParams) error {
+	hours := 168
+	if params.Hours != nil {
+		hours = *params.Hours
+	}
+	if hours < 1 {
+		hours = 1
+	}
+	if hours > 720 {
+		hours = 720
+	}
+
+	resp, err := h.saveActivityCache.Get(ctx.Request().Context(), strconv.Itoa(hours))
+	if err != nil {
+		return ctx.String(http.StatusInternalServerError, err.Error())
+	}
+
+	return ctx.JSON(http.StatusOK, resp)
 }
 
 // generateUserSecretV4 は v4 用のユーザーシークレットを生成する

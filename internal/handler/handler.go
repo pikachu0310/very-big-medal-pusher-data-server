@@ -21,12 +21,24 @@ const statisticsCacheV3TTL = 30 * time.Minute
 // v4統計データのキャッシュTTL
 const statisticsCacheV4TTL = 5 * time.Minute
 
+// 実績取得率キャッシュTTL
+const achievementRatesCacheTTL = time.Hour
+
+// メダル推移キャッシュTTL
+const medalTimeseriesCacheTTL = time.Hour
+
+// セーブアクティビティキャッシュTTL
+const saveActivityCacheTTL = 10 * time.Minute
+
 type Handler struct {
-	repo              *repository.Repository
-	rankingCache      *sc.Cache[string, []models.GameData]
-	totalMedalsCache  *sc.Cache[string, int]
-	statisticsCacheV3 *sc.Cache[string, *models.StatisticsV3]
-	statisticsCacheV4 *sc.Cache[string, *models.StatisticsV4]
+	repo                  *repository.Repository
+	rankingCache          *sc.Cache[string, []models.GameData]
+	totalMedalsCache      *sc.Cache[string, int]
+	statisticsCacheV3     *sc.Cache[string, *models.StatisticsV3]
+	statisticsCacheV4     *sc.Cache[string, *models.StatisticsV4]
+	achievementRatesCache *sc.Cache[string, *models.AchievementRates]
+	medalTimeseriesCache  *sc.Cache[string, *models.MedalTimeseriesResponse]
+	saveActivityCache     *sc.Cache[string, *models.SaveActivityResponse]
 }
 
 func New(repo *repository.Repository) *Handler {
@@ -89,6 +101,55 @@ func New(repo *repository.Repository) *Handler {
 		log.Fatalf("failed to create statistics v4 cache: %v", err)
 	}
 	h.statisticsCacheV4 = statsCacheV4
+
+	// achievements rate キャッシュ
+	achievementsCache, err := sc.New(
+		func(ctx context.Context, key string) (*models.AchievementRates, error) {
+			return h.repo.GetAchievementRates(ctx)
+		},
+		achievementRatesCacheTTL,
+		achievementRatesCacheTTL,
+	)
+	if err != nil {
+		log.Fatalf("failed to create achievement rates cache: %v", err)
+	}
+	h.achievementRatesCache = achievementsCache
+
+	// メダル推移キャッシュ（日単位）
+	medalTimeseriesCache, err := sc.New(
+		func(ctx context.Context, key string) (*models.MedalTimeseriesResponse, error) {
+			days, _ := strconv.Atoi(key)
+			if days <= 0 {
+				days = 30
+			}
+			return h.repo.GetMedalTimeseries(ctx, days)
+		},
+		medalTimeseriesCacheTTL,
+		medalTimeseriesCacheTTL,
+		sc.WithLRUBackend(32),
+	)
+	if err != nil {
+		log.Fatalf("failed to create medal timeseries cache: %v", err)
+	}
+	h.medalTimeseriesCache = medalTimeseriesCache
+
+	// セーブアクティビティキャッシュ（時間単位）
+	saveActivityCache, err := sc.New(
+		func(ctx context.Context, key string) (*models.SaveActivityResponse, error) {
+			hours, _ := strconv.Atoi(key)
+			if hours <= 0 {
+				hours = 168
+			}
+			return h.repo.GetSaveActivity(ctx, hours)
+		},
+		saveActivityCacheTTL,
+		saveActivityCacheTTL,
+		sc.WithLRUBackend(32),
+	)
+	if err != nil {
+		log.Fatalf("failed to create save activity cache: %v", err)
+	}
+	h.saveActivityCache = saveActivityCache
 
 	return h
 }
