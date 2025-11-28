@@ -315,7 +315,17 @@ function HomePage() {
       color={color}
       fw={700}
       c={variant === 'outline' ? color || 'dark' : 'white'}
-      style={{ minHeight: `calc(${size === 'xl' ? 52 : 44}px * ${heightMultiplier})` }}
+      style={{
+        minHeight: `calc(${size === 'xl' ? 52 : 44}px * ${heightMultiplier})`,
+        whiteSpace: 'normal',
+        lineHeight: 1.3,
+        paddingInline: '1.4rem',
+        textAlign: 'center',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        wordBreak: 'break-word'
+      }}
     >
       {children}
     </Button>
@@ -385,17 +395,17 @@ function HomePage() {
                 variant="filled"
                 color="indigo"
               >
-                公式VRChatグループ
+                公式グループ(VRChat)
               </HeroButton>
               <Box mt="sm">
                 <HeroButton
-                  href="https://vrchat.com/home/group/grp_f38ec6a3-0de5-499e-a85f-1038013bdd04"
+                  href="https://vrchat.com/home/launch?worldId=wrld_1af53798-92a3-4c3f-99ae-a7c42ec6084d"
                   icon={<IconWorld size={20} />}
                   size="lg"
                   variant="filled"
                   color="indigo"
                 >
-                  でかプ交流会 ～ MMP Meeting
+                  VRChatワールドリンク
                 </HeroButton>
               </Box>
               <Box mt="sm">
@@ -407,7 +417,7 @@ function HomePage() {
                   color="blue"
                   heightMultiplier={1}
                 >
-                  #でかプ / #VRでかプ (リアルタイムX投稿)
+                  #でかプ / #VRでかプ (X投稿)
                 </HeroButton>
               </Box>
             </Grid.Col>
@@ -473,34 +483,6 @@ function HomePage() {
               leftSection={<IconBrandGithub size={14} />}
             >
               Data Server Github
-            </Button>
-            <Button
-              variant="light"
-              color="gray"
-              component="a"
-              href="https://github.com/pikachu0310/VRCWorld-MassiveMedalPusher"
-              target="_blank"
-              rel="noreferrer"
-              radius="md"
-              c="dark"
-              size="sm"
-              leftSection={<IconLock size={14} />}
-            >
-              VRCWorld-MassiveMedalPusher
-            </Button>
-            <Button
-              variant="light"
-              color="gray"
-              component="a"
-              href="https://github.com/pikariku/VRCWorld-VeryBigMedalPusher"
-              target="_blank"
-              rel="noreferrer"
-              radius="md"
-              c="dark"
-              size="sm"
-              leftSection={<IconLock size={14} />}
-            >
-              VRCWorld-VeryBigMedalPusher
             </Button>
           </Group>
         </Stack>
