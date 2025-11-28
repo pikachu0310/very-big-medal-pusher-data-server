@@ -16,8 +16,6 @@ import {
   Table,
   Badge,
   Anchor,
-  Divider,
-  Tooltip,
   ThemeIcon,
   Highlight,
   Spoiler,
@@ -33,7 +31,8 @@ import {
   IconBook2,
   IconBrandGithub,
   IconExternalLink,
-  IconPlugConnected
+  IconPlugConnected,
+  IconLock
 } from '@tabler/icons-react';
 
 interface PersonalStats {
@@ -354,7 +353,7 @@ function HomePage() {
           >
             Massive Medal Pusher / リンク集
           </Highlight>
-         <Grid gutter="md">
+          <Grid gutter="md">
             <Grid.Col span={{ base: 12, md: 6 }}>
               <HeroButton
                 href="https://discord.com/invite/CgnYyXecKm"
@@ -417,50 +416,93 @@ function HomePage() {
       </Card>
 
       {/* 開発者向けリンク集 */}
-      <Card withBorder shadow="sm" radius="md" padding="md">
-        <Group gap="sm" grow>
-          <Button
-            variant="gradient"
-            gradient={{ from: 'orange', to: 'red' }}
-            component="a"
-            href="/swagger/index.html"
-            target="_blank"
-            rel="noreferrer"
-            radius="md"
-            leftSection={<IconExternalLink size={16} />}
-            c="white"
-            size="md"
+      <Card padding="xl" radius="md" shadow="sm" style={{ background: 'linear-gradient(135deg, #e7f5ff 0%, #d0ebff 100%)' }}>
+        <Stack gap="md">
+          <Highlight
+            highlight={['Massive Medal Pusher']}
             fw={700}
+            fz={14}
+            c="#1e1e1e"
+            highlightStyles={(theme) => ({
+              backgroundColor: theme.colors.gray[1],
+              color: theme.colors.blue[7],
+            })}
           >
-            SwaggerUI (API一覧)
-          </Button>
-          <Button
-            variant="light"
-            color="gray"
-            component="a"
-            href="https://push.trap.show/?server=mariadb.ns-system.svc.cluster.local&username=nsapp_c27d6f571f88ffff360fe2&db=nsapp_c27d6f571f88ffff360fe2"
-            target="_blank"
-            rel="noreferrer"
-            radius="md"
-            c="dark"
-            size="sm"
-          >
-            データベース
-          </Button>
-          <Button
-            variant="light"
-            color="gray"
-            component="a"
-            href="https://github.com/pikachu0310/very-big-medal-pusher-data-server"
-            target="_blank"
-            rel="noreferrer"
-            radius="md"
-            c="dark"
-            size="sm"
-          >
-            GitHub
-          </Button>
-        </Group>
+            Massive Medal Pusher / 開発者向けリンク集
+          </Highlight>
+          <Group gap="sm" grow>
+            <Button
+              variant="gradient"
+              gradient={{ from: 'orange', to: 'red' }}
+              component="a"
+              href="/swagger/index.html"
+              target="_blank"
+              rel="noreferrer"
+              radius="md"
+              leftSection={<IconExternalLink size={16} />}
+              c="white"
+              size="md"
+              fw={700}
+            >
+              SwaggerUI (API一覧)
+            </Button>
+            <Button
+              variant="light"
+              color="gray"
+              component="a"
+              href="https://push.trap.show/?server=mariadb.ns-system.svc.cluster.local&username=nsapp_c27d6f571f88ffff360fe2&db=nsapp_c27d6f571f88ffff360fe2"
+              target="_blank"
+              rel="noreferrer"
+              radius="md"
+              c="dark"
+              size="sm"
+              leftSection={<IconLock size={14} />}
+            >
+              データベース
+            </Button>
+            <Button
+              variant="light"
+              color="gray"
+              component="a"
+              href="https://github.com/pikachu0310/very-big-medal-pusher-data-server"
+              target="_blank"
+              rel="noreferrer"
+              radius="md"
+              c="dark"
+              size="sm"
+            >
+              Data Server Github
+            </Button>
+            <Button
+              variant="light"
+              color="gray"
+              component="a"
+              href="https://github.com/pikachu0310/VRCWorld-MassiveMedalPusher"
+              target="_blank"
+              rel="noreferrer"
+              radius="md"
+              c="dark"
+              size="sm"
+              leftSection={<IconLock size={14} />}
+            >
+              VRCWorld-MassiveMedalPusher
+            </Button>
+            <Button
+              variant="light"
+              color="gray"
+              component="a"
+              href="https://github.com/pikariku/VRCWorld-VeryBigMedalPusher"
+              target="_blank"
+              rel="noreferrer"
+              radius="md"
+              c="dark"
+              size="sm"
+              leftSection={<IconLock size={14} />}
+            >
+              VRCWorld-VeryBigMedalPusher
+            </Button>
+          </Group>
+        </Stack>
       </Card>
 
       <Tabs defaultValue="personal" variant="outline">
@@ -581,65 +623,6 @@ function HomePage() {
       <Grid gutter="md">
         <Grid.Col span={{ base: 12, md: 6 }}>
           <Card withBorder radius="md" padding="lg" shadow="sm">
-            <Group justify="space-between" mb="sm">
-              <Title order={3}>Massive Medal Pusher / 開発者向け</Title>
-              <Tooltip label="コピーできるよ" position="left">
-                <Badge color="gray">copy ready</Badge>
-              </Tooltip>
-            </Group>
-            <Stack gap="sm">
-              <Group gap="sm" grow>
-                <Button
-                  variant="gradient"
-                  gradient={{ from: 'orange', to: 'red' }}
-                  component="a"
-                  href="/swagger/index.html"
-                  target="_blank"
-                  radius="md"
-                  leftSection={<IconExternalLink size={16} />}
-                  c="white"
-                  size="md"
-                  fw={700}
-                  fullWidth
-                >
-                  Swagger UI
-                </Button>
-                <Button
-                  variant="gradient"
-                  gradient={{ from: 'gray', to: 'gray' }}
-                  component="a"
-                  href="https://push.trap.show/?server=mariadb.ns-system.svc.cluster.local&username=nsapp_c27d6f571f88ffff360fe2&db=nsapp_c27d6f571f88ffff360fe2"
-                  target="_blank"
-                  rel="noreferrer"
-                  radius="md"
-                  c="white"
-                  size="sm"
-                  fw={600}
-                  fullWidth
-                >
-                  データベース
-                </Button>
-                <Button
-                  variant="gradient"
-                  gradient={{ from: 'gray', to: 'gray' }}
-                  component="a"
-                  href="https://github.com/pikachu0310/very-big-medal-pusher-data-server"
-                  target="_blank"
-                  rel="noreferrer"
-                  radius="md"
-                  c="white"
-                  size="sm"
-                  fw={600}
-                  fullWidth
-                >
-                  Data Server Github
-                </Button>
-              </Group>
-            </Stack>
-          </Card>
-        </Grid.Col>
-        <Grid.Col span={{ base: 12, md: 6 }}>
-          <Card withBorder radius="md" padding="lg" shadow="sm">
             <Group justify="space-between" align="center">
               <Title order={3}>サーバーヘルス</Title>
               <Button
@@ -665,7 +648,10 @@ function HomePage() {
                 {pingState === 'ng' && '疎通 NG'}
               </Badge>
             </Group>
-            <Divider my="md" />
+          </Card>
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, md: 6 }}>
+          <Card withBorder radius="md" padding="lg" shadow="sm">
             <Group gap="xs">
               <ThemeIcon size={34} radius="lg" variant="light" color="blue">
                 <IconBrandGithub size={18} />
