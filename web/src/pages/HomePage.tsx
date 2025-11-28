@@ -15,7 +15,6 @@ import {
   Tabs,
   Table,
   Badge,
-  ActionIcon,
   Anchor,
   Divider,
   Tooltip,
@@ -34,8 +33,7 @@ import {
   IconBook2,
   IconBrandGithub,
   IconExternalLink,
-  IconPlugConnected,
-  IconCopy
+  IconPlugConnected
 } from '@tabler/icons-react';
 
 interface PersonalStats {
@@ -129,7 +127,6 @@ function HomePage() {
   const [globalStats, setGlobalStats] = useState<GlobalStats | null>(null);
   const [error, setError] = useState('');
   const [pingState, setPingState] = useState<'idle' | 'ok' | 'ng' | 'loading'>('idle');
-  const [copyMessage, setCopyMessage] = useState<string>('');
   const twitterHashUrl = 'https://x.com/search?q=%23%E3%81%A7%E3%81%8B%E3%83%97%20OR%20%23VR%E3%81%A7%E3%81%8B%E3%83%97&f=live';
   const [rawPayload, setRawPayload] = useState<string>('');
   const isObjectKey = new Set(['dc_ball_chain', 'dc_ball_get', 'dc_medal_get', 'dc_palball_get', 'dc_palball_jp']);
@@ -211,17 +208,6 @@ function HomePage() {
     } catch (err) {
       console.error(err);
       setPingState('ng');
-    }
-  };
-
-  const handleCopy = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopyMessage('コピーしました！');
-      setTimeout(() => setCopyMessage(''), 2000);
-    } catch {
-      setCopyMessage('コピーに失敗しました');
-      setTimeout(() => setCopyMessage(''), 2000);
     }
   };
 
@@ -372,7 +358,7 @@ function HomePage() {
             <Grid.Col span={{ base: 12, md: 6 }}>
               <HeroButton
                 href="https://discord.com/invite/CgnYyXecKm"
-                icon={<IconBrandDiscord size={22} />}
+                icon={<IconBrandDiscord size={33} />}
                 size="xl"
                 variant="gradient"
                 gradient={{ from: 'grape', to: 'indigo' }}
@@ -388,7 +374,7 @@ function HomePage() {
                   variant="filled"
                   color="blue"
                 >
-                  公式Wiki クソでっけぇプッシャーゲーム
+                  公式Wiki
                 </HeroButton>
               </Box>
             </Grid.Col>
@@ -400,7 +386,7 @@ function HomePage() {
                 variant="filled"
                 color="indigo"
               >
-                公式グループ クソでっけぇプッシャーゲーム同好会
+                公式VRChatグループ
               </HeroButton>
               <Box mt="sm">
                 <HeroButton
@@ -422,7 +408,7 @@ function HomePage() {
                   color="blue"
                   heightMultiplier={1}
                 >
-                  #でかプ / #VRでかプ リアルタイム
+                  #でかプ / #VRでかプ (リアルタイムX投稿)
                 </HeroButton>
               </Box>
             </Grid.Col>
@@ -585,18 +571,6 @@ function HomePage() {
                     </Grid.Col>
                   );
                 })}
-                {globalStats.total_medals !== undefined && (
-                  <Grid.Col span={{ base: 12 }}>
-                    <Card shadow="sm" padding="lg" radius="md" withBorder>
-                      <Group justify="space-between">
-                        <Title order={4}>世界の総メダル数</Title>
-                        <Badge color="yellow" variant="filled" radius="sm">
-                          {globalStats.total_medals.toLocaleString()} 枚
-                        </Badge>
-                      </Group>
-                    </Card>
-                  </Grid.Col>
-                )}
               </Grid>
             )}
           </Paper>
@@ -608,9 +582,9 @@ function HomePage() {
         <Grid.Col span={{ base: 12, md: 6 }}>
           <Card withBorder radius="md" padding="lg" shadow="sm">
             <Group justify="space-between" mb="sm">
-              <Title order={3}>開発者向けリンク</Title>
+              <Title order={3}>Massive Medal Pusher / 開発者向け</Title>
               <Tooltip label="コピーできるよ" position="left">
-                <Badge color={copyMessage ? 'teal' : 'gray'}>{copyMessage || 'copy ready'}</Badge>
+                <Badge color="gray">copy ready</Badge>
               </Tooltip>
             </Group>
             <Stack gap="sm">
@@ -631,52 +605,35 @@ function HomePage() {
                   Swagger UI
                 </Button>
                 <Button
-                  variant="light"
+                  variant="gradient"
+                  gradient={{ from: 'gray', to: 'gray' }}
                   component="a"
                   href="https://push.trap.show/?server=mariadb.ns-system.svc.cluster.local&username=nsapp_c27d6f571f88ffff360fe2&db=nsapp_c27d6f571f88ffff360fe2"
                   target="_blank"
                   rel="noreferrer"
                   radius="md"
-                  color="gray"
-                  c="dark"
+                  c="white"
+                  size="sm"
+                  fw={600}
                   fullWidth
                 >
-                  DBにアクセス
+                  データベース
                 </Button>
-              </Group>
-              <Divider my="sm" />
-              <Group justify="space-between">
-                <Text>本番 API</Text>
-                <Group gap="xs">
-                  <Anchor href="https://push.trap.games/api" target="_blank" rel="noreferrer" c="blue">
-                    開く
-                  </Anchor>
-                  <ActionIcon variant="light" onClick={() => handleCopy('https://push.trap.games/api')}>
-                    <IconCopy size={16} />
-                  </ActionIcon>
-                </Group>
-              </Group>
-              <Group justify="space-between">
-                <Text>テスト API</Text>
-                <Group gap="xs">
-                  <Anchor href="https://push-test.trap.games/api" target="_blank" rel="noreferrer" c="blue">
-                    開く
-                  </Anchor>
-                  <ActionIcon variant="light" onClick={() => handleCopy('https://push-test.trap.games/api')}>
-                    <IconCopy size={16} />
-                  </ActionIcon>
-                </Group>
-              </Group>
-              <Group justify="space-between">
-                <Text>ローカル API</Text>
-                <Group gap="xs">
-                  <Anchor href="http://localhost:8080/api" target="_blank" rel="noreferrer" c="blue">
-                    開く
-                  </Anchor>
-                  <ActionIcon variant="light" onClick={() => handleCopy('http://localhost:8080/api')}>
-                    <IconCopy size={16} />
-                  </ActionIcon>
-                </Group>
+                <Button
+                  variant="gradient"
+                  gradient={{ from: 'gray', to: 'gray' }}
+                  component="a"
+                  href="https://github.com/pikachu0310/very-big-medal-pusher-data-server"
+                  target="_blank"
+                  rel="noreferrer"
+                  radius="md"
+                  c="white"
+                  size="sm"
+                  fw={600}
+                  fullWidth
+                >
+                  Data Server Github
+                </Button>
               </Group>
             </Stack>
           </Card>
