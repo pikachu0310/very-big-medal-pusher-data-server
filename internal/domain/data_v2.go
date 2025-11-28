@@ -291,8 +291,8 @@ func (sd *SaveData) ToModel() *models.SaveDataV2 {
 	var (
 		legacy            = sd.Legacy
 		version           = sd.Version
-		credit            = sd.Credit
-		creditAll         = sd.CreditAll
+		creditStr         = strconv.FormatInt(sd.Credit, 10)
+		creditAllStr      = strconv.FormatInt(sd.CreditAll, 10)
 		medalIn           = sd.MedalIn
 		medalGet          = sd.MedalGet
 		ballGet           = sd.BallGet
@@ -347,8 +347,8 @@ func (sd *SaveData) ToModel() *models.SaveDataV2 {
 	m := &models.SaveDataV2{
 		Legacy:            &legacy,
 		Version:           &version,
-		Credit:            &credit,
-		CreditAll:         &creditAll,
+		Credit:            &creditStr,
+		CreditAll:         &creditAllStr,
 		MedalIn:           &medalIn,
 		MedalGet:          &medalGet,
 		BallGet:           &ballGet,

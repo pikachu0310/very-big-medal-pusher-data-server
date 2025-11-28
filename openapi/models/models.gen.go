@@ -143,8 +143,8 @@ type SaveDataV2 struct {
 	BuyShbi           *int              `db:"buy_shbi" json:"buy_shbi,omitempty"`
 	BuyTotal          *int              `db:"buy_total" json:"buy_total,omitempty"`
 	CpmMax            *float64          `db:"cpm_max" json:"cpm_max,omitempty"`
-	Credit            *int64            `db:"credit" json:"credit,omitempty"`
-	CreditAll         *int64            `db:"credit_all" json:"credit_all,omitempty"`
+	Credit            *string           `db:"credit" json:"credit,omitempty"`
+	CreditAll         *string           `db:"credit_all" json:"credit_all,omitempty"`
 	DcBallChain       *map[string]int   `json:"dc_ball_chain,omitempty" table:"save_data_v2_ball_chain"`
 	DcBallGet         *map[string]int64 `json:"dc_ball_get,omitempty" table:"save_data_v2_ball_get"`
 	DcMedalGet        *map[string]int   `json:"dc_medal_get,omitempty" table:"save_data_v2_medal_get"`

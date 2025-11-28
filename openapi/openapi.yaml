@@ -712,12 +712,10 @@ components:
           type: integer
           x-oapi-codegen-extra-tags: { db: 'version' }
         credit:
-          type: integer
-          format: int64
+          type: string
           x-oapi-codegen-extra-tags: { db: 'credit' }
         credit_all:
-          type: integer
-          format: int64
+          type: string
           x-oapi-codegen-extra-tags: { db: 'credit_all' }
         medal_in:
           type: integer
