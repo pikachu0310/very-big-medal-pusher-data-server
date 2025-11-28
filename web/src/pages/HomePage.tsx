@@ -20,7 +20,9 @@ import {
   Divider,
   Tooltip,
   ThemeIcon,
-  Highlight
+  Highlight,
+  Spoiler,
+  Box
 } from '@mantine/core';
 import {
   IconAlertCircle,
@@ -131,6 +133,7 @@ function HomePage() {
   const [copyMessage, setCopyMessage] = useState<string>('');
   const twitterHashUrl = 'https://x.com/search?q=%23%E3%81%A7%E3%81%8B%E3%83%97%20OR%20%23VR%E3%81%A7%E3%81%8B%E3%83%97&f=live';
   const [rawPayload, setRawPayload] = useState<string>('');
+  const isObjectKey = new Set(['dc_ball_chain', 'dc_ball_get', 'dc_medal_get', 'dc_palball_get', 'dc_palball_jp']);
 
   useEffect(() => {
     const fetchGlobalStats = async () => {
@@ -240,9 +243,11 @@ function HomePage() {
 
   const renderRankingTable = (data: RankingEntry[], title: string, type: string) => (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
-      <Title order={4} mb="md">{title}</Title>
-      <Text size="sm" c="dimmed" mb="sm">総エントリー数: {data.length}件</Text>
-      <div style={{ maxHeight: '280px', overflowY: 'auto' }}>
+      <Group justify="space-between" mb="xs">
+        <Title order={4}>{title}</Title>
+        <Badge color="gray" variant="light">TOP {data.length}</Badge>
+      </Group>
+      <div style={{ maxHeight: '240px', overflowY: 'auto' }}>
         <Table>
           <Table.Thead>
             <Table.Tr>
@@ -265,6 +270,71 @@ function HomePage() {
         </Table>
       </div>
     </Card>
+  );
+
+  const renderValue = (key: string, val: any) => {
+    if (key === 'l_achieve' && Array.isArray(val)) {
+      return (
+        <Spoiler maxHeight={60} showLabel="もっと見る" hideLabel="閉じる">
+          <Text size="sm" c="dimmed" style={{ wordBreak: 'break-all' }}>
+            {val.join(', ')}
+          </Text>
+        </Spoiler>
+      );
+    }
+    if (isObjectKey.has(key) && val && typeof val === 'object') {
+      return (
+        <Spoiler maxHeight={60} showLabel="展開" hideLabel="閉じる">
+          <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontSize: '0.8rem' }}>
+            {JSON.stringify(val, null, 2)}
+          </pre>
+        </Spoiler>
+      );
+    }
+    return (
+      <Text size="sm" c="dimmed" style={{ wordBreak: 'break-all' }}>
+        {Array.isArray(val) ? val.join(', ') : `${val ?? 'N/A'}`}
+      </Text>
+    );
+  };
+
+  const HeroButton = ({
+    children,
+    href,
+    icon,
+    size = 'lg',
+    variant = 'filled',
+    gradient,
+    color,
+    heightMultiplier = 1,
+  }: {
+    children: React.ReactNode;
+    href: string;
+    icon: React.ReactNode;
+    size?: 'lg' | 'xl';
+    variant?: 'filled' | 'outline' | 'light' | 'gradient';
+    gradient?: { from: string; to: string };
+    color?: string;
+    heightMultiplier?: number;
+  }) => (
+    <Button
+      component="a"
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      leftSection={icon}
+      size={size}
+      radius="md"
+      fullWidth
+      variant={variant}
+      gradient={gradient}
+      color={color}
+      fw={700}
+      c={variant === 'outline' ? color || 'dark' : 'white'}
+      style={{ minHeight: `calc(${size === 'xl' ? 52 : 44}px * ${heightMultiplier})` }}
+    >
+      {children}
+    </Button>
   );
 
   return (
@@ -299,109 +369,74 @@ function HomePage() {
           >
             Massive Medal Pusher / リンク集
           </Highlight>
-          <Grid gutter="md">
+         <Grid gutter="md">
             <Grid.Col span={{ base: 12, md: 6 }}>
-              <Button
-                size="xl"
-                radius="md"
-                fullWidth
-                leftSection={<IconBrandDiscord size={22} />}
-                component="a"
+              <HeroButton
                 href="https://discord.com/invite/CgnYyXecKm"
-                target="_blank"
-                rel="noreferrer"
+                icon={<IconBrandDiscord size={22} />}
+                size="xl"
                 variant="gradient"
                 gradient={{ from: 'grape', to: 'indigo' }}
-                fw={700}
-                c="white"
+                heightMultiplier={2}
               >
                 公式Discord でかプ同好会
-              </Button>
-              <Button
-                mt="sm"
-                size="xl"
-                radius="md"
-                fullWidth
-                leftSection={<IconBook2 size={22} />}
-                component="a"
-                href="https://wikiwiki.jp/vr_bigpusher/"
-                target="_blank"
-                rel="noreferrer"
-                variant="filled"
-                color="blue"
-                fw={700}
-                c="white"
-              >
-                公式Wiki クソでっけぇプッシャーゲーム
-              </Button>
+              </HeroButton>
+              <Box mt="sm">
+                <HeroButton
+                  href="https://wikiwiki.jp/vr_bigpusher/"
+                  icon={<IconBook2 size={22} />}
+                  size="xl"
+                  variant="filled"
+                  color="blue"
+                >
+                  公式Wiki クソでっけぇプッシャーゲーム
+                </HeroButton>
+              </Box>
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6 }}>
-              <Button
-                size="lg"
-                radius="md"
-                fullWidth
-                leftSection={<IconWorld size={20} />}
-                component="a"
+              <HeroButton
                 href="https://vrchat.com/home/group/grp_5900a25d-0bb9-48d4-bab1-f3bd5c9a5e73"
-                target="_blank"
-                rel="noreferrer"
+                icon={<IconWorld size={20} />}
+                size="lg"
                 variant="outline"
                 color="indigo"
-                fw={700}
-                c="indigo"
               >
-                VRChatグループ クソでっけぇプッシャーゲーム同好会
-              </Button>
-              <Button
-                mt="sm"
-                size="lg"
-                radius="md"
-                fullWidth
-                leftSection={<IconWorld size={20} />}
-                component="a"
-                href="https://vrchat.com/home/group/grp_f38ec6a3-0de5-499e-a85f-1038013bdd04"
-                target="_blank"
-                rel="noreferrer"
-                variant="outline"
-                color="indigo"
-                fw={700}
-                c="indigo"
-              >
-                でかプ交流会 ～ MMP Meeting
-              </Button>
-              <Button
-                mt="sm"
-                size="lg"
-                radius="md"
-                fullWidth
-                leftSection={<IconRocket size={20} />}
-                component="a"
-                href="https://github.com/pikachu0310/very-big-medal-pusher-data-server"
-                target="_blank"
-                rel="noreferrer"
-                variant="gradient"
-                gradient={{ from: 'teal', to: 'blue' }}
-                fw={700}
-                c="white"
-              >
-                v4 クラウドセーブ稼働中（GitHub）
-              </Button>
-              <Button
-                mt="sm"
-                size="lg"
-                radius="md"
-                fullWidth
-                leftSection={<IconExternalLink size={20} />}
-                component="a"
-                href={twitterHashUrl}
-                target="_blank"
-                rel="noreferrer"
-                variant="light"
-                color="blue"
-                fw={700}
-              >
-                #でかプ / #VRでかプ リアルタイム
-              </Button>
+                公式グループ クソでっけぇプッシャーゲーム同好会
+              </HeroButton>
+              <Box mt="sm">
+                <HeroButton
+                  href="https://vrchat.com/home/group/grp_f38ec6a3-0de5-499e-a85f-1038013bdd04"
+                  icon={<IconWorld size={20} />}
+                  size="lg"
+                  variant="outline"
+                  color="indigo"
+                >
+                  でかプ交流会 ～ MMP Meeting
+                </HeroButton>
+              </Box>
+              <Box mt="sm">
+                <HeroButton
+                  href={twitterHashUrl}
+                  icon={<IconExternalLink size={20} />}
+                  size="lg"
+                  variant="light"
+                  color="blue"
+                  heightMultiplier={1}
+                >
+                  #でかプ / #VRでかプ リアルタイム
+                </HeroButton>
+              </Box>
+              <Box mt="sm">
+                <HeroButton
+                  href="https://github.com/pikachu0310/very-big-medal-pusher-data-server"
+                  icon={<IconRocket size={20} />}
+                  size="lg"
+                  variant="gradient"
+                  gradient={{ from: 'teal', to: 'blue' }}
+                >
+                  v4 クラウドセーブ稼働中（GitHub）
+                </HeroButton>
+              </Box>
             </Grid.Col>
           </Grid>
         </Stack>
@@ -465,6 +500,15 @@ function HomePage() {
                 </Card>
               )}
 
+              {rawPayload && (
+                <Card shadow="sm" padding="md" radius="md" withBorder>
+                  <Text size="sm" fw={600} mb="xs">受信データ (Base64)</Text>
+                  <Spoiler maxHeight={60} showLabel="展開" hideLabel="閉じる">
+                    <Text size="xs" c="dimmed" style={{ wordBreak: 'break-all' }}>{rawPayload}</Text>
+                  </Spoiler>
+                </Card>
+              )}
+
               {personalStats && (
                 <Card shadow="sm" padding="lg" radius="md" withBorder>
                   <Title order={4}>個人統計データ</Title>
@@ -472,9 +516,7 @@ function HomePage() {
                     {Object.entries(personalStats).map(([key, val]) => (
                       <Grid.Col span={{ base: 12, sm: 6 }} key={key}>
                         <Text size="sm" fw={600}>{key}</Text>
-                        <Text size="sm" c="dimmed" style={{ wordBreak: 'break-all' }}>
-                          {Array.isArray(val) ? val.join(', ') : `${val ?? 'N/A'}`}
-                        </Text>
+                        {renderValue(key, val)}
                       </Grid.Col>
                     ))}
                   </Grid>
@@ -505,6 +547,18 @@ function HomePage() {
                     </Grid.Col>
                   );
                 })}
+                {globalStats.total_medals !== undefined && (
+                  <Grid.Col span={{ base: 12 }}>
+                    <Card shadow="sm" padding="lg" radius="md" withBorder>
+                      <Group justify="space-between">
+                        <Title order={4}>世界の総メダル数</Title>
+                        <Badge color="yellow" variant="filled" radius="sm">
+                          {globalStats.total_medals.toLocaleString()} 枚
+                        </Badge>
+                      </Group>
+                    </Card>
+                  </Grid.Col>
+                )}
               </Grid>
             )}
           </Paper>
@@ -522,6 +576,37 @@ function HomePage() {
               </Tooltip>
             </Group>
             <Stack gap="sm">
+              <Group gap="sm" grow>
+                <Button
+                  variant="gradient"
+                  gradient={{ from: 'orange', to: 'red' }}
+                  component="a"
+                  href="/swagger/index.html"
+                  target="_blank"
+                  radius="md"
+                  leftSection={<IconExternalLink size={16} />}
+                  c="white"
+                  size="md"
+                  fw={700}
+                  fullWidth
+                >
+                  Swagger UI
+                </Button>
+                <Button
+                  variant="light"
+                  component="a"
+                  href="https://push.trap.show/?server=mariadb.ns-system.svc.cluster.local&username=nsapp_c27d6f571f88ffff360fe2&db=nsapp_c27d6f571f88ffff360fe2"
+                  target="_blank"
+                  rel="noreferrer"
+                  radius="md"
+                  color="gray"
+                  c="dark"
+                  fullWidth
+                >
+                  DBにアクセス
+                </Button>
+              </Group>
+              <Divider my="sm" />
               <Group justify="space-between">
                 <Text>本番 API</Text>
                 <Group gap="xs">
@@ -555,47 +640,6 @@ function HomePage() {
                   </ActionIcon>
                 </Group>
               </Group>
-              <Divider />
-              <Group gap="sm">
-                <Button
-                  variant="gradient"
-                  gradient={{ from: 'orange', to: 'red' }}
-                  component="a"
-                  href="/swagger/index.html"
-                  target="_blank"
-                  radius="md"
-                  leftSection={<IconExternalLink size={16} />}
-                  c="white"
-                  size="md"
-                  fw={700}
-                >
-                  Swagger UI
-                </Button>
-                <Button
-                  variant="subtle"
-                  component="a"
-                  href="/api/openapi.yaml"
-                  target="_blank"
-                  radius="md"
-                  leftSection={<IconDownload size={14} />}
-                  size="xs"
-                  color="gray"
-                >
-                  OpenAPI をダウンロード
-                </Button>
-              </Group>
-              <Button
-                variant="light"
-                component="a"
-                href="https://push.trap.show/?server=mariadb.ns-system.svc.cluster.local&username=nsapp_c27d6f571f88ffff360fe2&db=nsapp_c27d6f571f88ffff360fe2"
-                target="_blank"
-                rel="noreferrer"
-                radius="md"
-                color="gray"
-                c="dark"
-              >
-                DBにアクセス
-              </Button>
             </Stack>
           </Card>
         </Grid.Col>
