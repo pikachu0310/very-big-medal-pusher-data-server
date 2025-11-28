@@ -470,6 +470,7 @@ function HomePage() {
               radius="md"
               c="dark"
               size="sm"
+              leftSection={<IconBrandGithub size={14} />}
             >
               Data Server Github
             </Button>
@@ -660,6 +661,18 @@ function HomePage() {
                 <Text fw={600} fz="sm">GitHub</Text>
                 <Anchor href="https://github.com/pikachu0310/very-big-medal-pusher-data-server" target="_blank" rel="noreferrer" c="blue">
                   very-big-medal-pusher-data-server
+                </Anchor>
+                <Anchor href="https://github.com/pikachu0310/VRCWorld-MassiveMedalPusher" target="_blank" rel="noreferrer" c="blue">
+                  <Group gap={6}>
+                    <IconLock size={14} />
+                    <Text component="span" size="sm" c="blue">VRCWorld-MassiveMedalPusher</Text>
+                  </Group>
+                </Anchor>
+                <Anchor href="https://github.com/pikariku/VRCWorld-VeryBigMedalPusher" target="_blank" rel="noreferrer" c="blue">
+                  <Group gap={6}>
+                    <IconLock size={14} />
+                    <Text component="span" size="sm" c="blue">VRCWorld-VeryBigMedalPusher</Text>
+                  </Group>
                 </Anchor>
               </Stack>
             </Group>
