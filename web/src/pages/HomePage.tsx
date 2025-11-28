@@ -496,13 +496,6 @@ function HomePage() {
               {rawPayload && (
                 <Card shadow="sm" padding="md" radius="md" withBorder>
                   <Text size="sm" fw={600} mb="xs">受信データ (Base64)</Text>
-                  <Text size="xs" c="dimmed" style={{ wordBreak: 'break-all' }}>{rawPayload}</Text>
-                </Card>
-              )}
-
-              {rawPayload && (
-                <Card shadow="sm" padding="md" radius="md" withBorder>
-                  <Text size="sm" fw={600} mb="xs">受信データ (Base64)</Text>
                   <Spoiler maxHeight={60} showLabel="展開" hideLabel="閉じる">
                     <Text size="xs" c="dimmed" style={{ wordBreak: 'break-all' }}>{rawPayload}</Text>
                   </Spoiler>
@@ -528,6 +521,16 @@ function HomePage() {
 
         <Tabs.Panel value="global" pt="md">
           <Paper p="xl" shadow="sm" radius="md">
+            {globalStats && (
+              <Card shadow="sm" padding="lg" radius="md" withBorder mb="md">
+                <Group justify="space-between">
+                  <Text fw={700}>世界の総メダル数</Text>
+                  <Badge color="yellow" variant="filled" radius="sm">
+                    {globalStats.total_medals?.toLocaleString() ?? 'N/A'} 枚
+                  </Badge>
+                </Group>
+              </Card>
+            )}
             <Title order={2} mb="md">グローバル統計</Title>
 
             {isLoadingGlobal && (
