@@ -440,51 +440,44 @@ function HomePage() {
           >
             Massive Medal Pusher / 開発者向けリンク集
           </Highlight>
-          <Group gap="sm" grow>
-            <Button
-              variant="gradient"
-              gradient={{ from: 'orange', to: 'red' }}
-              component="a"
-              href="/swagger/index.html"
-              target="_blank"
-              rel="noreferrer"
-              radius="md"
-              leftSection={<IconExternalLink size={16} />}
-              c="white"
-              size="md"
-              fw={700}
-            >
-              SwaggerUI (API一覧)
-            </Button>
-            <Button
-              variant="light"
-              color="gray"
-              component="a"
-              href="https://push.trap.show/?server=mariadb.ns-system.svc.cluster.local&username=nsapp_c27d6f571f88ffff360fe2&db=nsapp_c27d6f571f88ffff360fe2"
-              target="_blank"
-              rel="noreferrer"
-              radius="md"
-              c="dark"
-              size="sm"
-              leftSection={<IconLock size={14} />}
-            >
-              データベース
-            </Button>
-            <Button
-              variant="light"
-              color="gray"
-              component="a"
-              href="https://github.com/pikachu0310/very-big-medal-pusher-data-server"
-              target="_blank"
-              rel="noreferrer"
-              radius="md"
-              c="dark"
-              size="sm"
-              leftSection={<IconBrandGithub size={14} />}
-            >
-              Data Server Github
-            </Button>
-          </Group>
+          <Grid gutter="sm">
+            <Grid.Col span={{ base: 12, sm: 4 }}>
+              <HeroButton
+                href="/swagger/index.html"
+                icon={<IconExternalLink size={18} />}
+                size="lg"
+                variant="gradient"
+                gradient={{ from: 'orange', to: 'red' }}
+                heightMultiplier={1.1}
+              >
+                SwaggerUI (API一覧)
+              </HeroButton>
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, sm: 4 }}>
+              <HeroButton
+                href="https://push.trap.show/?server=mariadb.ns-system.svc.cluster.local&username=nsapp_c27d6f571f88ffff360fe2&db=nsapp_c27d6f571f88ffff360fe2"
+                icon={<IconLock size={18} />}
+                size="lg"
+                variant="outline"
+                color="black"
+                heightMultiplier={1.1}
+              >
+                データベース
+              </HeroButton>
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, sm: 4 }}>
+              <HeroButton
+                href="https://github.com/pikachu0310/very-big-medal-pusher-data-server"
+                icon={<IconBrandGithub size={18} />}
+                size="lg"
+                variant="light"
+                color="gray"
+                heightMultiplier={1.1}
+              >
+                Data Server GitHub
+              </HeroButton>
+            </Grid.Col>
+          </Grid>
         </Stack>
       </Card>
 
