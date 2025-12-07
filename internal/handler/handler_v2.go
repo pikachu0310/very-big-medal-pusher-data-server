@@ -17,7 +17,7 @@ const (
 func (h *Handler) GetV2Data(ctx echo.Context, params models.GetV2DataParams) error {
 	// v2エンドポイントはもう使われなくなりました
 	return ctx.JSON(http.StatusGone, map[string]string{
-		"error": "This endpoint is deprecated and no longer available. Please use v3 endpoints instead.",
+		"error": "This endpoint is deprecated and no longer available. Please use v4 endpoints instead.",
 		"code":  "DEPRECATED_ENDPOINT",
 	})
 
@@ -73,7 +73,7 @@ func (h *Handler) GetV2Data(ctx echo.Context, params models.GetV2DataParams) err
 func (h *Handler) GetV2UsersUserIdData(ctx echo.Context, userId string) error {
 	// v2エンドポイントはもう使われなくなりました
 	return ctx.JSON(http.StatusGone, map[string]string{
-		"error": "This endpoint is deprecated and no longer available. Please use v3 endpoints instead.",
+		"error": "This endpoint is deprecated and no longer available. Please use v4 endpoints instead.",
 		"code":  "DEPRECATED_ENDPOINT",
 	})
 
@@ -94,7 +94,7 @@ func (h *Handler) GetV2UsersUserIdData(ctx echo.Context, userId string) error {
 func (h *Handler) GetV2Statistics(ctx echo.Context) error {
 	// v2エンドポイントはもう使われなくなりました
 	return ctx.JSON(http.StatusGone, map[string]string{
-		"error": "This endpoint is deprecated and no longer available. Please use v3 endpoints instead.",
+		"error": "This endpoint is deprecated and no longer available. Please use v4 endpoints instead.",
 		"code":  "DEPRECATED_ENDPOINT",
 	})
 

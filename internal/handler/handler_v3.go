@@ -154,8 +154,14 @@ func verifyUserSignature(userID, sig string) bool {
 // 	return ctx.JSON(http.StatusOK, rates)
 // }
 
-// GetV4Data は v4 エンドポイントでセーブデータを保存する
+// GetV3Data は v3 エンドポイントでセーブデータを保存する
 func (h *Handler) GetV3Data(ctx echo.Context, params models.GetV3DataParams) error {
+	// v3エンドポイントはもう使われなくなりました
+	return ctx.JSON(http.StatusGone, map[string]string{
+		"error": "This endpoint is deprecated and no longer available. Please use v4 endpoints instead.",
+		"code":  "DEPRECATED_ENDPOINT",
+	})
+
 	// クエリパラメータを正しい順序で構築して署名検証を行う
 	dataEncoded := strings.ReplaceAll(url.QueryEscape(params.Data), "+", "%20")
 	userIdEncoded := strings.ReplaceAll(url.QueryEscape(params.UserId), "+", "%20")
@@ -196,6 +202,12 @@ func (h *Handler) GetV3UsersUserIdData(
 	userId string,
 	params models.GetV3UsersUserIdDataParams,
 ) error {
+	// v3エンドポイントはもう使われなくなりました
+	return ctx.JSON(http.StatusGone, map[string]string{
+		"error": "This endpoint is deprecated and no longer available. Please use v4 endpoints instead.",
+		"code":  "DEPRECATED_ENDPOINT",
+	})
+
 	// 署名必須
 	if params.Sig == "" {
 		return ctx.String(http.StatusBadRequest, "missing signature")
@@ -217,6 +229,12 @@ func (h *Handler) GetV3UsersUserIdData(
 
 // GetV4Statistics は v4 エンドポイントで最適化された統計データを返す
 func (h *Handler) GetV3Statistics(ctx echo.Context) error {
+	// v3エンドポイントはもう使われなくなりました
+	return ctx.JSON(http.StatusGone, map[string]string{
+		"error": "This endpoint is deprecated and no longer available. Please use v4 endpoints instead.",
+		"code":  "DEPRECATED_ENDPOINT",
+	})
+
 	// キャッシュから取得
 	stats, err := h.statisticsCacheV4.Get(ctx.Request().Context(), statisticsCacheV4Key)
 	if err != nil {
@@ -228,6 +246,12 @@ func (h *Handler) GetV3Statistics(ctx echo.Context) error {
 
 // GetV4AchievementsRates は v4 エンドポイントで実績取得率を返す
 func (h *Handler) GetV3AchievementsRates(ctx echo.Context) error {
+	// v3エンドポイントはもう使われなくなりました
+	return ctx.JSON(http.StatusGone, map[string]string{
+		"error": "This endpoint is deprecated and no longer available. Please use v4 endpoints instead.",
+		"code":  "DEPRECATED_ENDPOINT",
+	})
+
 	rates, err := h.achievementRatesCache.Get(ctx.Request().Context(), achievementRatesCacheKey)
 	if err != nil {
 		return ctx.String(http.StatusInternalServerError, err.Error())

@@ -7,7 +7,7 @@ VRChat ワールド「クソでっけぇプッシャーゲーム」向けのク�
 - ベース URL: `http://localhost:8080/api` / `https://push.trap.games/api` / `https://push-test.trap.games/api`
 - Swagger UI: `GET /swagger/index.html` (リダイレクト含む)
 - OpenAPI: `GET /api/openapi.yaml`
-- API バージョン: `v1/v2/v3` は互換維持のみ（非推奨）、`v4` が現行。`/ping` は `general` タグに集約。
+- API バージョン: `v1/v2/v3` は互換維持のみ（HTTP 410 応答）、`v4` が現行。`/ping` は `general` タグに集約。
 
 ## クイックスタート（ローカル）
 ```bash
@@ -77,8 +77,7 @@ make lint           # golangci-lint --fix
 ## 運用メモ
 - 本番/ステージングの Swagger からも spec を参照可能（UI で prod/stg/local を切替）。  
 - セーブ送信は Base64URL、ロード応答は標準 Base64 + HMAC-SHA256 署名（LOAD シークレット）。  
-- v1–v3 は互換のみ。新規機能は v4 で実装。
+- v1–v3 は互換スタブ（HTTP 410）。新規機能は v4 で実装。
 
 ## 関連リポジトリ
 - クライアント (VRChat/Udon#): `/mnt/h/github/VRCWorld-MassiveMedalPusher`
-

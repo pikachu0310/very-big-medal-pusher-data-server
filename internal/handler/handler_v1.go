@@ -26,7 +26,7 @@ func (h *Handler) GetPing(ctx echo.Context) error {
 func (h *Handler) GetData(ctx echo.Context, params models.GetDataParams) error {
 	// v1エンドポイントはもう使われなくなりました
 	return ctx.JSON(http.StatusGone, map[string]string{
-		"error": "This endpoint is deprecated and no longer available. Please use v3 endpoints instead.",
+		"error": "This endpoint is deprecated and no longer available. Please use v4 endpoints instead.",
 		"code":  "DEPRECATED_ENDPOINT",
 	})
 
@@ -76,7 +76,7 @@ func nullifyNullValues(params *models.GetDataParams) {
 func (h *Handler) GetUsersUserIdData(ctx echo.Context, userId string) error {
 	// v1エンドポイントはもう使われなくなりました
 	return ctx.JSON(http.StatusGone, map[string]string{
-		"error": "This endpoint is deprecated and no longer available. Please use v3 endpoints instead.",
+		"error": "This endpoint is deprecated and no longer available. Please use v4 endpoints instead.",
 		"code":  "DEPRECATED_ENDPOINT",
 	})
 
@@ -90,7 +90,7 @@ func (h *Handler) GetUsersUserIdData(ctx echo.Context, userId string) error {
 func (h *Handler) GetRankings(ctx echo.Context, params models.GetRankingsParams) error {
 	// v1エンドポイントはもう使われなくなりました
 	return ctx.JSON(http.StatusGone, map[string]string{
-		"error": "This endpoint is deprecated and no longer available. Please use v3 endpoints instead.",
+		"error": "This endpoint is deprecated and no longer available. Please use v4 endpoints instead.",
 		"code":  "DEPRECATED_ENDPOINT",
 	})
 
@@ -131,7 +131,7 @@ func (h *Handler) GetRankings(ctx echo.Context, params models.GetRankingsParams)
 func (h *Handler) GetTotalMedals(ctx echo.Context) error {
 	// v1エンドポイントはもう使われなくなりました
 	return ctx.JSON(http.StatusGone, map[string]string{
-		"error": "This endpoint is deprecated and no longer available. Please use v3 endpoints instead.",
+		"error": "This endpoint is deprecated and no longer available. Please use v4 endpoints instead.",
 		"code":  "DEPRECATED_ENDPOINT",
 	})
 

@@ -306,8 +306,12 @@ paths:
   /v3/data:
     get:
       tags: [ v3 ]
-      summary: セーブデータを送信 (v3)
-      description: JSON 化したセーブデータを GET パラメータで送信して保存します。
+      summary: セーブデータを送信 (v3・非推奨)
+      description: |
+        **⚠️ このエンドポイントは非推奨です。もう使われなくなりました。**
+
+        v3 クライアントは提供を終了しました。`/v4/data` を利用してください。
+      deprecated: true
       parameters:
         - name: data
           in: query
@@ -323,6 +327,7 @@ paths:
           required: true
           schema: { type: string }
       responses:
+        '410': { description: このエンドポイントはもう使われなくなりました }
         '200': { description: 正常に保存されました }
         '400': { description: 無効なパラメータ }
         '401': { description: 署名認証失敗 }
@@ -332,8 +337,12 @@ paths:
   /v3/users/{user_id}/data:
     get:
       tags: [ v3 ]
-      summary: ユーザーの最新セーブデータを取得 (v3・署名付き)
-      description: 指定ユーザーの最新セーブデータを返します。`sig` で HMAC 認証を行います。
+      summary: ユーザーの最新セーブデータを取得 (v3・署名付き・非推奨)
+      description: |
+        **⚠️ このエンドポイントは非推奨です。もう使われなくなりました。**
+
+        v3 クライアントは提供を終了しました。`/v4/users/{user_id}/data` を利用してください。
+      deprecated: true
       parameters:
         - name: user_id
           in: path
@@ -345,6 +354,7 @@ paths:
           description: HMAC-SHA256 署名
           schema: { type: string }
       responses:
+        '410': { description: このエンドポイントはもう使われなくなりました }
         '200':
           description: セーブデータ
           content:
@@ -358,11 +368,14 @@ paths:
   /v3/statistics:
     get:
       tags: [ v3 ]
-      summary: グローバル統計を取得 (v2・上位1000件)
-      description: >
-        各ランキングを最大 **1000 件** まで（/v2/statistics は 500 件まで）と、
-        全ユーザーのメダル総量をまとめて返します。
+      summary: グローバル統計を取得 (v3・非推奨)
+      description: |
+        **⚠️ このエンドポイントは非推奨です。もう使われなくなりました。**
+
+        v3 クライアントは提供を終了しました。`/v4/statistics` を利用してください。
+      deprecated: true
       responses:
+        '410': { description: このエンドポイントはもう使われなくなりました }
         '200':
           description: 統計データ (ランキング上限 1000)
           content:
@@ -374,9 +387,14 @@ paths:
   /v3/achievements/rates:
     get:
       tags: [ v3 ]
-      summary: 実績取得率を取得
-      description: 各実績IDの取得率（取得したユーザー数 / 全ユーザー数）を返します。
+      summary: 実績取得率を取得 (v3・非推奨)
+      description: |
+        **⚠️ このエンドポイントは非推奨です。もう使われなくなりました。**
+
+        v3 クライアントは提供を終了しました。`/v4/achievements/rates` を利用してください。
+      deprecated: true
       responses:
+        '410': { description: このエンドポイントはもう使われなくなりました }
         '200':
           description: 実績取得率データ
           content:
