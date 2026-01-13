@@ -68,7 +68,9 @@ func main() {
 	if err != nil {
 		e.Logger.Fatal(err)
 	}
-	defer db.Close()
+	defer func() {
+		_ = db.Close()
+	}()
 
 	// migrate tables
 	if err := migration.MigrateTables(db.DB); err != nil {

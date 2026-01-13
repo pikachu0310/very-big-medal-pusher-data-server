@@ -203,7 +203,9 @@ func (r *Repository) GetStatisticsV4(ctx context.Context) (*models.StatisticsV4,
 		if err != nil {
 			return err
 		}
-		defer rows.Close()
+		defer func() {
+			_ = rows.Close()
+		}()
 
 		// 事前に容量を確保してメモリ効率を改善（最大1000個）
 		list := make([]models.RankingEntry, 0, 1000)
@@ -408,7 +410,9 @@ func (r *Repository) insertNewAchievements(ctx context.Context, tx *sqlx.Tx, use
 	if err != nil {
 		return err
 	}
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+	}()
 
 	for rows.Next() {
 		var achievementID string
@@ -462,7 +466,9 @@ ORDER BY user_count DESC
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+	}()
 
 	// 最適化3: 事前に容量を確保（アチーブメント数は限定的）
 	achievementRates := make(map[string]struct {
