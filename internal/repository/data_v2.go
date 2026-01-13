@@ -22,7 +22,9 @@ func (r *Repository) InsertSave(ctx context.Context, sd *domain.SaveData) error 
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() {
+		_ = tx.Rollback()
+	}()
 
 	res, err := tx.ExecContext(ctx, `
 INSERT INTO v2_save_data (

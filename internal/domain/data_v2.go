@@ -514,17 +514,6 @@ func parseInt64Message(raw json.RawMessage) int64 {
 	return 0
 }
 
-func parseUnix(s *string) int64 {
-	if s == nil {
-		return 0
-	}
-	i, err := strconv.ParseInt(*s, 10, 64)
-	if err != nil {
-		return 0
-	}
-	return i
-}
-
 func parseUnixFromNumber(n *json.Number) int64 {
 	if n == nil {
 		return 0

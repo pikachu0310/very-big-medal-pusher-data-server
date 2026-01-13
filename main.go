@@ -81,7 +81,6 @@ func main() {
 	// setup routes
 	h := handler.New(repo)
 	openapi.RegisterHandlersWithBaseURL(e, h, baseURL)
-	handler.GlobalSecret = config.GetSecretKey()
 
 	// expose OpenAPI and Swagger UI
 	e.GET(baseURL+"/openapi.yaml", func(c echo.Context) error {
