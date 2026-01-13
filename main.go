@@ -65,6 +65,10 @@ func main() {
 		LogMethod:   true,
 		LogURI:      true,
 		LogRemoteIP: true,
+		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+			c.Logger().Infof("status=%d method=%s uri=%s remote_ip=%s", v.Status, v.Method, v.URI, v.RemoteIP)
+			return nil
+		},
 	}))
 	//e.Use(oapimiddleware.OapiRequestValidator(swagger))
 
