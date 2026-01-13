@@ -60,7 +60,12 @@ func main() {
 
 	// middlewares
 	e.Use(middleware.Recover())
-	e.Use(middleware.Logger())
+	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+		LogStatus:   true,
+		LogMethod:   true,
+		LogURI:      true,
+		LogRemoteIP: true,
+	}))
 	//e.Use(oapimiddleware.OapiRequestValidator(swagger))
 
 	// connect to database
