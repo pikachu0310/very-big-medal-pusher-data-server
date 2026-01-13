@@ -182,6 +182,15 @@ func TestRepositoryV4_InsertLatestAndExists(t *testing.T) {
 		t.Fatalf("insert save2: %v", err)
 	}
 
+	t1 := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
+	t2 := time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)
+	if _, err := db.Exec("UPDATE v2_save_data SET updated_at = ? WHERE user_id = ? AND playtime = ?", t1, userID, 10); err != nil {
+		t.Fatalf("update save1 timestamp: %v", err)
+	}
+	if _, err := db.Exec("UPDATE v2_save_data SET updated_at = ? WHERE user_id = ? AND playtime = ?", t2, userID, 20); err != nil {
+		t.Fatalf("update save2 timestamp: %v", err)
+	}
+
 	exists, err := repo.ExistsSameSave(ctx, userID, 10)
 	if err != nil {
 		t.Fatalf("exists: %v", err)
