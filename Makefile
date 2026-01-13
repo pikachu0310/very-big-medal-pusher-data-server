@@ -2,6 +2,7 @@ SHELL    := /bin/bash
 APP_NAME := $(shell basename $(PWD))
 GO_FILES := $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 GO_TEST_FLAGS := -v -cover -race -shuffle=on
+GO_TEST_COVER_FLAGS := -coverprofile=coverage.out -covermode=atomic
 
 .PHONY: help
 help: ## Display this help
@@ -22,10 +23,14 @@ test: test-unit test-integration ## Run all the tests
 test-unit: ## Run the unit tests
 	go test $(GO_TEST_FLAGS) . ./internal/...
 
+.PHONY: test-cover
+test-cover: ## Run the unit tests with coverage output
+	go test $(GO_TEST_FLAGS) $(GO_TEST_COVER_FLAGS) . ./internal/...
+
 .PHONY: test-integration
 test-integration: ## Run the integration tests
 	if [ -d ./integration ]; then \
-		go test $(GO_TEST_FLAGS) ./integration/...; \
+		go test $(GO_TEST_FLAGS) -tags=integration ./integration/...; \
 	else \
 		echo "integration tests not found; skipping"; \
 	fi

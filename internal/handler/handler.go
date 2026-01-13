@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/motoki317/sc"
-	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/repository"
+	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/domain"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
 )
 
@@ -31,7 +31,7 @@ const medalTimeseriesCacheTTL = time.Hour
 const saveActivityCacheTTL = 10 * time.Minute
 
 type Handler struct {
-	repo                  *repository.Repository
+	repo                  Repository
 	rankingCache          *sc.Cache[string, []models.GameData]
 	totalMedalsCache      *sc.Cache[string, int]
 	statisticsCacheV3     *sc.Cache[string, *models.StatisticsV3]
@@ -41,7 +41,23 @@ type Handler struct {
 	saveActivityCache     *sc.Cache[string, *models.SaveActivityResponse]
 }
 
-func New(repo *repository.Repository) *Handler {
+type Repository interface {
+	GetRankings(ctx context.Context, sortBy string, limit int) ([]models.GameData, error)
+	GetTotalMedals(ctx context.Context) (int, error)
+	GetStatisticsV4(ctx context.Context) (*models.StatisticsV4, error)
+	GetAchievementRates(ctx context.Context) (*models.AchievementRates, error)
+	GetMedalTimeseries(ctx context.Context, days int) (*models.MedalTimeseriesResponse, error)
+	GetSaveActivity(ctx context.Context, hours int) (*models.SaveActivityResponse, error)
+	GetCreditAllDistribution(ctx context.Context) (*models.CreditAllDistributionResponse, error)
+
+	ExistsSameSave(ctx context.Context, userID string, playtime int64) (bool, error)
+	InsertSaveV4(ctx context.Context, sd *domain.SaveData) error
+	GetLatestSave(ctx context.Context, userID string) (*domain.SaveData, error)
+	GetSaveHistory(ctx context.Context, userID string, limit int, before *time.Time) ([]models.SaveHistoryEntry, bool, error)
+	GetAchievementUnlockHistory(ctx context.Context, userID string, limit int) ([]models.AchievementUnlockEntry, int, error)
+}
+
+func New(repo Repository) *Handler {
 	h := &Handler{repo: repo}
 
 	// ランキング全般キャッシュ (キー: "sortBy:limit")
@@ -72,20 +88,24 @@ func New(repo *repository.Repository) *Handler {
 	}
 	h.totalMedalsCache = medalCache
 
-	// v3 統計データキャッシュの初期化
-	statsCacheV3, err := sc.New(
-		func(ctx context.Context, key string) (*models.StatisticsV3, error) {
-			// key は使わないので無視
-			return repo.GetStatisticsV3(ctx)
-		},
-		statisticsCacheV3TTL, // freshFor: 5分
-		statisticsCacheV3TTL, // ttl:      5分
-		// 単一キーなのでバックエンドはデフォルトの map で十分
-	)
-	if err != nil {
-		log.Fatalf("failed to create statistics v3 cache: %v", err)
+	if v3Repo, ok := repo.(interface {
+		GetStatisticsV3(ctx context.Context) (*models.StatisticsV3, error)
+	}); ok {
+		// v3 統計データキャッシュの初期化
+		statsCacheV3, err := sc.New(
+			func(ctx context.Context, key string) (*models.StatisticsV3, error) {
+				// key は使わないので無視
+				return v3Repo.GetStatisticsV3(ctx)
+			},
+			statisticsCacheV3TTL, // freshFor: 5分
+			statisticsCacheV3TTL, // ttl:      5分
+			// 単一キーなのでバックエンドはデフォルトの map で十分
+		)
+		if err != nil {
+			log.Fatalf("failed to create statistics v3 cache: %v", err)
+		}
+		h.statisticsCacheV3 = statsCacheV3
 	}
-	h.statisticsCacheV3 = statsCacheV3
 
 	// v4 統計データキャッシュの初期化
 	statsCacheV4, err := sc.New(
