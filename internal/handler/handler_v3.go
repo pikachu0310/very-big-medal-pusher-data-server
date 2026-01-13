@@ -5,18 +5,11 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"net/http"
-	"net/url"
 	"strings"
 
 	"github.com/labstack/echo/v4"
-	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/domain"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/pkg/config"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
-)
-
-const (
-	// 統計データのキャッシュキー（単一なので何でも良い）
-	statisticsCacheV3Key = "v3_stats"
 )
 
 // func (h *Handler) GetV3Data(ctx echo.Context, params models.GetV3DataParams) error {
@@ -161,39 +154,6 @@ func (h *Handler) GetV3Data(ctx echo.Context, params models.GetV3DataParams) err
 		"error": "This endpoint is deprecated and no longer available. Please use v4 endpoints instead.",
 		"code":  "DEPRECATED_ENDPOINT",
 	})
-
-	// クエリパラメータを正しい順序で構築して署名検証を行う
-	dataEncoded := strings.ReplaceAll(url.QueryEscape(params.Data), "+", "%20")
-	userIdEncoded := strings.ReplaceAll(url.QueryEscape(params.UserId), "+", "%20")
-	signingStr := "data=" + dataEncoded + "&user_id=" + userIdEncoded
-
-	// 署名検証
-	if !verifySignature(signingStr, params.Sig, generateUserSecretV4(params.UserId)) {
-		return ctx.String(http.StatusUnauthorized, "invalid signature")
-	}
-
-	// JSON 部分をパース
-	sd, err := domain.ParseSaveData(params.Data)
-	if err != nil {
-		return ctx.String(http.StatusBadRequest, err.Error())
-	}
-
-	// 重複チェック
-	exists, err := h.repo.ExistsSameSave(ctx.Request().Context(), params.UserId, sd.Playtime)
-	if err != nil {
-		return ctx.String(http.StatusInternalServerError, err.Error())
-	}
-	if exists {
-		return ctx.String(http.StatusConflict, "duplicate save data")
-	}
-
-	// 保存（v2_save_data に保存し、v3_user_latest_save_data を更新）
-	sd.UserId = params.UserId
-	if err := h.repo.InsertSaveV4(ctx.Request().Context(), sd); err != nil {
-		return ctx.String(http.StatusInternalServerError, err.Error())
-	}
-
-	return ctx.JSON(http.StatusOK, "success")
 }
 
 // GetV4UsersUserIdData は v4 エンドポイントでユーザーの最新セーブデータを取得する
@@ -207,24 +167,6 @@ func (h *Handler) GetV3UsersUserIdData(
 		"error": "This endpoint is deprecated and no longer available. Please use v4 endpoints instead.",
 		"code":  "DEPRECATED_ENDPOINT",
 	})
-
-	// 署名必須
-	if params.Sig == "" {
-		return ctx.String(http.StatusBadRequest, "missing signature")
-	}
-	if !verifyUserSignature(userId, params.Sig) {
-		return ctx.String(http.StatusUnauthorized, "invalid signature")
-	}
-
-	// 最新セーブデータ取得（v2_save_data を参照）
-	sd, err := h.repo.GetLatestSave(ctx.Request().Context(), userId)
-	if err != nil {
-		return ctx.String(http.StatusNotFound, err.Error())
-	}
-
-	// OpenAPI モデル化 & 返却
-	model := sd.ToModel()
-	return ctx.JSON(http.StatusOK, model)
 }
 
 // GetV4Statistics は v4 エンドポイントで最適化された統計データを返す
@@ -234,14 +176,6 @@ func (h *Handler) GetV3Statistics(ctx echo.Context) error {
 		"error": "This endpoint is deprecated and no longer available. Please use v4 endpoints instead.",
 		"code":  "DEPRECATED_ENDPOINT",
 	})
-
-	// キャッシュから取得
-	stats, err := h.statisticsCacheV4.Get(ctx.Request().Context(), statisticsCacheV4Key)
-	if err != nil {
-		return ctx.String(http.StatusInternalServerError, err.Error())
-	}
-
-	return ctx.JSON(http.StatusOK, stats)
 }
 
 // GetV4AchievementsRates は v4 エンドポイントで実績取得率を返す
@@ -251,11 +185,4 @@ func (h *Handler) GetV3AchievementsRates(ctx echo.Context) error {
 		"error": "This endpoint is deprecated and no longer available. Please use v4 endpoints instead.",
 		"code":  "DEPRECATED_ENDPOINT",
 	})
-
-	rates, err := h.achievementRatesCache.Get(ctx.Request().Context(), achievementRatesCacheKey)
-	if err != nil {
-		return ctx.String(http.StatusInternalServerError, err.Error())
-	}
-
-	return ctx.JSON(http.StatusOK, rates)
 }

@@ -16,7 +16,9 @@ func (r *Repository) InsertSaveV4(ctx context.Context, sd *domain.SaveData) erro
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() {
+		_ = tx.Rollback()
+	}()
 
 	// v2_save_data に挿入
 	res, err := tx.ExecContext(ctx, `
