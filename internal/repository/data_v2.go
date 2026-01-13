@@ -189,7 +189,9 @@ WHERE save_id = ?
 		}
 		sd.DCMedalGet[id] = cnt
 	}
-	rows.Close()
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
 
 	// 3) ball_get
 	sd.DCBallGet = make(map[string]int64)
@@ -209,7 +211,9 @@ WHERE save_id = ?
 		}
 		sd.DCBallGet[id] = cnt
 	}
-	rows.Close()
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
 
 	// 4) ball_chain
 	sd.DCBallChain = make(map[string]int)
@@ -229,7 +233,9 @@ WHERE save_id = ?
 		}
 		sd.DCBallChain[id] = cnt
 	}
-	rows.Close()
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
 
 	// 5) achievements - v3_user_latest_save_data_achievements から取得
 	rows, err = r.db.QueryxContext(ctx, `
@@ -249,7 +255,9 @@ WHERE user_id = ?
 		}
 		sd.LAchieve = append(sd.LAchieve, aid)
 	}
-	rows.Close()
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
 
 	// 6) palball_get
 	sd.DCPalettaBallGet = make(map[string]int)
@@ -269,7 +277,9 @@ WHERE save_id = ?
 		}
 		sd.DCPalettaBallGet[id] = cnt
 	}
-	rows.Close()
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
 
 	// 7) palball_jp
 	sd.DCPalettaBallJackpot = make(map[string]int)
@@ -289,7 +299,9 @@ WHERE save_id = ?
 		}
 		sd.DCPalettaBallJackpot[id] = cnt
 	}
-	rows.Close()
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
 
 	// 8) perks
 	rows, err = r.db.QueryxContext(ctx, `
@@ -317,7 +329,9 @@ ORDER BY perk_id
 			sd.LPerkLevels[perkID] = level
 		}
 	}
-	rows.Close()
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
 
 	// 9) perks_credit
 	rows, err = r.db.QueryxContext(ctx, `
@@ -345,7 +359,9 @@ ORDER BY perk_id
 			sd.LPerkUsedCredits[perkID] = credits
 		}
 	}
-	rows.Close()
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
 
 	// 10) totems
 	rows, err = r.db.QueryxContext(ctx, `
@@ -371,7 +387,9 @@ ORDER BY totem_id
 			sd.LTotemLevels[totemID] = level
 		}
 	}
-	rows.Close()
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
 
 	// 11) totems_credit
 	rows, err = r.db.QueryxContext(ctx, `
@@ -397,7 +415,9 @@ ORDER BY totem_id
 			sd.LTotemUsedCredits[totemID] = credits
 		}
 	}
-	rows.Close()
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
 
 	// 12) totems_placement
 	rows, err = r.db.QueryxContext(ctx, `
@@ -423,7 +443,9 @@ ORDER BY placement_idx
 			sd.LTotemPlacements[placementIdx] = totemID
 		}
 	}
-	rows.Close()
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
 
 	fmt.Printf("[REPO-DEBUG] GetLatestSave SUCCESS - user_id=%s, achievements=%d, perks=%d, totems=%d\n", userID, len(sd.LAchieve), len(sd.LPerkLevels), len(sd.LTotemLevels))
 	return &sd, nil
@@ -452,7 +474,9 @@ LIMIT 500
 		if err != nil {
 			return nil, err
 		}
-		defer rows.Close()
+		defer func() {
+			_ = rows.Close()
+		}()
 
 		list := []models.RankingEntry{}
 		for rows.Next() {
@@ -483,7 +507,9 @@ LIMIT 500
 		if err != nil {
 			return nil, err
 		}
-		defer rows.Close()
+		defer func() {
+			_ = rows.Close()
+		}()
 
 		list := []models.RankingEntry{}
 		for rows.Next() {
@@ -512,7 +538,9 @@ LIMIT 500
 		if err != nil {
 			return nil, err
 		}
-		defer rows.Close()
+		defer func() {
+			_ = rows.Close()
+		}()
 
 		list := []models.RankingEntry{}
 		for rows.Next() {
@@ -560,7 +588,9 @@ func (r *Repository) GetStatisticsV3(ctx context.Context) (*models.StatisticsV3,
 		if err != nil {
 			return err
 		}
-		defer rows.Close()
+		defer func() {
+			_ = rows.Close()
+		}()
 
 		// 事前に容量を確保してメモリ効率を改善（最大500個）
 		list := make([]models.RankingEntry, 0, 500)
