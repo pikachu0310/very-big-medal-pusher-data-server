@@ -1,4 +1,5 @@
 # Massive Medal Pusher Data Server
+![Coverage](https://img.shields.io/badge/coverage-20.5%25-brightgreen)
 ## https://push.trap.games/
 VRChat ワールド「クソでっけぇプッシャーゲーム」向けのクラウドセーブ/API サーバーです。  
 クラウドセーブ送信・最新セーブ取得・ランキング/統計を提供し、`oapi-codegen` で型安全に実装されています。クライアント実装は `/mnt/h/github/VRCWorld-MassiveMedalPusher` の Udon# です。
