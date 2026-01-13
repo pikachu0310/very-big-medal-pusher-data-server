@@ -432,6 +432,38 @@ paths:
         '409': { description: 同一データの重複検出 }
         '500': { description: サーバー内部エラー }
 
+  /v4/data/verify:
+    get:
+      tags: [ v4 ]
+      summary: セーブデータ署名を検証 (v4)
+      description: >
+        `/v4/data` と同じクエリを受け取り、署名検証のみを行います。保存はしません。
+      parameters:
+        - name: data
+          in: query
+          required: true
+          schema: { type: string }
+          description: Base64URL エンコード済み JSON セーブデータ（後方互換で URL エンコードも可）
+        - name: user_id
+          in: query
+          required: true
+          schema: { type: string }
+          description: Base64URL エンコードされたユーザーID（従来の生文字列にも対応）
+        - name: sig
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: 署名検証に成功しました
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignatureVerifyResponse'
+        '400': { description: 無効なパラメータ }
+        '401': { description: 署名認証失敗 }
+        '500': { description: サーバー内部エラー }
+
   /v4/users/{user_id}/data:
     get:
       tags: [ v4 ]
@@ -458,6 +490,33 @@ paths:
                 $ref: '#/components/schemas/SignedSaveData'
         '401': { description: 署名認証失敗 }
         '404': { description: データが見つかりません }
+        '500': { description: サーバー内部エラー }
+
+  /v4/users/{user_id}/data/verify:
+    get:
+      tags: [ v4 ]
+      summary: ロード用署名を検証 (v4)
+      description: >
+        `/v4/users/{user_id}/data` と同じ署名方式で検証だけを行います。
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: sig
+          in: query
+          required: true
+          description: HMAC-SHA256 署名
+          schema: { type: string }
+      responses:
+        '200':
+          description: 署名検証に成功しました
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignatureVerifyResponse'
+        '400': { description: 無効なパラメータ }
+        '401': { description: 署名認証失敗 }
         '500': { description: サーバー内部エラー }
 
   /v4/statistics:
@@ -975,6 +1034,15 @@ components:
           type: string
           description: HMAC-SHA256(data) による署名（LOAD シークレットを使用）
       required: [data, sig]
+
+    SignatureVerifyResponse:
+      type: object
+      description: 署名検証結果
+      properties:
+        valid:
+          type: boolean
+          description: 署名が正しい場合に true
+      required: [valid]
 
     RankingEntry:
       type: object
