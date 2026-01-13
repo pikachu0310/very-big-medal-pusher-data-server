@@ -223,6 +223,12 @@ type SaveHistoryResponse struct {
 	NextBefore *time.Time          `json:"next_before,omitempty"`
 }
 
+// SignatureVerifyResponse 署名検証結果
+type SignatureVerifyResponse struct {
+	// Valid 署名が正しい場合に true
+	Valid bool `json:"valid"`
+}
+
 // SignedSaveData Base64 でエンコードされたセーブデータと署名
 type SignedSaveData struct {
 	// Data Base64 エンコード済みのセーブデータ JSON（標準 Base64）
@@ -349,6 +355,16 @@ type GetV4DataParams struct {
 	Sig    string `form:"sig" json:"sig"`
 }
 
+// GetV4DataVerifyParams defines parameters for GetV4DataVerify.
+type GetV4DataVerifyParams struct {
+	// Data Base64URL エンコード済み JSON セーブデータ（後方互換で URL エンコードも可）
+	Data string `form:"data" json:"data"`
+
+	// UserId Base64URL エンコードされたユーザーID（従来の生文字列にも対応）
+	UserId string `form:"user_id" json:"user_id"`
+	Sig    string `form:"sig" json:"sig"`
+}
+
 // GetV4StatisticsMedalsTimeseriesParams defines parameters for GetV4StatisticsMedalsTimeseries.
 type GetV4StatisticsMedalsTimeseriesParams struct {
 	// Days 取得する日数（1〜180）
@@ -372,6 +388,12 @@ type GetV4UsersUserIdAchievementsHistoryParams struct {
 
 // GetV4UsersUserIdDataParams defines parameters for GetV4UsersUserIdData.
 type GetV4UsersUserIdDataParams struct {
+	// Sig HMAC-SHA256 署名
+	Sig string `form:"sig" json:"sig"`
+}
+
+// GetV4UsersUserIdDataVerifyParams defines parameters for GetV4UsersUserIdDataVerify.
+type GetV4UsersUserIdDataVerifyParams struct {
 	// Sig HMAC-SHA256 署名
 	Sig string `form:"sig" json:"sig"`
 }

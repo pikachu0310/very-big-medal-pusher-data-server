@@ -66,6 +66,33 @@ func (h *Handler) GetV4Data(ctx echo.Context, params models.GetV4DataParams) err
 	return ctx.JSON(http.StatusOK, "success")
 }
 
+// GetV4DataVerify は v4 セーブデータの署名検証のみを行う
+func (h *Handler) GetV4DataVerify(ctx echo.Context, params models.GetV4DataVerifyParams) error {
+	userID, err := decodeUserIDParam(params.UserId)
+	if err != nil {
+		return ctx.String(http.StatusBadRequest, "invalid user_id")
+	}
+	if userID == "" {
+		return ctx.String(http.StatusBadRequest, "missing user_id")
+	}
+	if params.Data == "" {
+		return ctx.String(http.StatusBadRequest, "missing data")
+	}
+	if params.Sig == "" {
+		return ctx.String(http.StatusBadRequest, "missing signature")
+	}
+
+	dataEncoded := strings.ReplaceAll(url.QueryEscape(params.Data), "+", "%20")
+	userIdEncoded := strings.ReplaceAll(url.QueryEscape(params.UserId), "+", "%20")
+	signingStr := "data=" + dataEncoded + "&user_id=" + userIdEncoded
+
+	if !verifySignature(signingStr, params.Sig, generateUserSecretV4(userID)) {
+		return ctx.String(http.StatusUnauthorized, "invalid signature")
+	}
+
+	return ctx.JSON(http.StatusOK, models.SignatureVerifyResponse{Valid: true})
+}
+
 // GetV4UsersUserIdData は v4 エンドポイントでユーザーの最新セーブデータを取得する
 func (h *Handler) GetV4UsersUserIdData(
 	ctx echo.Context,
@@ -101,6 +128,30 @@ func (h *Handler) GetV4UsersUserIdData(
 		return ctx.String(http.StatusInternalServerError, err.Error())
 	}
 	return ctx.JSON(http.StatusOK, signed)
+}
+
+// GetV4UsersUserIdDataVerify はロード用の署名検証のみを行う
+func (h *Handler) GetV4UsersUserIdDataVerify(
+	ctx echo.Context,
+	userId string,
+	params models.GetV4UsersUserIdDataVerifyParams,
+) error {
+	decodedUserID, err := decodeUserIDParam(userId)
+	if err != nil {
+		return ctx.String(http.StatusBadRequest, "invalid user_id")
+	}
+	if decodedUserID == "" {
+		return ctx.String(http.StatusBadRequest, "missing user_id")
+	}
+
+	if params.Sig == "" {
+		return ctx.String(http.StatusBadRequest, "missing signature")
+	}
+	if !verifyUserSignatureV4(userId, decodedUserID, params.Sig) {
+		return ctx.String(http.StatusUnauthorized, "invalid signature")
+	}
+
+	return ctx.JSON(http.StatusOK, models.SignatureVerifyResponse{Valid: true})
 }
 
 // GetV4Statistics は v4 エンドポイントで最適化された統計データを返す
