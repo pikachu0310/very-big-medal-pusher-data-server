@@ -1,5 +1,8 @@
 # Massive Medal Pusher Data Server
+[![CI](https://github.com/pikachu0310/very-big-medal-pusher-data-server/actions/workflows/ci.yml/badge.svg)](https://github.com/pikachu0310/very-big-medal-pusher-data-server/actions/workflows/ci.yml)
+[![Main](https://github.com/pikachu0310/very-big-medal-pusher-data-server/actions/workflows/main.yml/badge.svg)](https://github.com/pikachu0310/very-big-medal-pusher-data-server/actions/workflows/main.yml)
 [![Coverage](https://codecov.io/gh/pikachu0310/very-big-medal-pusher-data-server/branch/main/graph/badge.svg)](https://codecov.io/gh/pikachu0310/very-big-medal-pusher-data-server)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/pikachu0310/very-big-medal-pusher-data-server/blob/main/LICENSE)
 ## https://push.trap.games/
 VRChat ワールド「クソでっけぇプッシャーゲーム」向けのクラウドセーブ/API サーバーです。  
 クラウドセーブ送信・最新セーブ取得・ランキング/統計を提供し、`oapi-codegen` で型安全に実装されています。クライアント実装は `/mnt/h/github/VRCWorld-MassiveMedalPusher` の Udon# です。
