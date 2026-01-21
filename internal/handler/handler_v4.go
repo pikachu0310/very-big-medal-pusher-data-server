@@ -319,15 +319,3 @@ func generateUserSecretV4(userID string) []byte {
 	h.Write([]byte(userID))
 	return h.Sum(nil)
 }
-
-// verifyUserSignatureV4 tries both decoded and raw user_id to keep compatibility with
-// clients that sign either representation.
-func verifyUserSignatureV4(rawUserID, decodedUserID, sig string) bool {
-	if decodedUserID != "" && verifyUserSignature(decodedUserID, sig) {
-		return true
-	}
-	if rawUserID != "" && rawUserID != decodedUserID {
-		return verifyUserSignature(rawUserID, sig)
-	}
-	return false
-}
