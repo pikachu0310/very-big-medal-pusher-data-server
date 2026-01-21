@@ -150,7 +150,22 @@ FROM (
 ) s;
 
 -- v2_save_data_ball_chain
-WITH diff AS (
+INSERT INTO v2_save_data_ball_chain (save_id, ball_id, chain_count)
+SELECT @new_save_id, k.ball_id,
+       COALESCE(b.chain_count, 0) + COALESCE(d.diff_chain, 0)
+FROM (
+  SELECT ball_id FROM v2_save_data_ball_chain WHERE save_id = @base_id
+  UNION
+  SELECT ball_id FROM v2_save_data_ball_chain WHERE save_id = @to_id
+  UNION
+  SELECT ball_id FROM v2_save_data_ball_chain WHERE save_id = @from_id
+) k
+LEFT JOIN (
+  SELECT ball_id, chain_count
+  FROM v2_save_data_ball_chain
+  WHERE save_id = @base_id
+) b ON b.ball_id = k.ball_id
+LEFT JOIN (
   SELECT k.ball_id,
          COALESCE(t.chain_count, 0) - COALESCE(f.chain_count, 0) AS diff_chain
   FROM (
@@ -158,27 +173,30 @@ WITH diff AS (
     UNION
     SELECT ball_id FROM v2_save_data_ball_chain WHERE save_id = @from_id
   ) k
-  LEFT JOIN v2_save_data_ball_chain t ON t.save_id = @to_id AND t.ball_id = k.ball_id
-  LEFT JOIN v2_save_data_ball_chain f ON f.save_id = @from_id AND f.ball_id = k.ball_id
-),
-base AS (
-  SELECT ball_id, chain_count FROM v2_save_data_ball_chain WHERE save_id = @base_id
-),
-key_rows AS (
-  SELECT ball_id FROM base
-  UNION
-  SELECT ball_id FROM diff
-)
-INSERT INTO v2_save_data_ball_chain (save_id, ball_id, chain_count)
-SELECT @new_save_id, k.ball_id,
-       COALESCE(b.chain_count, 0) + COALESCE(d.diff_chain, 0)
-FROM key_rows k
-LEFT JOIN base b ON b.ball_id = k.ball_id
-LEFT JOIN diff d ON d.ball_id = k.ball_id
+  LEFT JOIN v2_save_data_ball_chain t
+    ON t.save_id = @to_id AND t.ball_id = k.ball_id
+  LEFT JOIN v2_save_data_ball_chain f
+    ON f.save_id = @from_id AND f.ball_id = k.ball_id
+) d ON d.ball_id = k.ball_id
 WHERE COALESCE(b.chain_count, 0) + COALESCE(d.diff_chain, 0) <> 0;
 
 -- v2_save_data_ball_get
-WITH diff AS (
+INSERT INTO v2_save_data_ball_get (save_id, ball_id, `count`)
+SELECT @new_save_id, k.ball_id,
+       COALESCE(b.`count`, 0) + COALESCE(d.diff_count, 0)
+FROM (
+  SELECT ball_id FROM v2_save_data_ball_get WHERE save_id = @base_id
+  UNION
+  SELECT ball_id FROM v2_save_data_ball_get WHERE save_id = @to_id
+  UNION
+  SELECT ball_id FROM v2_save_data_ball_get WHERE save_id = @from_id
+) k
+LEFT JOIN (
+  SELECT ball_id, `count`
+  FROM v2_save_data_ball_get
+  WHERE save_id = @base_id
+) b ON b.ball_id = k.ball_id
+LEFT JOIN (
   SELECT k.ball_id,
          COALESCE(t.`count`, 0) - COALESCE(f.`count`, 0) AS diff_count
   FROM (
@@ -186,27 +204,30 @@ WITH diff AS (
     UNION
     SELECT ball_id FROM v2_save_data_ball_get WHERE save_id = @from_id
   ) k
-  LEFT JOIN v2_save_data_ball_get t ON t.save_id = @to_id AND t.ball_id = k.ball_id
-  LEFT JOIN v2_save_data_ball_get f ON f.save_id = @from_id AND f.ball_id = k.ball_id
-),
-base AS (
-  SELECT ball_id, `count` FROM v2_save_data_ball_get WHERE save_id = @base_id
-),
-key_rows AS (
-  SELECT ball_id FROM base
-  UNION
-  SELECT ball_id FROM diff
-)
-INSERT INTO v2_save_data_ball_get (save_id, ball_id, `count`)
-SELECT @new_save_id, k.ball_id,
-       COALESCE(b.`count`, 0) + COALESCE(d.diff_count, 0)
-FROM key_rows k
-LEFT JOIN base b ON b.ball_id = k.ball_id
-LEFT JOIN diff d ON d.ball_id = k.ball_id
+  LEFT JOIN v2_save_data_ball_get t
+    ON t.save_id = @to_id AND t.ball_id = k.ball_id
+  LEFT JOIN v2_save_data_ball_get f
+    ON f.save_id = @from_id AND f.ball_id = k.ball_id
+) d ON d.ball_id = k.ball_id
 WHERE COALESCE(b.`count`, 0) + COALESCE(d.diff_count, 0) <> 0;
 
 -- v2_save_data_medal_get
-WITH diff AS (
+INSERT INTO v2_save_data_medal_get (save_id, medal_id, `count`)
+SELECT @new_save_id, k.medal_id,
+       COALESCE(b.`count`, 0) + COALESCE(d.diff_count, 0)
+FROM (
+  SELECT medal_id FROM v2_save_data_medal_get WHERE save_id = @base_id
+  UNION
+  SELECT medal_id FROM v2_save_data_medal_get WHERE save_id = @to_id
+  UNION
+  SELECT medal_id FROM v2_save_data_medal_get WHERE save_id = @from_id
+) k
+LEFT JOIN (
+  SELECT medal_id, `count`
+  FROM v2_save_data_medal_get
+  WHERE save_id = @base_id
+) b ON b.medal_id = k.medal_id
+LEFT JOIN (
   SELECT k.medal_id,
          COALESCE(t.`count`, 0) - COALESCE(f.`count`, 0) AS diff_count
   FROM (
@@ -214,27 +235,30 @@ WITH diff AS (
     UNION
     SELECT medal_id FROM v2_save_data_medal_get WHERE save_id = @from_id
   ) k
-  LEFT JOIN v2_save_data_medal_get t ON t.save_id = @to_id AND t.medal_id = k.medal_id
-  LEFT JOIN v2_save_data_medal_get f ON f.save_id = @from_id AND f.medal_id = k.medal_id
-),
-base AS (
-  SELECT medal_id, `count` FROM v2_save_data_medal_get WHERE save_id = @base_id
-),
-key_rows AS (
-  SELECT medal_id FROM base
-  UNION
-  SELECT medal_id FROM diff
-)
-INSERT INTO v2_save_data_medal_get (save_id, medal_id, `count`)
-SELECT @new_save_id, k.medal_id,
-       COALESCE(b.`count`, 0) + COALESCE(d.diff_count, 0)
-FROM key_rows k
-LEFT JOIN base b ON b.medal_id = k.medal_id
-LEFT JOIN diff d ON d.medal_id = k.medal_id
+  LEFT JOIN v2_save_data_medal_get t
+    ON t.save_id = @to_id AND t.medal_id = k.medal_id
+  LEFT JOIN v2_save_data_medal_get f
+    ON f.save_id = @from_id AND f.medal_id = k.medal_id
+) d ON d.medal_id = k.medal_id
 WHERE COALESCE(b.`count`, 0) + COALESCE(d.diff_count, 0) <> 0;
 
 -- v2_save_data_palball_get
-WITH diff AS (
+INSERT INTO v2_save_data_palball_get (save_id, ball_id, `count`)
+SELECT @new_save_id, k.ball_id,
+       COALESCE(b.`count`, 0) + COALESCE(d.diff_count, 0)
+FROM (
+  SELECT ball_id FROM v2_save_data_palball_get WHERE save_id = @base_id
+  UNION
+  SELECT ball_id FROM v2_save_data_palball_get WHERE save_id = @to_id
+  UNION
+  SELECT ball_id FROM v2_save_data_palball_get WHERE save_id = @from_id
+) k
+LEFT JOIN (
+  SELECT ball_id, `count`
+  FROM v2_save_data_palball_get
+  WHERE save_id = @base_id
+) b ON b.ball_id = k.ball_id
+LEFT JOIN (
   SELECT k.ball_id,
          COALESCE(t.`count`, 0) - COALESCE(f.`count`, 0) AS diff_count
   FROM (
@@ -242,27 +266,30 @@ WITH diff AS (
     UNION
     SELECT ball_id FROM v2_save_data_palball_get WHERE save_id = @from_id
   ) k
-  LEFT JOIN v2_save_data_palball_get t ON t.save_id = @to_id AND t.ball_id = k.ball_id
-  LEFT JOIN v2_save_data_palball_get f ON f.save_id = @from_id AND f.ball_id = k.ball_id
-),
-base AS (
-  SELECT ball_id, `count` FROM v2_save_data_palball_get WHERE save_id = @base_id
-),
-key_rows AS (
-  SELECT ball_id FROM base
-  UNION
-  SELECT ball_id FROM diff
-)
-INSERT INTO v2_save_data_palball_get (save_id, ball_id, `count`)
-SELECT @new_save_id, k.ball_id,
-       COALESCE(b.`count`, 0) + COALESCE(d.diff_count, 0)
-FROM key_rows k
-LEFT JOIN base b ON b.ball_id = k.ball_id
-LEFT JOIN diff d ON d.ball_id = k.ball_id
+  LEFT JOIN v2_save_data_palball_get t
+    ON t.save_id = @to_id AND t.ball_id = k.ball_id
+  LEFT JOIN v2_save_data_palball_get f
+    ON f.save_id = @from_id AND f.ball_id = k.ball_id
+) d ON d.ball_id = k.ball_id
 WHERE COALESCE(b.`count`, 0) + COALESCE(d.diff_count, 0) <> 0;
 
 -- v2_save_data_palball_jp
-WITH diff AS (
+INSERT INTO v2_save_data_palball_jp (save_id, ball_id, `count`)
+SELECT @new_save_id, k.ball_id,
+       COALESCE(b.`count`, 0) + COALESCE(d.diff_count, 0)
+FROM (
+  SELECT ball_id FROM v2_save_data_palball_jp WHERE save_id = @base_id
+  UNION
+  SELECT ball_id FROM v2_save_data_palball_jp WHERE save_id = @to_id
+  UNION
+  SELECT ball_id FROM v2_save_data_palball_jp WHERE save_id = @from_id
+) k
+LEFT JOIN (
+  SELECT ball_id, `count`
+  FROM v2_save_data_palball_jp
+  WHERE save_id = @base_id
+) b ON b.ball_id = k.ball_id
+LEFT JOIN (
   SELECT k.ball_id,
          COALESCE(t.`count`, 0) - COALESCE(f.`count`, 0) AS diff_count
   FROM (
@@ -270,27 +297,30 @@ WITH diff AS (
     UNION
     SELECT ball_id FROM v2_save_data_palball_jp WHERE save_id = @from_id
   ) k
-  LEFT JOIN v2_save_data_palball_jp t ON t.save_id = @to_id AND t.ball_id = k.ball_id
-  LEFT JOIN v2_save_data_palball_jp f ON f.save_id = @from_id AND f.ball_id = k.ball_id
-),
-base AS (
-  SELECT ball_id, `count` FROM v2_save_data_palball_jp WHERE save_id = @base_id
-),
-key_rows AS (
-  SELECT ball_id FROM base
-  UNION
-  SELECT ball_id FROM diff
-)
-INSERT INTO v2_save_data_palball_jp (save_id, ball_id, `count`)
-SELECT @new_save_id, k.ball_id,
-       COALESCE(b.`count`, 0) + COALESCE(d.diff_count, 0)
-FROM key_rows k
-LEFT JOIN base b ON b.ball_id = k.ball_id
-LEFT JOIN diff d ON d.ball_id = k.ball_id
+  LEFT JOIN v2_save_data_palball_jp t
+    ON t.save_id = @to_id AND t.ball_id = k.ball_id
+  LEFT JOIN v2_save_data_palball_jp f
+    ON f.save_id = @from_id AND f.ball_id = k.ball_id
+) d ON d.ball_id = k.ball_id
 WHERE COALESCE(b.`count`, 0) + COALESCE(d.diff_count, 0) <> 0;
 
 -- v2_save_data_perks
-WITH diff AS (
+INSERT INTO v2_save_data_perks (save_id, perk_id, level)
+SELECT @new_save_id, k.perk_id,
+       COALESCE(b.level, 0) + COALESCE(d.diff_level, 0)
+FROM (
+  SELECT perk_id FROM v2_save_data_perks WHERE save_id = @base_id
+  UNION
+  SELECT perk_id FROM v2_save_data_perks WHERE save_id = @to_id
+  UNION
+  SELECT perk_id FROM v2_save_data_perks WHERE save_id = @from_id
+) k
+LEFT JOIN (
+  SELECT perk_id, level
+  FROM v2_save_data_perks
+  WHERE save_id = @base_id
+) b ON b.perk_id = k.perk_id
+LEFT JOIN (
   SELECT k.perk_id,
          COALESCE(t.level, 0) - COALESCE(f.level, 0) AS diff_level
   FROM (
@@ -298,27 +328,30 @@ WITH diff AS (
     UNION
     SELECT perk_id FROM v2_save_data_perks WHERE save_id = @from_id
   ) k
-  LEFT JOIN v2_save_data_perks t ON t.save_id = @to_id AND t.perk_id = k.perk_id
-  LEFT JOIN v2_save_data_perks f ON f.save_id = @from_id AND f.perk_id = k.perk_id
-),
-base AS (
-  SELECT perk_id, level FROM v2_save_data_perks WHERE save_id = @base_id
-),
-key_rows AS (
-  SELECT perk_id FROM base
-  UNION
-  SELECT perk_id FROM diff
-)
-INSERT INTO v2_save_data_perks (save_id, perk_id, level)
-SELECT @new_save_id, k.perk_id,
-       COALESCE(b.level, 0) + COALESCE(d.diff_level, 0)
-FROM key_rows k
-LEFT JOIN base b ON b.perk_id = k.perk_id
-LEFT JOIN diff d ON d.perk_id = k.perk_id
+  LEFT JOIN v2_save_data_perks t
+    ON t.save_id = @to_id AND t.perk_id = k.perk_id
+  LEFT JOIN v2_save_data_perks f
+    ON f.save_id = @from_id AND f.perk_id = k.perk_id
+) d ON d.perk_id = k.perk_id
 WHERE COALESCE(b.level, 0) + COALESCE(d.diff_level, 0) <> 0;
 
 -- v2_save_data_perks_credit
-WITH diff AS (
+INSERT INTO v2_save_data_perks_credit (save_id, perk_id, credits)
+SELECT @new_save_id, k.perk_id,
+       COALESCE(b.credits, 0) + COALESCE(d.diff_credits, 0)
+FROM (
+  SELECT perk_id FROM v2_save_data_perks_credit WHERE save_id = @base_id
+  UNION
+  SELECT perk_id FROM v2_save_data_perks_credit WHERE save_id = @to_id
+  UNION
+  SELECT perk_id FROM v2_save_data_perks_credit WHERE save_id = @from_id
+) k
+LEFT JOIN (
+  SELECT perk_id, credits
+  FROM v2_save_data_perks_credit
+  WHERE save_id = @base_id
+) b ON b.perk_id = k.perk_id
+LEFT JOIN (
   SELECT k.perk_id,
          COALESCE(t.credits, 0) - COALESCE(f.credits, 0) AS diff_credits
   FROM (
@@ -326,27 +359,30 @@ WITH diff AS (
     UNION
     SELECT perk_id FROM v2_save_data_perks_credit WHERE save_id = @from_id
   ) k
-  LEFT JOIN v2_save_data_perks_credit t ON t.save_id = @to_id AND t.perk_id = k.perk_id
-  LEFT JOIN v2_save_data_perks_credit f ON f.save_id = @from_id AND f.perk_id = k.perk_id
-),
-base AS (
-  SELECT perk_id, credits FROM v2_save_data_perks_credit WHERE save_id = @base_id
-),
-key_rows AS (
-  SELECT perk_id FROM base
-  UNION
-  SELECT perk_id FROM diff
-)
-INSERT INTO v2_save_data_perks_credit (save_id, perk_id, credits)
-SELECT @new_save_id, k.perk_id,
-       COALESCE(b.credits, 0) + COALESCE(d.diff_credits, 0)
-FROM key_rows k
-LEFT JOIN base b ON b.perk_id = k.perk_id
-LEFT JOIN diff d ON d.perk_id = k.perk_id
+  LEFT JOIN v2_save_data_perks_credit t
+    ON t.save_id = @to_id AND t.perk_id = k.perk_id
+  LEFT JOIN v2_save_data_perks_credit f
+    ON f.save_id = @from_id AND f.perk_id = k.perk_id
+) d ON d.perk_id = k.perk_id
 WHERE COALESCE(b.credits, 0) + COALESCE(d.diff_credits, 0) <> 0;
 
 -- v2_save_data_totems
-WITH diff AS (
+INSERT INTO v2_save_data_totems (save_id, totem_id, level)
+SELECT @new_save_id, k.totem_id,
+       COALESCE(b.level, 0) + COALESCE(d.diff_level, 0)
+FROM (
+  SELECT totem_id FROM v2_save_data_totems WHERE save_id = @base_id
+  UNION
+  SELECT totem_id FROM v2_save_data_totems WHERE save_id = @to_id
+  UNION
+  SELECT totem_id FROM v2_save_data_totems WHERE save_id = @from_id
+) k
+LEFT JOIN (
+  SELECT totem_id, level
+  FROM v2_save_data_totems
+  WHERE save_id = @base_id
+) b ON b.totem_id = k.totem_id
+LEFT JOIN (
   SELECT k.totem_id,
          COALESCE(t.level, 0) - COALESCE(f.level, 0) AS diff_level
   FROM (
@@ -354,27 +390,30 @@ WITH diff AS (
     UNION
     SELECT totem_id FROM v2_save_data_totems WHERE save_id = @from_id
   ) k
-  LEFT JOIN v2_save_data_totems t ON t.save_id = @to_id AND t.totem_id = k.totem_id
-  LEFT JOIN v2_save_data_totems f ON f.save_id = @from_id AND f.totem_id = k.totem_id
-),
-base AS (
-  SELECT totem_id, level FROM v2_save_data_totems WHERE save_id = @base_id
-),
-key_rows AS (
-  SELECT totem_id FROM base
-  UNION
-  SELECT totem_id FROM diff
-)
-INSERT INTO v2_save_data_totems (save_id, totem_id, level)
-SELECT @new_save_id, k.totem_id,
-       COALESCE(b.level, 0) + COALESCE(d.diff_level, 0)
-FROM key_rows k
-LEFT JOIN base b ON b.totem_id = k.totem_id
-LEFT JOIN diff d ON d.totem_id = k.totem_id
+  LEFT JOIN v2_save_data_totems t
+    ON t.save_id = @to_id AND t.totem_id = k.totem_id
+  LEFT JOIN v2_save_data_totems f
+    ON f.save_id = @from_id AND f.totem_id = k.totem_id
+) d ON d.totem_id = k.totem_id
 WHERE COALESCE(b.level, 0) + COALESCE(d.diff_level, 0) <> 0;
 
 -- v2_save_data_totems_credit
-WITH diff AS (
+INSERT INTO v2_save_data_totems_credit (save_id, totem_id, credits)
+SELECT @new_save_id, k.totem_id,
+       COALESCE(b.credits, 0) + COALESCE(d.diff_credits, 0)
+FROM (
+  SELECT totem_id FROM v2_save_data_totems_credit WHERE save_id = @base_id
+  UNION
+  SELECT totem_id FROM v2_save_data_totems_credit WHERE save_id = @to_id
+  UNION
+  SELECT totem_id FROM v2_save_data_totems_credit WHERE save_id = @from_id
+) k
+LEFT JOIN (
+  SELECT totem_id, credits
+  FROM v2_save_data_totems_credit
+  WHERE save_id = @base_id
+) b ON b.totem_id = k.totem_id
+LEFT JOIN (
   SELECT k.totem_id,
          COALESCE(t.credits, 0) - COALESCE(f.credits, 0) AS diff_credits
   FROM (
@@ -382,42 +421,14 @@ WITH diff AS (
     UNION
     SELECT totem_id FROM v2_save_data_totems_credit WHERE save_id = @from_id
   ) k
-  LEFT JOIN v2_save_data_totems_credit t ON t.save_id = @to_id AND t.totem_id = k.totem_id
-  LEFT JOIN v2_save_data_totems_credit f ON f.save_id = @from_id AND f.totem_id = k.totem_id
-),
-base AS (
-  SELECT totem_id, credits FROM v2_save_data_totems_credit WHERE save_id = @base_id
-),
-key_rows AS (
-  SELECT totem_id FROM base
-  UNION
-  SELECT totem_id FROM diff
-)
-INSERT INTO v2_save_data_totems_credit (save_id, totem_id, credits)
-SELECT @new_save_id, k.totem_id,
-       COALESCE(b.credits, 0) + COALESCE(d.diff_credits, 0)
-FROM key_rows k
-LEFT JOIN base b ON b.totem_id = k.totem_id
-LEFT JOIN diff d ON d.totem_id = k.totem_id
+  LEFT JOIN v2_save_data_totems_credit t
+    ON t.save_id = @to_id AND t.totem_id = k.totem_id
+  LEFT JOIN v2_save_data_totems_credit f
+    ON f.save_id = @from_id AND f.totem_id = k.totem_id
+) d ON d.totem_id = k.totem_id
 WHERE COALESCE(b.credits, 0) + COALESCE(d.diff_credits, 0) <> 0;
 
 -- v2_save_data_totems_placement: take changes from to_id
-WITH key_rows AS (
-  SELECT placement_idx FROM v2_save_data_totems_placement WHERE save_id = @base_id
-  UNION
-  SELECT placement_idx FROM v2_save_data_totems_placement WHERE save_id = @from_id
-  UNION
-  SELECT placement_idx FROM v2_save_data_totems_placement WHERE save_id = @to_id
-),
-base AS (
-  SELECT placement_idx, totem_id FROM v2_save_data_totems_placement WHERE save_id = @base_id
-),
-f AS (
-  SELECT placement_idx, totem_id FROM v2_save_data_totems_placement WHERE save_id = @from_id
-),
-t AS (
-  SELECT placement_idx, totem_id FROM v2_save_data_totems_placement WHERE save_id = @to_id
-)
 INSERT INTO v2_save_data_totems_placement (save_id, placement_idx, totem_id)
 SELECT @new_save_id, s.placement_idx, s.totem_id
 FROM (
@@ -427,10 +438,28 @@ FROM (
            WHEN f.totem_id IS NOT NULL AND t.totem_id IS NULL THEN NULL
            ELSE b.totem_id
          END AS totem_id
-  FROM key_rows k
-  LEFT JOIN base b ON b.placement_idx = k.placement_idx
-  LEFT JOIN f ON f.placement_idx = k.placement_idx
-  LEFT JOIN t ON t.placement_idx = k.placement_idx
+  FROM (
+    SELECT placement_idx FROM v2_save_data_totems_placement WHERE save_id = @base_id
+    UNION
+    SELECT placement_idx FROM v2_save_data_totems_placement WHERE save_id = @from_id
+    UNION
+    SELECT placement_idx FROM v2_save_data_totems_placement WHERE save_id = @to_id
+  ) k
+  LEFT JOIN (
+    SELECT placement_idx, totem_id
+    FROM v2_save_data_totems_placement
+    WHERE save_id = @base_id
+  ) b ON b.placement_idx = k.placement_idx
+  LEFT JOIN (
+    SELECT placement_idx, totem_id
+    FROM v2_save_data_totems_placement
+    WHERE save_id = @from_id
+  ) f ON f.placement_idx = k.placement_idx
+  LEFT JOIN (
+    SELECT placement_idx, totem_id
+    FROM v2_save_data_totems_placement
+    WHERE save_id = @to_id
+  ) t ON t.placement_idx = k.placement_idx
 ) s
 WHERE s.totem_id IS NOT NULL;
 
