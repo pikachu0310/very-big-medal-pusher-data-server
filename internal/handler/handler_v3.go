@@ -1,14 +1,9 @@
 package handler
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
 	"net/http"
-	"strings"
 
 	"github.com/labstack/echo/v4"
-	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/pkg/config"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
 )
 
@@ -96,19 +91,6 @@ import (
 // 	fmt.Printf("[V3-DEBUG] GetV3UsersUserIdData SUCCESS - user_id=%s\n", userId)
 // 	return ctx.JSON(http.StatusOK, model)
 // }
-
-// -----------------------------------------------------------------
-// 署名検証：sig == HMAC-SHA256( key=<LoadSecret>, msg=userID )
-// -----------------------------------------------------------------
-func verifyUserSignature(userID, sig string) bool {
-	secret := []byte(config.GetSecretKeyLoadV2())
-
-	mac := hmac.New(sha256.New, secret)
-	mac.Write([]byte(userID))
-	expected := hex.EncodeToString(mac.Sum(nil))
-
-	return strings.EqualFold(sig, expected)
-}
 
 // // GetV3Statistics returns combined rankings and total medals, with cache.
 // func (h *Handler) GetV3Statistics(ctx echo.Context) error {

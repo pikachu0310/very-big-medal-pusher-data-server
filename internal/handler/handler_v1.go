@@ -1,9 +1,6 @@
 package handler
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -45,11 +42,4 @@ func (h *Handler) GetTotalMedals(ctx echo.Context) error {
 		"error": "This endpoint is deprecated and no longer available. Please use v4 endpoints instead.",
 		"code":  "DEPRECATED_ENDPOINT",
 	})
-}
-
-func verifySignature(data, sig string, secret []byte) bool {
-	mac := hmac.New(sha256.New, secret)
-	mac.Write([]byte(data))
-	expected := hex.EncodeToString(mac.Sum(nil))
-	return hmac.Equal([]byte(expected), []byte(sig))
 }

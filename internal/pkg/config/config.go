@@ -24,6 +24,10 @@ func GetSecretKeyLoadV2() string {
 	return getEnv("LOAD", "C")
 }
 
+func GetSignatureBypassToken() string {
+	return getEnv("SIGNATURE_BYPASS_TOKEN", "")
+}
+
 func AppAddr() string {
 	return getEnv("APP_ADDR", ":8080")
 }
