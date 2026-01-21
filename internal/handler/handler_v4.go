@@ -3,6 +3,8 @@ package handler
 import (
 	"crypto/hmac"
 	"crypto/sha256"
+	"database/sql"
+	"errors"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -118,7 +120,12 @@ func (h *Handler) GetV4UsersUserIdData(
 	// 最新セーブデータ取得（v2_save_data を参照）
 	sd, err := h.repo.GetLatestSave(ctx.Request().Context(), decodedUserID)
 	if err != nil {
-		return ctx.String(http.StatusNotFound, err.Error())
+		if errors.Is(err, sql.ErrNoRows) && userId != "" && userId != decodedUserID {
+			sd, err = h.repo.GetLatestSave(ctx.Request().Context(), userId)
+		}
+		if err != nil {
+			return ctx.String(http.StatusNotFound, err.Error())
+		}
 	}
 
 	// OpenAPI モデル化 & 返却
@@ -213,6 +220,12 @@ func (h *Handler) GetV4UsersUserIdSaves(
 	if err != nil {
 		return ctx.String(http.StatusInternalServerError, err.Error())
 	}
+	if len(entries) == 0 && userId != "" && userId != decodedUserID {
+		entries, hasMore, err = h.repo.GetSaveHistory(ctx.Request().Context(), userId, limit, params.Before)
+		if err != nil {
+			return ctx.String(http.StatusInternalServerError, err.Error())
+		}
+	}
 
 	resp := models.SaveHistoryResponse{
 		Items: &entries,
@@ -259,6 +272,12 @@ func (h *Handler) GetV4UsersUserIdAchievementsHistory(
 	entries, total, err := h.repo.GetAchievementUnlockHistory(ctx.Request().Context(), decodedUserID, limit)
 	if err != nil {
 		return ctx.String(http.StatusInternalServerError, err.Error())
+	}
+	if total == 0 && len(entries) == 0 && userId != "" && userId != decodedUserID {
+		entries, total, err = h.repo.GetAchievementUnlockHistory(ctx.Request().Context(), userId, limit)
+		if err != nil {
+			return ctx.String(http.StatusInternalServerError, err.Error())
+		}
 	}
 
 	resp := models.AchievementUnlockHistoryResponse{
