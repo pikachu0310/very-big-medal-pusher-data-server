@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"database/sql"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -31,8 +32,11 @@ type stubRepo struct {
 	insertErr      error
 	insertedSave   *domain.SaveData
 
-	latestSave *domain.SaveData
-	latestErr  error
+	latestSave        *domain.SaveData
+	latestErr         error
+	latestSaveByUser  map[string]*domain.SaveData
+	latestErrByUser   map[string]error
+	latestSaveUserIDs []string
 
 	saveHistory        []models.SaveHistoryEntry
 	saveHistoryHasMore bool
@@ -119,6 +123,20 @@ func (s *stubRepo) InsertSaveV4(ctx context.Context, sd *domain.SaveData) error 
 }
 
 func (s *stubRepo) GetLatestSave(ctx context.Context, userID string) (*domain.SaveData, error) {
+	if s.latestSaveByUser != nil || s.latestErrByUser != nil {
+		s.latestSaveUserIDs = append(s.latestSaveUserIDs, userID)
+		if s.latestErrByUser != nil {
+			if err, ok := s.latestErrByUser[userID]; ok {
+				return nil, err
+			}
+		}
+		if s.latestSaveByUser != nil {
+			if save, ok := s.latestSaveByUser[userID]; ok {
+				return save, nil
+			}
+		}
+		return nil, sql.ErrNoRows
+	}
 	return s.latestSave, s.latestErr
 }
 
@@ -433,6 +451,44 @@ func TestGetV4UsersUserIdData_Success(t *testing.T) {
 	}
 	if model.CreditAll == nil || *model.CreditAll != "1000" {
 		t.Fatalf("credit_all: got %#v", model.CreditAll)
+	}
+}
+
+func TestGetV4UsersUserIdData_FallbackToRawUserID(t *testing.T) {
+	setTestSecrets(t)
+	rawUserID := "dekapu_debug"
+	decodedUserID, err := decodeUserIDParam(rawUserID)
+	if err != nil {
+		t.Fatalf("decodeUserIDParam: %v", err)
+	}
+	if decodedUserID == rawUserID {
+		t.Fatalf("expected base64 decode to differ for %q", rawUserID)
+	}
+
+	repo := &stubRepo{
+		latestSaveByUser: map[string]*domain.SaveData{
+			rawUserID: {
+				UserId:    rawUserID,
+				Legacy:    1,
+				Version:   4,
+				CreditAll: 1000,
+				Playtime:  123,
+			},
+		},
+	}
+	e := newTestServer(t, repo)
+
+	q := url.Values{}
+	q.Set("sig", makeLoadSig(rawUserID))
+	req := httptest.NewRequest(http.MethodGet, "/v4/users/"+rawUserID+"/data?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status: got %d body=%s", rec.Code, rec.Body.String())
+	}
+	if len(repo.latestSaveUserIDs) != 2 || repo.latestSaveUserIDs[0] != decodedUserID || repo.latestSaveUserIDs[1] != rawUserID {
+		t.Fatalf("fallback order: got %#v", repo.latestSaveUserIDs)
 	}
 }
 
