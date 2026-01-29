@@ -45,7 +45,7 @@ type SaveData struct {
 	BstpStep                    int64     `db:"bstp_step"`
 	BstpRwd                     int64     `db:"bstp_rwd"`
 	BuyTotal                    int       `db:"buy_total"`
-	SkillPoint                  int       `db:"skill_point"`
+	SkillPoint                  int64     `db:"skill_point"`
 	BlackBox                    int       `db:"blackbox"`
 	BlackBoxTotal               int64     `db:"blackbox_total"`
 	SpUse                       int64     `db:"sp_use"`
@@ -124,7 +124,7 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		BstpStep                    json.RawMessage  `json:"bstp_step"`
 		BstpRwd                     json.RawMessage  `json:"bstp_rwd"`
 		BuyTotal                    *int             `json:"buy_total"`
-		SkillPoint                  *float64         `json:"sp"`
+		SkillPoint                  json.RawMessage  `json:"sp"`
 		BlackBox                    *float64         `json:"bbox"`
 		BlackBoxTotal               *float64         `json:"bbox_all"`
 		SpUse                       json.RawMessage  `json:"sp_use"`
@@ -209,7 +209,7 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		BstpStep:                    parseInt64Message(m.BstpStep),
 		BstpRwd:                     parseInt64Message(m.BstpRwd),
 		BuyTotal:                    safeInt(m.BuyTotal),
-		SkillPoint:                  int(safeFloat64(m.SkillPoint)),
+		SkillPoint:                  parseInt64Message(m.SkillPoint),
 		BlackBox:                    int(safeFloat64(m.BlackBox)),
 		BlackBoxTotal:               int64(safeFloat64(m.BlackBoxTotal)),
 		SpUse:                       parseInt64Message(m.SpUse),
