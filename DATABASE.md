@@ -190,7 +190,7 @@ CREATE TABLE `v2_save_data` (
   `bstp_step` bigint(20) NOT NULL DEFAULT 0,
   `bstp_rwd` bigint(20) NOT NULL DEFAULT 0,
   `buy_total` int(11) NOT NULL DEFAULT 0,
-  `skill_point` int(11) NOT NULL DEFAULT 0,
+  `skill_point` bigint(20) NOT NULL DEFAULT 0,
   `blackbox` int(11) NOT NULL DEFAULT 0,
   `blackbox_total` bigint(20) NOT NULL DEFAULT 0,
   `sp_use` bigint(20) NOT NULL DEFAULT 0,
