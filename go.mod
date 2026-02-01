@@ -11,7 +11,7 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/labstack/echo/v4 v4.15.0
 	github.com/motoki317/sc v1.8.2
-	github.com/oapi-codegen/runtime v1.1.1
+	github.com/oapi-codegen/runtime v1.1.2
 	github.com/pressly/goose/v3 v3.26.0
 )
 
