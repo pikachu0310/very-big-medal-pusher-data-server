@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Title,
   Text,
@@ -127,10 +127,6 @@ const pageTitleColor = '#2c4256';
 const primaryButtonColor = 'blue';
 const globalStatsEndpoint = 'https://push.trap.games/api/v4/statistics';
 const objectValueSpoilerKeys = new Set(['dc_ball_chain', 'dc_ball_get', 'dc_medal_get', 'dc_palball_get', 'dc_palball_jp']);
-const deferredSectionStyle: CSSProperties = {
-  contentVisibility: 'auto',
-  containIntrinsicSize: '1000px'
-};
 
 function HomePage() {
   const [dataUrl, setDataUrl] = useState('');
@@ -375,22 +371,29 @@ function HomePage() {
     <Stack gap="xl" pt={0}>
       {/* ロゴ */}
       <Center mt={0} pt={0} mb={0}>
-        <img
-          src="/MMP_logo.webp"
-          alt="Massive Medal Pusher ロゴ"
-          width={1200}
-          height={495}
-          loading="eager"
-          fetchPriority="high"
-          decoding="async"
+        <Box
           style={{
-            maxWidth: '700px',
-            width: '100%',
-            height: 'auto',
+            width: 'min(100%, 700px)',
+            aspectRatio: '1200 / 495',
             marginBottom: '0.5rem',
-            marginTop: '0'
+            marginTop: 0
           }}
-        />
+        >
+          <img
+            src="/MMP_logo.webp"
+            alt="Massive Medal Pusher ロゴ"
+            width={1200}
+            height={495}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            style={{
+              width: '100%',
+              height: '100%',
+              display: 'block'
+            }}
+          />
+        </Box>
       </Center>
       <Title order={1} ta="center" fz={{ base: 26, sm: 32 }} c={pageTitleColor}>
         クソでっけぇプッシャーゲーム 公式ウェブサイト
@@ -514,7 +517,6 @@ function HomePage() {
         </Stack>
       </Card>
 
-      <Box style={deferredSectionStyle}>
         <Tabs
           value={activeTab}
           onChange={setActiveTab}
@@ -530,8 +532,8 @@ function HomePage() {
             </Tabs.Tab>
           </Tabs.List>
 
-          <Tabs.Panel value="personal" pt="md">
-            <Paper p="xl" shadow="sm" radius="md">
+        <Tabs.Panel value="personal" pt="md">
+            <Paper p="xl" shadow="sm" radius="md" mih={360}>
               <Title order={2} mb="md" ta="center">
                 個人統計情報
               </Title>
@@ -599,8 +601,8 @@ function HomePage() {
             </Paper>
           </Tabs.Panel>
 
-          <Tabs.Panel value="global" pt="md">
-            <Paper p="xl" shadow="sm" radius="md">
+        <Tabs.Panel value="global" pt="md">
+            <Paper p="xl" shadow="sm" radius="md" mih={360}>
               {globalStats && (
                 <Card shadow="sm" padding="lg" radius="md" withBorder mb="md">
                   <Group justify="space-between">
@@ -635,10 +637,8 @@ function HomePage() {
             </Paper>
           </Tabs.Panel>
         </Tabs>
-      </Box>
 
       {/* 開発者ツール */}
-      <Box style={deferredSectionStyle}>
         <Grid gutter="md">
           <Grid.Col span={{ base: 12, md: 6 }}>
             <Card withBorder radius="md" padding="lg" shadow="sm">
@@ -697,7 +697,6 @@ function HomePage() {
             </Card>
           </Grid.Col>
         </Grid>
-      </Box>
     </Stack>
   );
 }

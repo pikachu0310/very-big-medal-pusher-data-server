@@ -5,6 +5,10 @@
   --app-focus-ring: #2f6ebf;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 /* traQing風のシンプルなデザイン */
 body {
   background: #fafafa;
