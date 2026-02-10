@@ -1,16 +1,22 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400..700&display=swap");
 @import '@mantine/core/styles.css';
 @import '@mantine/notifications/styles.css';
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400..700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --mantine-color-dimmed: #5f6b76;
+  --app-focus-ring: #2f6ebf;
+}
 
 /* traQing風のシンプルなデザイン */
 body {
   background: #fafafa;
   min-height: 100vh;
   font-family: "Noto Sans JP", sans-serif;
-  color: #49535b;
+  color: #334155;
+  line-height: 1.5;
 }
 
 /* カードのスタイル */
@@ -19,16 +25,58 @@ body {
   border: 1px solid #e5e7eb;
 }
 
-/* ボタンのスタイル */
-.mantine-Button-root {
-  background: #3b82f6;
+/* MMP 共通プライマリーボタン（データロードとリンク集を同一化） */
+.mantine-Button-root.mmp-primary-button {
+  background: var(--mantine-color-blue-6);
   border: none;
-  transition: all 0.2s ease;
+  color: #ffffff;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 2px 0 rgba(24, 100, 171, 0.55), 0 4px 10px rgba(34, 139, 230, 0.22);
 }
 
-.mantine-Button-root:hover {
-  background: #2563eb;
+.mantine-Button-root.mmp-primary-button:hover,
+.mantine-Button-root.mmp-primary-button[data-hovered] {
+  background: var(--mantine-color-blue-7);
   transform: translateY(-1px);
+}
+
+.mantine-Button-root.mmp-primary-button:active,
+.mantine-Button-root.mmp-primary-button[data-active] {
+  transform: translateY(0);
+  box-shadow: 0 1px 0 rgba(24, 100, 171, 0.55), 0 2px 5px rgba(34, 139, 230, 0.18);
+}
+
+.mantine-Button-root.mmp-primary-button .mantine-Button-label,
+.mantine-Button-root.mmp-primary-button .mantine-Button-section {
+  color: #fff;
+}
+
+/* 黒枠透明ボタン（開発者向けリンク） */
+.mantine-Button-root.mmp-outline-black-button {
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid #1f2937;
+  color: #1f2937;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.mantine-Button-root.mmp-outline-black-button:hover,
+.mantine-Button-root.mmp-outline-black-button[data-hovered],
+.mantine-Button-root.mmp-outline-black-button:focus-visible {
+  background: #e5e7eb;
+  border-color: #111827;
+  box-shadow: 0 3px 10px rgba(17, 24, 39, 0.16);
+  transform: translateY(-1px);
+}
+
+.mantine-Button-root.mmp-outline-black-button:active,
+.mantine-Button-root.mmp-outline-black-button[data-active] {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(17, 24, 39, 0.1);
+}
+
+.mantine-Button-root.mmp-outline-black-button .mantine-Button-label,
+.mantine-Button-root.mmp-outline-black-button .mantine-Button-section {
+  color: #1f2937;
 }
 
 /* 入力フィールドのスタイル */
@@ -39,24 +87,69 @@ body {
 
 .mantine-TextInput-input:focus {
   border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
 }
 
 /* カードのホバーエフェクト */
 .mantine-Card-root {
-  transition: all 0.2s ease;
+  transition: box-shadow 0.2s ease;
 }
 
 .mantine-Card-root:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
 }
 
 /* ロゴのスタイル */
 .logo-container {
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease;
 }
 
 .logo-container:hover {
   transform: scale(1.02);
+}
+
+/* キーボードフォーカスを明確化 */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+  outline: 3px solid var(--app-focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* スキップリンク */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 1rem;
+  z-index: 1000;
+  background: #2a6c95;
+  color: #fff;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  text-decoration: none;
+}
+
+.skip-link:focus-visible {
+  top: 1rem;
+}
+
+/* 表キャプションの可読性 */
+.mantine-Table-caption {
+  color: #475569;
+  font-size: 0.85rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

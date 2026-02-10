@@ -6,7 +6,11 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 function App() {
   return (
     <Box style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Container size="lg" style={{ flex: 1, padding: '1rem 1rem 2rem 1rem' }}>
+      <Anchor href="#main-content" className="skip-link">
+        メインコンテンツへスキップ
+      </Anchor>
+
+      <Container component="main" id="main-content" size="lg" style={{ flex: 1, padding: '1rem 1rem 2rem 1rem' }}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
@@ -23,12 +27,12 @@ function App() {
           marginTop: 'auto'
         }}
       >
-        <Text size="xs" c="dimmed" style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <Anchor component={Link} to="/privacy" size="xs" c="dimmed" underline="hover">
+        <Text size="sm" c="dimmed" style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <Anchor component={Link} to="/privacy" size="sm" c="dimmed" underline="hover">
             プライバシーポリシー
           </Anchor>
           <Text span c="dimmed">|</Text>
-          <Anchor href="https://github.com/pikachu0310/very-big-medal-pusher-data-server" target="_blank" rel="noreferrer" size="xs" c="dimmed" underline="hover">
+          <Anchor href="https://github.com/pikachu0310/very-big-medal-pusher-data-server" target="_blank" rel="noreferrer" size="sm" c="dimmed" underline="hover">
             GitHub
           </Anchor>
           <Text span c="dimmed">|</Text>
