@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import {
   Title,
   Text,
@@ -125,9 +125,16 @@ const linkSectionCardStyle = {
 const sectionTitleColor = '#1f5da8';
 const pageTitleColor = '#2c4256';
 const primaryButtonColor = 'blue';
+const globalStatsEndpoint = 'https://push.trap.games/api/v4/statistics';
+const objectValueSpoilerKeys = new Set(['dc_ball_chain', 'dc_ball_get', 'dc_medal_get', 'dc_palball_get', 'dc_palball_jp']);
+const deferredSectionStyle: CSSProperties = {
+  contentVisibility: 'auto',
+  containIntrinsicSize: '1000px'
+};
 
 function HomePage() {
   const [dataUrl, setDataUrl] = useState('');
+  const [activeTab, setActiveTab] = useState<string | null>('personal');
   const [isLoadingPersonal, setIsLoadingPersonal] = useState(false);
   const [isLoadingGlobal, setIsLoadingGlobal] = useState(false);
   const [personalStats, setPersonalStats] = useState<PersonalStats | null>(null);
@@ -136,27 +143,38 @@ function HomePage() {
   const [pingState, setPingState] = useState<'idle' | 'ok' | 'ng' | 'loading'>('idle');
   const twitterHashUrl = 'https://x.com/search?q=%23%E3%81%A7%E3%81%8B%E3%83%97%20OR%20%23VR%E3%81%A7%E3%81%8B%E3%83%97&f=live';
   const [rawPayload, setRawPayload] = useState<string>('');
-  const isObjectKey = new Set(['dc_ball_chain', 'dc_ball_get', 'dc_medal_get', 'dc_palball_get', 'dc_palball_jp']);
 
   useEffect(() => {
+    if (activeTab !== 'global' || globalStats || isLoadingGlobal) {
+      return;
+    }
+
+    const abortController = new AbortController();
+
     const fetchGlobalStats = async () => {
       setIsLoadingGlobal(true);
       try {
-        const response = await fetch('https://push.trap.games/api/v4/statistics');
+        const response = await fetch(globalStatsEndpoint, { signal: abortController.signal });
         if (!response.ok) {
           throw new Error('統計情報の取得に失敗しました');
         }
         const data = await response.json();
         setGlobalStats(data);
       } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') {
+          return;
+        }
         console.error('統計情報の取得エラー:', err);
       } finally {
-        setIsLoadingGlobal(false);
+        if (!abortController.signal.aborted) {
+          setIsLoadingGlobal(false);
+        }
       }
     };
 
     fetchGlobalStats();
-  }, []);
+    return () => abortController.abort();
+  }, [activeTab, globalStats, isLoadingGlobal]);
 
   const handleLoadPersonalData = async () => {
     if (!dataUrl.trim()) {
@@ -250,7 +268,7 @@ function HomePage() {
           </Table.Thead>
           <Table.Tbody>
             {data.map((entry, index) => (
-              <Table.Tr key={`${index}`}>
+              <Table.Tr key={entry.user_id || `${index}`}>
                 <Table.Td>
                   <Badge color={index === 0 ? 'yellow' : index === 1 ? 'gray' : index === 2 ? 'orange' : 'blue'}>
                     {index + 1}位
@@ -275,7 +293,7 @@ function HomePage() {
         </Spoiler>
       );
     }
-    if (isObjectKey.has(key) && val && typeof val === 'object') {
+    if (objectValueSpoilerKeys.has(key) && val && typeof val === 'object') {
       return (
         <Spoiler maxHeight={60} showLabel="展開" hideLabel="閉じる">
           <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontSize: '0.8rem' }}>
@@ -360,6 +378,11 @@ function HomePage() {
         <img
           src="/MMP_logo.webp"
           alt="Massive Medal Pusher ロゴ"
+          width={1200}
+          height={495}
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
           style={{
             maxWidth: '700px',
             width: '100%',
@@ -491,181 +514,190 @@ function HomePage() {
         </Stack>
       </Card>
 
-      <Tabs defaultValue="personal" variant="outline">
-        <Tabs.List aria-label="統計情報の切り替え">
-          <Tabs.Tab value="personal" leftSection={<IconUsers size="1rem" />}>
-            個人統計
-          </Tabs.Tab>
-          <Tabs.Tab value="global" leftSection={<IconTrophy size="1rem" />}>
-            グローバル統計
-          </Tabs.Tab>
-        </Tabs.List>
+      <Box style={deferredSectionStyle}>
+        <Tabs
+          value={activeTab}
+          onChange={setActiveTab}
+          keepMounted={false}
+          variant="outline"
+        >
+          <Tabs.List aria-label="統計情報の切り替え">
+            <Tabs.Tab value="personal" leftSection={<IconUsers size="1rem" />}>
+              個人統計
+            </Tabs.Tab>
+            <Tabs.Tab value="global" leftSection={<IconTrophy size="1rem" />}>
+              グローバル統計
+            </Tabs.Tab>
+          </Tabs.List>
 
-        <Tabs.Panel value="personal" pt="md">
-          <Paper p="xl" shadow="sm" radius="md">
-            <Title order={2} mb="md" ta="center">
-              個人統計情報
-            </Title>
-            <Text size="sm" c="dimmed" mb="md" ta="center">
-              クラウドセーブで取得した URL を入力してください（Base64 応答を自動復号します）
-            </Text>
+          <Tabs.Panel value="personal" pt="md">
+            <Paper p="xl" shadow="sm" radius="md">
+              <Title order={2} mb="md" ta="center">
+                個人統計情報
+              </Title>
+              <Text size="sm" c="dimmed" mb="md" ta="center">
+                クラウドセーブで取得した URL を入力してください（Base64 応答を自動復号します）
+              </Text>
 
-            <Stack gap="md">
-              <TextInput
-                placeholder="https://push.trap.games/api/v4/users/xxxx/data?sig=xxxx"
-                label="LoadSaveDataURL"
-                description="クラウドセーブ URL を入力すると、レスポンスを自動で復号して表示します。"
-                value={dataUrl}
-                onChange={(e) => setDataUrl(e.currentTarget.value)}
-              />
+              <Stack gap="md">
+                <TextInput
+                  placeholder="https://push.trap.games/api/v4/users/xxxx/data?sig=xxxx"
+                  label="LoadSaveDataURL"
+                  description="クラウドセーブ URL を入力すると、レスポンスを自動で復号して表示します。"
+                  value={dataUrl}
+                  onChange={(e) => setDataUrl(e.currentTarget.value)}
+                />
 
-              <Group justify="center">
-                <Button
-                  onClick={handleLoadPersonalData}
-                  loading={isLoadingPersonal}
-                  leftSection={<IconDownload size="1rem" />}
-                  color={primaryButtonColor}
-                  className="mmp-primary-button"
-                  radius="md"
-                >
-                  データをロード
-                </Button>
-              </Group>
+                <Group justify="center">
+                  <Button
+                    onClick={handleLoadPersonalData}
+                    loading={isLoadingPersonal}
+                    leftSection={<IconDownload size="1rem" />}
+                    color={primaryButtonColor}
+                    className="mmp-primary-button"
+                    radius="md"
+                  >
+                    データをロード
+                  </Button>
+                </Group>
 
-              {error && (
-                <Alert icon={<IconAlertCircle size="1rem" />} title="エラー" color="red">
-                  {error}
-                </Alert>
+                {error && (
+                  <Alert icon={<IconAlertCircle size="1rem" />} title="エラー" color="red">
+                    {error}
+                  </Alert>
+                )}
+
+                {isLoadingPersonal && (
+                  <Center role="status" aria-live="polite">
+                    <Loader />
+                  </Center>
+                )}
+
+                {rawPayload && (
+                  <Card shadow="sm" padding="md" radius="md" withBorder>
+                    <Text size="sm" fw={600} mb="xs">受信データ (Base64)</Text>
+                    <Spoiler maxHeight={60} showLabel="展開" hideLabel="閉じる">
+                      <Text size="xs" c="dimmed" style={{ wordBreak: 'break-all' }}>{rawPayload}</Text>
+                    </Spoiler>
+                  </Card>
+                )}
+
+                {personalStats && (
+                  <Card shadow="sm" padding="lg" radius="md" withBorder>
+                    <Title order={4}>個人統計データ</Title>
+                    <Grid mt="md" gutter="sm">
+                      {Object.entries(personalStats).map(([key, val]) => (
+                        <Grid.Col span={{ base: 12, sm: 6 }} key={key}>
+                          <Text size="sm" fw={600}>{key}</Text>
+                          {renderValue(key, val)}
+                        </Grid.Col>
+                      ))}
+                    </Grid>
+                  </Card>
+                )}
+              </Stack>
+            </Paper>
+          </Tabs.Panel>
+
+          <Tabs.Panel value="global" pt="md">
+            <Paper p="xl" shadow="sm" radius="md">
+              {globalStats && (
+                <Card shadow="sm" padding="lg" radius="md" withBorder mb="md">
+                  <Group justify="space-between">
+                    <Text fw={700}>世界の総メダル数</Text>
+                    <Text fw={800} fz="xl">
+                      {globalStats.total_medals?.toLocaleString() ?? 'N/A'} 枚
+                    </Text>
+                  </Group>
+                </Card>
               )}
+              <Title order={2} mb="md">グローバル統計</Title>
 
-              {isLoadingPersonal && (
+              {isLoadingGlobal && (
                 <Center role="status" aria-live="polite">
                   <Loader />
                 </Center>
               )}
 
-              {rawPayload && (
-                <Card shadow="sm" padding="md" radius="md" withBorder>
-                  <Text size="sm" fw={600} mb="xs">受信データ (Base64)</Text>
-                  <Spoiler maxHeight={60} showLabel="展開" hideLabel="閉じる">
-                    <Text size="xs" c="dimmed" style={{ wordBreak: 'break-all' }}>{rawPayload}</Text>
-                  </Spoiler>
-                </Card>
-              )}
-
-              {personalStats && (
-                <Card shadow="sm" padding="lg" radius="md" withBorder>
-                  <Title order={4}>個人統計データ</Title>
-                  <Grid mt="md" gutter="sm">
-                    {Object.entries(personalStats).map(([key, val]) => (
-                      <Grid.Col span={{ base: 12, sm: 6 }} key={key}>
-                        <Text size="sm" fw={600}>{key}</Text>
-                        {renderValue(key, val)}
+              {globalStats && (
+                <Grid gutter="md">
+                  {rankingDefinitions.map((def) => {
+                    const entries = (globalStats as any)[def.key] as RankingEntry[] | undefined;
+                    if (!entries) return null;
+                    return (
+                      <Grid.Col span={{ base: 12, md: 6 }} key={def.key}>
+                        {renderRankingTable(entries, def.label, def.key)}
                       </Grid.Col>
-                    ))}
-                  </Grid>
-                </Card>
+                    );
+                  })}
+                </Grid>
               )}
-            </Stack>
-          </Paper>
-        </Tabs.Panel>
-
-        <Tabs.Panel value="global" pt="md">
-          <Paper p="xl" shadow="sm" radius="md">
-            {globalStats && (
-              <Card shadow="sm" padding="lg" radius="md" withBorder mb="md">
-                <Group justify="space-between">
-                  <Text fw={700}>世界の総メダル数</Text>
-                  <Text fw={800} fz="xl">
-                    {globalStats.total_medals?.toLocaleString() ?? 'N/A'} 枚
-                  </Text>
-                </Group>
-              </Card>
-            )}
-            <Title order={2} mb="md">グローバル統計</Title>
-
-            {isLoadingGlobal && (
-              <Center role="status" aria-live="polite">
-                <Loader />
-              </Center>
-            )}
-
-            {globalStats && (
-              <Grid gutter="md">
-                {rankingDefinitions.map((def) => {
-                  const entries = (globalStats as any)[def.key] as RankingEntry[] | undefined;
-                  if (!entries) return null;
-                  return (
-                    <Grid.Col span={{ base: 12, md: 6 }} key={def.key}>
-                      {renderRankingTable(entries, def.label, def.key)}
-                    </Grid.Col>
-                  );
-                })}
-              </Grid>
-            )}
-          </Paper>
-        </Tabs.Panel>
-      </Tabs>
+            </Paper>
+          </Tabs.Panel>
+        </Tabs>
+      </Box>
 
       {/* 開発者ツール */}
-      <Grid gutter="md">
-        <Grid.Col span={{ base: 12, md: 6 }}>
-          <Card withBorder radius="md" padding="lg" shadow="sm">
-            <Group justify="space-between" align="center">
-              <Title order={3}>サーバーヘルス</Title>
-              <Button
-                size="sm"
-                variant="outline"
-                color="black"
-                className="mmp-outline-black-button"
-                leftSection={<IconPlugConnected size={14} />}
-                loading={pingState === 'loading'}
-                onClick={handlePing}
-              >
-                ping
-              </Button>
-            </Group>
-            <Text size="sm" c="dimmed" mb="sm">
-              https://push.trap.games/api/ping
-            </Text>
-            <Group gap="sm">
-              <Badge color={pingState === 'ok' ? 'teal' : pingState === 'ng' ? 'red' : 'gray'} radius="sm" aria-live="polite">
-                {pingState === 'idle' && '未実行'}
-                {pingState === 'loading' && '確認中...'}
-                {pingState === 'ok' && '稼働中'}
-                {pingState === 'ng' && '疎通 NG'}
-              </Badge>
-            </Group>
-          </Card>
-        </Grid.Col>
-        <Grid.Col span={{ base: 12, md: 6 }}>
-          <Card withBorder radius="md" padding="lg" shadow="sm">
-            <Group gap="xs">
-              <ThemeIcon size={34} radius="lg" variant="light" color="blue">
-                <IconBrandGithub size={18} />
-              </ThemeIcon>
-              <Stack gap={4}>
-                <Text fw={600} fz="sm">GitHub</Text>
-                <Anchor href="https://github.com/pikachu0310/very-big-medal-pusher-data-server" target="_blank" rel="noreferrer" c="blue">
-                  very-big-medal-pusher-data-server
-                </Anchor>
-                <Anchor href="https://github.com/pikachu0310/VRCWorld-MassiveMedalPusher" target="_blank" rel="noreferrer" c="blue">
-                  <Group gap={6}>
-                    <IconLock size={14} />
-                    <Text component="span" size="sm" c="blue">VRCWorld-MassiveMedalPusher</Text>
-                  </Group>
-                </Anchor>
-                <Anchor href="https://github.com/pikariku/VRCWorld-VeryBigMedalPusher" target="_blank" rel="noreferrer" c="blue">
-                  <Group gap={6}>
-                    <IconLock size={14} />
-                    <Text component="span" size="sm" c="blue">VRCWorld-VeryBigMedalPusher</Text>
-                  </Group>
-                </Anchor>
-              </Stack>
-            </Group>
-          </Card>
-        </Grid.Col>
-      </Grid>
+      <Box style={deferredSectionStyle}>
+        <Grid gutter="md">
+          <Grid.Col span={{ base: 12, md: 6 }}>
+            <Card withBorder radius="md" padding="lg" shadow="sm">
+              <Group justify="space-between" align="center">
+                <Title order={3}>サーバーヘルス</Title>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  color="black"
+                  className="mmp-outline-black-button"
+                  leftSection={<IconPlugConnected size={14} />}
+                  loading={pingState === 'loading'}
+                  onClick={handlePing}
+                >
+                  ping
+                </Button>
+              </Group>
+              <Text size="sm" c="dimmed" mb="sm">
+                https://push.trap.games/api/ping
+              </Text>
+              <Group gap="sm">
+                <Badge color={pingState === 'ok' ? 'teal' : pingState === 'ng' ? 'red' : 'gray'} radius="sm" aria-live="polite">
+                  {pingState === 'idle' && '未実行'}
+                  {pingState === 'loading' && '確認中...'}
+                  {pingState === 'ok' && '稼働中'}
+                  {pingState === 'ng' && '疎通 NG'}
+                </Badge>
+              </Group>
+            </Card>
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, md: 6 }}>
+            <Card withBorder radius="md" padding="lg" shadow="sm">
+              <Group gap="xs">
+                <ThemeIcon size={34} radius="lg" variant="light" color="blue">
+                  <IconBrandGithub size={18} />
+                </ThemeIcon>
+                <Stack gap={4}>
+                  <Text fw={600} fz="sm">GitHub</Text>
+                  <Anchor href="https://github.com/pikachu0310/very-big-medal-pusher-data-server" target="_blank" rel="noreferrer" c="blue">
+                    very-big-medal-pusher-data-server
+                  </Anchor>
+                  <Anchor href="https://github.com/pikachu0310/VRCWorld-MassiveMedalPusher" target="_blank" rel="noreferrer" c="blue">
+                    <Group gap={6}>
+                      <IconLock size={14} />
+                      <Text component="span" size="sm" c="blue">VRCWorld-MassiveMedalPusher</Text>
+                    </Group>
+                  </Anchor>
+                  <Anchor href="https://github.com/pikariku/VRCWorld-VeryBigMedalPusher" target="_blank" rel="noreferrer" c="blue">
+                    <Group gap={6}>
+                      <IconLock size={14} />
+                      <Text component="span" size="sm" c="blue">VRCWorld-VeryBigMedalPusher</Text>
+                    </Group>
+                  </Anchor>
+                </Stack>
+              </Group>
+            </Card>
+          </Grid.Col>
+        </Grid>
+      </Box>
     </Stack>
   );
 }

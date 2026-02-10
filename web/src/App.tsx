@@ -1,7 +1,9 @@
+import { lazy, Suspense } from 'react';
 import { Container, Box, Text, Anchor } from '@mantine/core';
 import { Link, Route, Routes } from 'react-router';
 import HomePage from './pages/HomePage';
-import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
 
 function App() {
   return (
@@ -13,7 +15,7 @@ function App() {
       <Container component="main" id="main-content" size="lg" style={{ flex: 1, padding: '1rem 1rem 2rem 1rem' }}>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/privacy" element={<Suspense fallback={null}><PrivacyPolicyPage /></Suspense>} />
         </Routes>
       </Container>
       

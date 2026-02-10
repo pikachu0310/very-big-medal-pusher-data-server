@@ -1,9 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400..700&display=swap");
 @import '@mantine/core/styles.css';
-@import '@mantine/notifications/styles.css';
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 :root {
   --mantine-color-dimmed: #5f6b76;
@@ -14,7 +9,7 @@
 body {
   background: #fafafa;
   min-height: 100vh;
-  font-family: "Noto Sans JP", sans-serif;
+  font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
   color: #334155;
   line-height: 1.5;
 }
