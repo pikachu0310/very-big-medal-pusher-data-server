@@ -315,6 +315,19 @@ function HomePage() {
       color={color}
       fw={700}
       c={variant === 'outline' ? color || 'dark' : 'white'}
+      styles={variant === 'outline' && color === 'black' ? {
+        root: {
+          backgroundColor: 'transparent',
+          border: '1px solid #000',
+          color: '#000',
+          '&:hover': {
+            backgroundColor: 'transparent',
+            border: '1px solid #000'
+          }
+        },
+        label: { color: '#000' },
+        section: { color: '#000' }
+      } : undefined}
       style={{
         minHeight: `calc(${size === 'xl' ? 52 : 44}px * ${heightMultiplier})`,
         whiteSpace: 'normal',
@@ -446,8 +459,8 @@ function HomePage() {
                 href="/swagger/index.html"
                 icon={<IconExternalLink size={18} />}
                 size="lg"
-                variant="gradient"
-                gradient={{ from: 'orange', to: 'red' }}
+                variant="outline"
+                color="black"
                 heightMultiplier={1.1}
               >
                 SwaggerUI (API一覧)
@@ -470,8 +483,8 @@ function HomePage() {
                 href="https://github.com/pikachu0310/very-big-medal-pusher-data-server"
                 icon={<IconBrandGithub size={18} />}
                 size="lg"
-                variant="light"
-                color="gray"
+                variant="outline"
+                color="black"
                 heightMultiplier={1.1}
               >
                 Data Server GitHub
@@ -603,9 +616,21 @@ function HomePage() {
               <Title order={3}>サーバーヘルス</Title>
               <Button
                 size="sm"
-                variant="light"
-                color="gray"
-                c="dark"
+                variant="outline"
+                color="black"
+                styles={{
+                  root: {
+                    backgroundColor: 'transparent',
+                    border: '1px solid #000',
+                    color: '#000',
+                    '&:hover': {
+                      backgroundColor: 'transparent',
+                      border: '1px solid #000'
+                    }
+                  },
+                  label: { color: '#000' },
+                  section: { color: '#000' }
+                }}
                 leftSection={<IconPlugConnected size={14} />}
                 loading={pingState === 'loading'}
                 onClick={handlePing}
