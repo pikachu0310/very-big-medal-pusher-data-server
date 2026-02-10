@@ -336,8 +336,8 @@ function HomePage() {
       {/* ロゴ */}
       <Center mt={0} pt={0} mb={0}>
         <img
-          src="/MPG_logo.png"
-          alt="MPG Logo"
+          src="/MMP_logo.webp"
+          alt="MMP Logo"
           style={{
             maxWidth: '700px',
             width: '100%',
