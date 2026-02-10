@@ -1,6 +1,6 @@
-# Very Big Medal Pusher - Frontend
+# Massive Medal Pusher - Frontend
 
-このディレクトリには、Very Big Medal Pusher のフロントエンドアプリケーションが含まれています。
+このディレクトリには、Massive Medal Pusher のフロントエンドアプリケーションが含まれています。
 
 ## 技術スタック
 
