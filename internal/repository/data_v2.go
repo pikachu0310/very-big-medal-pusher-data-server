@@ -38,7 +38,10 @@ INSERT INTO v2_save_data (
     hide_record, cpm_max, jack_totalmax_v2, ult_totalmax_v2,
     palball_get, pallot_lot_t0, pallot_lot_t1, pallot_lot_t2, pallot_lot_t3, pallot_lot_t4,
     jacksp_get_all, jacksp_get_t0, jacksp_get_t1, jacksp_get_t2, jacksp_get_t3, jacksp_get_t4,
-    jacksp_startmax, jacksp_totalmax, task_cnt, totem_altars, totem_altars_credit, buy_shbi,
+    jacksp_startmax, jacksp_totalmax, ferball_get, ferlot_lot,
+    jackfr_get_all, jackfr_get_t0, jackfr_get_t1, jackfr_get_t2, jackfr_get_t3, jackfr_get_t4,
+    jackfr_startmax, jackfr_totalmax, ferlot_hit, ferlot_lose, ferlot_chance, ferlot_act, ferlot_lines, bbox_shop,
+    task_cnt, totem_altars, totem_altars_credit, buy_shbi,
     firstboot, lastsave, playtime
 	) VALUES (
 	    ?, ?, ?,
@@ -51,7 +54,10 @@ INSERT INTO v2_save_data (
 	    ?, ?, ?, ?,
 	    ?, ?, ?, ?, ?, ?,
 	    ?, ?, ?, ?, ?, ?,
+	    ?, ?, ?, ?,
 	    ?, ?, ?, ?, ?, ?,
+	    ?, ?, ?, ?, ?, ?, ?, ?,
+	    ?, ?, ?, ?,
 	    ?, ?, ?
 	)`,
 		sd.UserId, sd.Legacy, sd.Version,
@@ -64,7 +70,10 @@ INSERT INTO v2_save_data (
 		sd.HideRecord, sd.CpMMax, sd.JackTotalMaxV2, sd.UltimateTotalMaxV2,
 		sd.PalettaBallGet, sd.PalettaLotteryAttemptTier0, sd.PalettaLotteryAttemptTier1, sd.PalettaLotteryAttemptTier2, sd.PalettaLotteryAttemptTier3, sd.PalettaLotteryAttemptTier4,
 		sd.JackpotSuperGetTotal, sd.JackpotSuperGetTier0, sd.JackpotSuperGetTier1, sd.JackpotSuperGetTier2, sd.JackpotSuperGetTier3, sd.JackpotSuperGetTier4,
-		sd.JackpotSuperStartMax, sd.JackpotSuperTotalMax, sd.TaskCompleteCount, sd.TotemAltarUnlockCount, sd.TotemAltarUnlockUsedCredits, sd.BuyShbi,
+		sd.JackpotSuperStartMax, sd.JackpotSuperTotalMax, sd.FerrettaBallGet, sd.FerrettaLotteryAttempt,
+		sd.JackpotFerrettaGetTotal, sd.JackpotFerrettaGetTier0, sd.JackpotFerrettaGetTier1, sd.JackpotFerrettaGetTier2, sd.JackpotFerrettaGetTier3, sd.JackpotFerrettaGetTier4,
+		sd.JackpotFerrettaStartMax, sd.JackpotFerrettaTotalMax, sd.FerrettaLotteryHit, sd.FerrettaLotteryLose, sd.FerrettaLotteryChance, sd.FerrettaLotteryActives, sd.FerrettaLotteryLines, sd.BlackBoxShopUsed,
+		sd.TaskCompleteCount, sd.TotemAltarUnlockCount, sd.TotemAltarUnlockUsedCredits, sd.BuyShbi,
 		sd.FirstBoot, sd.LastSave, sd.Playtime,
 	)
 	if err != nil {
@@ -110,6 +119,20 @@ INSERT INTO v2_save_data (
 	// palball_jp
 	for id, cnt := range sd.DCPalettaBallJackpot {
 		if _, err := tx.ExecContext(ctx, `INSERT INTO v2_save_data_palball_jp(save_id, ball_id, count) VALUES(?,?,?)`, saveID, id, cnt); err != nil {
+			return err
+		}
+	}
+
+	// bbox_shop
+	for id, cnt := range sd.DCBlackBoxShopUsed {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO v2_save_data_bbox_shop(save_id, item_id, count) VALUES(?,?,?)`, saveID, id, cnt); err != nil {
+			return err
+		}
+	}
+
+	// ferlot_item
+	for id, cnt := range sd.DCFerrettaLotteryItem {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO v2_save_data_ferlot_item(save_id, item_id, count) VALUES(?,?,?)`, saveID, id, cnt); err != nil {
 			return err
 		}
 	}
@@ -303,7 +326,51 @@ WHERE save_id = ?
 		return nil, err
 	}
 
-	// 8) perks
+	// 8) bbox_shop
+	sd.DCBlackBoxShopUsed = make(map[string]int)
+	rows, err = r.db.QueryxContext(ctx, `
+SELECT item_id, count
+FROM v2_save_data_bbox_shop
+WHERE save_id = ?
+`, sd.ID)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id string
+		var cnt int
+		if err := rows.Scan(&id, &cnt); err != nil {
+			return nil, err
+		}
+		sd.DCBlackBoxShopUsed[id] = cnt
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+
+	// 9) ferlot_item
+	sd.DCFerrettaLotteryItem = make(map[string]int)
+	rows, err = r.db.QueryxContext(ctx, `
+SELECT item_id, count
+FROM v2_save_data_ferlot_item
+WHERE save_id = ?
+`, sd.ID)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id string
+		var cnt int
+		if err := rows.Scan(&id, &cnt); err != nil {
+			return nil, err
+		}
+		sd.DCFerrettaLotteryItem[id] = cnt
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+
+	// 10) perks
 	rows, err = r.db.QueryxContext(ctx, `
 SELECT perk_id, level 
 FROM v2_save_data_perks 
@@ -333,7 +400,7 @@ ORDER BY perk_id
 		return nil, err
 	}
 
-	// 9) perks_credit
+	// 11) perks_credit
 	rows, err = r.db.QueryxContext(ctx, `
 SELECT perk_id, credits 
 FROM v2_save_data_perks_credit 
@@ -363,7 +430,7 @@ ORDER BY perk_id
 		return nil, err
 	}
 
-	// 10) totems
+	// 12) totems
 	rows, err = r.db.QueryxContext(ctx, `
 SELECT totem_id, level 
 FROM v2_save_data_totems 
@@ -391,7 +458,7 @@ ORDER BY totem_id
 		return nil, err
 	}
 
-	// 11) totems_credit
+	// 13) totems_credit
 	rows, err = r.db.QueryxContext(ctx, `
 SELECT totem_id, credits 
 FROM v2_save_data_totems_credit 
@@ -419,7 +486,7 @@ ORDER BY totem_id
 		return nil, err
 	}
 
-	// 12) totems_placement
+	// 14) totems_placement
 	rows, err = r.db.QueryxContext(ctx, `
 SELECT placement_idx, totem_id 
 FROM v2_save_data_totems_placement 

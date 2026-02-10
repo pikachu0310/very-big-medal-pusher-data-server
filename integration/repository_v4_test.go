@@ -81,6 +81,8 @@ func cleanupTables(t *testing.T, db *sqlx.DB) {
 		"v2_save_data_achievements",
 		"v2_save_data_palball_get",
 		"v2_save_data_palball_jp",
+		"v2_save_data_bbox_shop",
+		"v2_save_data_ferlot_item",
 		"v2_save_data_perks",
 		"v2_save_data_perks_credit",
 		"v2_save_data_totems",
@@ -157,6 +159,22 @@ func newSaveData(userID string, playtime int64, creditAll int64, achievements []
 		JackpotSuperGetTier4:        1,
 		JackpotSuperStartMax:        50,
 		JackpotSuperTotalMax:        60,
+		FerrettaBallGet:             7,
+		FerrettaLotteryAttempt:      8,
+		JackpotFerrettaGetTotal:     9,
+		JackpotFerrettaGetTier0:     1,
+		JackpotFerrettaGetTier1:     2,
+		JackpotFerrettaGetTier2:     3,
+		JackpotFerrettaGetTier3:     4,
+		JackpotFerrettaGetTier4:     5,
+		JackpotFerrettaStartMax:     playtime * 10,
+		JackpotFerrettaTotalMax:     playtime * 20,
+		FerrettaLotteryHit:          11,
+		FerrettaLotteryLose:         12,
+		FerrettaLotteryChance:       13,
+		FerrettaLotteryActives:      14,
+		FerrettaLotteryLines:        int(playtime),
+		BlackBoxShopUsed:            15,
 		TaskCompleteCount:           2,
 		TotemAltarUnlockCount:       1,
 		TotemAltarUnlockUsedCredits: 20,
@@ -165,6 +183,8 @@ func newSaveData(userID string, playtime int64, creditAll int64, achievements []
 		DCBallChain:                 map[string]int{"3": 5},
 		LAchieve:                    achievements,
 		DCPalettaBallGet:            map[string]int{"100": 4},
+		DCBlackBoxShopUsed:          map[string]int{"item-1": 2},
+		DCFerrettaLotteryItem:       map[string]int{"item-2": 3},
 	}
 }
 
@@ -215,6 +235,21 @@ func TestRepositoryV4_InsertLatestAndExists(t *testing.T) {
 	}
 	if latest.CreditAll != 200 {
 		t.Fatalf("latest credit_all: got %d", latest.CreditAll)
+	}
+	if latest.JackpotFerrettaStartMax != 200 {
+		t.Fatalf("latest jackfr_startmax: got %d", latest.JackpotFerrettaStartMax)
+	}
+	if latest.JackpotFerrettaTotalMax != 400 {
+		t.Fatalf("latest jackfr_totalmax: got %d", latest.JackpotFerrettaTotalMax)
+	}
+	if latest.FerrettaLotteryLines != 20 {
+		t.Fatalf("latest ferlot_lines: got %d", latest.FerrettaLotteryLines)
+	}
+	if latest.DCBlackBoxShopUsed["item-1"] != 2 {
+		t.Fatalf("latest dc_bbox_shop: got %#v", latest.DCBlackBoxShopUsed)
+	}
+	if latest.DCFerrettaLotteryItem["item-2"] != 3 {
+		t.Fatalf("latest dc_ferlot_item: got %#v", latest.DCFerrettaLotteryItem)
 	}
 
 	wantAchievements := []string{"ach-1", "ach-2", "ach-3"}
@@ -319,6 +354,15 @@ func TestRepositoryV4_StatisticsAndAchievementRates(t *testing.T) {
 	}
 	if stats.AchievementsCount == nil || len(*stats.AchievementsCount) != 2 {
 		t.Fatalf("achievements count ranking: got %#v", stats.AchievementsCount)
+	}
+	if stats.JackfrStartmax == nil || len(*stats.JackfrStartmax) != 2 {
+		t.Fatalf("jackfr_startmax ranking: got %#v", stats.JackfrStartmax)
+	}
+	if stats.JackfrTotalmax == nil || len(*stats.JackfrTotalmax) != 2 {
+		t.Fatalf("jackfr_totalmax ranking: got %#v", stats.JackfrTotalmax)
+	}
+	if stats.FerlotLines == nil || len(*stats.FerlotLines) != 2 {
+		t.Fatalf("ferlot_lines ranking: got %#v", stats.FerlotLines)
 	}
 
 	rates, err := repo.GetAchievementRates(ctx)

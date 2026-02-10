@@ -956,10 +956,82 @@ components:
           type: number
           format: double
           x-oapi-codegen-extra-tags: { db: 'jacksp_totalmax' }
+        ferball_get:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'ferball_get' }
+        ferlot_lot:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'ferlot_lot' }
+        jackfr_get_all:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'jackfr_get_all' }
+        jackfr_get_t0:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'jackfr_get_t0' }
+        jackfr_get_t1:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'jackfr_get_t1' }
+        jackfr_get_t2:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'jackfr_get_t2' }
+        jackfr_get_t3:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'jackfr_get_t3' }
+        jackfr_get_t4:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'jackfr_get_t4' }
+        jackfr_startmax:
+          type: integer
+          format: int64
+          x-oapi-codegen-extra-tags: { db: 'jackfr_startmax' }
+        jackfr_totalmax:
+          type: integer
+          format: int64
+          x-oapi-codegen-extra-tags: { db: 'jackfr_totalmax' }
+        ferlot_hit:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'ferlot_hit' }
+        ferlot_lose:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'ferlot_lose' }
+        ferlot_chance:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'ferlot_chance' }
+        ferlot_act:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'ferlot_act' }
+        ferlot_lines:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'ferlot_lines' }
+        bbox_shop:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'bbox_shop' }
         task_cnt:
           type: number
           format: double
           x-oapi-codegen-extra-tags: { db: 'task_cnt' }
+        dc_bbox_shop:
+          type: object
+          additionalProperties: { type: integer }
+          x-oapi-codegen-extra-tags: { table: 'save_data_v2_bbox_shop' }
+        dc_ferlot_item:
+          type: object
+          additionalProperties: { type: integer }
+          x-oapi-codegen-extra-tags: { table: 'save_data_v2_ferlot_item' }
         totem_altars:
           type: integer
           x-oapi-codegen-extra-tags: { db: 'totem_altars' }
@@ -1241,6 +1313,18 @@ components:
           items:
             $ref: '#/components/schemas/RankingEntry'
         jacksp_startmax:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankingEntry'
+        jackfr_startmax:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankingEntry'
+        jackfr_totalmax:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankingEntry'
+        ferlot_lines:
           type: array
           items:
             $ref: '#/components/schemas/RankingEntry'

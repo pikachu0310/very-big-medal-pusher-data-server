@@ -33,7 +33,10 @@ INSERT INTO v2_save_data (
     hide_record, cpm_max, jack_totalmax_v2, ult_totalmax_v2,
     palball_get, pallot_lot_t0, pallot_lot_t1, pallot_lot_t2, pallot_lot_t3, pallot_lot_t4,
     jacksp_get_all, jacksp_get_t0, jacksp_get_t1, jacksp_get_t2, jacksp_get_t3, jacksp_get_t4,
-    jacksp_startmax, jacksp_totalmax, task_cnt, totem_altars, totem_altars_credit, buy_shbi,
+    jacksp_startmax, jacksp_totalmax, ferball_get, ferlot_lot,
+    jackfr_get_all, jackfr_get_t0, jackfr_get_t1, jackfr_get_t2, jackfr_get_t3, jackfr_get_t4,
+    jackfr_startmax, jackfr_totalmax, ferlot_hit, ferlot_lose, ferlot_chance, ferlot_act, ferlot_lines, bbox_shop,
+    task_cnt, totem_altars, totem_altars_credit, buy_shbi,
     firstboot, lastsave, playtime
 	) VALUES (
 	    ?, ?, ?,
@@ -46,7 +49,10 @@ INSERT INTO v2_save_data (
 	    ?, ?, ?, ?,
 	    ?, ?, ?, ?, ?, ?,
 	    ?, ?, ?, ?, ?, ?,
+	    ?, ?, ?, ?,
 	    ?, ?, ?, ?, ?, ?,
+	    ?, ?, ?, ?, ?, ?, ?, ?,
+	    ?, ?, ?, ?,
 	    ?, ?, ?
 	)`,
 		sd.UserId, sd.Legacy, sd.Version,
@@ -59,7 +65,10 @@ INSERT INTO v2_save_data (
 		sd.HideRecord, sd.CpMMax, sd.JackTotalMaxV2, sd.UltimateTotalMaxV2,
 		sd.PalettaBallGet, sd.PalettaLotteryAttemptTier0, sd.PalettaLotteryAttemptTier1, sd.PalettaLotteryAttemptTier2, sd.PalettaLotteryAttemptTier3, sd.PalettaLotteryAttemptTier4,
 		sd.JackpotSuperGetTotal, sd.JackpotSuperGetTier0, sd.JackpotSuperGetTier1, sd.JackpotSuperGetTier2, sd.JackpotSuperGetTier3, sd.JackpotSuperGetTier4,
-		sd.JackpotSuperStartMax, sd.JackpotSuperTotalMax, sd.TaskCompleteCount, sd.TotemAltarUnlockCount, sd.TotemAltarUnlockUsedCredits, sd.BuyShbi,
+		sd.JackpotSuperStartMax, sd.JackpotSuperTotalMax, sd.FerrettaBallGet, sd.FerrettaLotteryAttempt,
+		sd.JackpotFerrettaGetTotal, sd.JackpotFerrettaGetTier0, sd.JackpotFerrettaGetTier1, sd.JackpotFerrettaGetTier2, sd.JackpotFerrettaGetTier3, sd.JackpotFerrettaGetTier4,
+		sd.JackpotFerrettaStartMax, sd.JackpotFerrettaTotalMax, sd.FerrettaLotteryHit, sd.FerrettaLotteryLose, sd.FerrettaLotteryChance, sd.FerrettaLotteryActives, sd.FerrettaLotteryLines, sd.BlackBoxShopUsed,
+		sd.TaskCompleteCount, sd.TotemAltarUnlockCount, sd.TotemAltarUnlockUsedCredits, sd.BuyShbi,
 		sd.FirstBoot, sd.LastSave, sd.Playtime,
 	)
 	if err != nil {
@@ -104,6 +113,20 @@ INSERT INTO v2_save_data (
 	// palball_jp
 	for id, cnt := range sd.DCPalettaBallJackpot {
 		if _, err := tx.ExecContext(ctx, `INSERT INTO v2_save_data_palball_jp(save_id, ball_id, count) VALUES(?,?,?)`, saveID, id, cnt); err != nil {
+			return err
+		}
+	}
+
+	// bbox_shop
+	for id, cnt := range sd.DCBlackBoxShopUsed {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO v2_save_data_bbox_shop(save_id, item_id, count) VALUES(?,?,?)`, saveID, id, cnt); err != nil {
+			return err
+		}
+	}
+
+	// ferlot_item
+	for id, cnt := range sd.DCFerrettaLotteryItem {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO v2_save_data_ferlot_item(save_id, item_id, count) VALUES(?,?,?)`, saveID, id, cnt); err != nil {
 			return err
 		}
 	}
@@ -162,9 +185,10 @@ INSERT INTO v2_save_data (
 	// v3_user_latest_save_data に挿入/更新
 	_, err = tx.ExecContext(ctx, `
 INSERT INTO v3_user_latest_save_data (
-    user_id, version, credit_all, playtime, save_id, achievements_count, jacksp_startmax, golden_palball_get,
+    user_id, version, credit_all, playtime, save_id, achievements_count,
+    jacksp_startmax, jackfr_startmax, jackfr_totalmax, ferlot_lines, golden_palball_get,
     cpm_max, max_chain_rainbow, jack_totalmax_v2, ult_combomax, ult_totalmax_v2, blackbox_total, sp_use, hide_record
-) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 ON DUPLICATE KEY UPDATE
     version = VALUES(version),
     credit_all = VALUES(credit_all),
@@ -172,6 +196,9 @@ ON DUPLICATE KEY UPDATE
     save_id = VALUES(save_id),
     achievements_count = VALUES(achievements_count),
     jacksp_startmax = VALUES(jacksp_startmax),
+    jackfr_startmax = VALUES(jackfr_startmax),
+    jackfr_totalmax = VALUES(jackfr_totalmax),
+    ferlot_lines = VALUES(ferlot_lines),
     golden_palball_get = VALUES(golden_palball_get),
     cpm_max = VALUES(cpm_max),
     max_chain_rainbow = VALUES(max_chain_rainbow),
@@ -182,7 +209,8 @@ ON DUPLICATE KEY UPDATE
     sp_use = VALUES(sp_use),
     hide_record = VALUES(hide_record),
     updated_at = CURRENT_TIMESTAMP`,
-		sd.UserId, sd.Version, sd.CreditAll, sd.Playtime, saveID, achievementsCount, sd.JackpotSuperStartMax, goldenPalballGet,
+		sd.UserId, sd.Version, sd.CreditAll, sd.Playtime, saveID, achievementsCount,
+		sd.JackpotSuperStartMax, sd.JackpotFerrettaStartMax, sd.JackpotFerrettaTotalMax, sd.FerrettaLotteryLines, goldenPalballGet,
 		sd.CpMMax, maxChainRainbow, sd.JackTotalMaxV2, sd.UltComboMax, sd.UltimateTotalMaxV2, sd.BlackBoxTotal, sd.SpUse, sd.HideRecord,
 	)
 	if err != nil {
@@ -265,8 +293,53 @@ LIMIT 1000
 		return nil, err
 	}
 
-	// 4) cpm_max
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_4 - cpm_max\n")
+	// 4) jackfr_startmax
+	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_4 - jackfr_startmax\n")
+	if err := addRanking(&stats.JackfrStartmax, `
+SELECT
+  user_id,
+  jackfr_startmax AS value,
+  updated_at AS created_at
+FROM v3_user_latest_save_data
+WHERE hide_record = 0
+ORDER BY jackfr_startmax DESC, created_at ASC
+LIMIT 1000
+`); err != nil {
+		return nil, err
+	}
+
+	// 5) jackfr_totalmax
+	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_5 - jackfr_totalmax\n")
+	if err := addRanking(&stats.JackfrTotalmax, `
+SELECT
+  user_id,
+  jackfr_totalmax AS value,
+  updated_at AS created_at
+FROM v3_user_latest_save_data
+WHERE hide_record = 0
+ORDER BY jackfr_totalmax DESC, created_at ASC
+LIMIT 1000
+`); err != nil {
+		return nil, err
+	}
+
+	// 6) ferlot_lines
+	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_6 - ferlot_lines\n")
+	if err := addRanking(&stats.FerlotLines, `
+SELECT
+  user_id,
+  ferlot_lines AS value,
+  updated_at AS created_at
+FROM v3_user_latest_save_data
+WHERE hide_record = 0
+ORDER BY ferlot_lines DESC, created_at ASC
+LIMIT 1000
+`); err != nil {
+		return nil, err
+	}
+
+	// 7) cpm_max
+	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_7 - cpm_max\n")
 	if err := addRanking(&stats.CpmMax, `
 SELECT
   user_id,
@@ -280,8 +353,8 @@ LIMIT 1000
 		return nil, err
 	}
 
-	// 5) max_chain_rainbow
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_5 - max_chain_rainbow\n")
+	// 8) max_chain_rainbow
+	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_8 - max_chain_rainbow\n")
 	if err := addRanking(&stats.MaxChainRainbow, `
 SELECT
   user_id,
@@ -295,8 +368,8 @@ LIMIT 1000
 		return nil, err
 	}
 
-	// 6) jack_totalmax_v2
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_6 - jack_totalmax_v2\n")
+	// 9) jack_totalmax_v2
+	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_9 - jack_totalmax_v2\n")
 	if err := addRanking(&stats.JackTotalmaxV2, `
 SELECT
   user_id,
@@ -310,8 +383,8 @@ LIMIT 1000
 		return nil, err
 	}
 
-	// 7) ult_combomax
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_7 - ult_combomax\n")
+	// 10) ult_combomax
+	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_10 - ult_combomax\n")
 	if err := addRanking(&stats.UltCombomax, `
 SELECT
   user_id,
@@ -325,8 +398,8 @@ LIMIT 1000
 		return nil, err
 	}
 
-	// 8) ult_totalmax_v2
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_8 - ult_totalmax_v2\n")
+	// 11) ult_totalmax_v2
+	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_11 - ult_totalmax_v2\n")
 	if err := addRanking(&stats.UltTotalmaxV2, `
 SELECT
   user_id,
@@ -340,8 +413,8 @@ LIMIT 1000
 		return nil, err
 	}
 
-	// 9) blackbox_total
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_9 - blackbox_total\n")
+	// 12) blackbox_total
+	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_12 - blackbox_total\n")
 	if err := addRanking(&stats.BlackboxTotal, `
 SELECT
   user_id,
@@ -355,8 +428,8 @@ LIMIT 1000
 		return nil, err
 	}
 
-	// 10) sp_use
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_10 - sp_use\n")
+	// 13) sp_use
+	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_13 - sp_use\n")
 	if err := addRanking(&stats.SpUse, `
 SELECT
   user_id,

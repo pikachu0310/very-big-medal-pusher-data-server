@@ -77,6 +77,8 @@ docker exec myapp_db mariadb -u root -ppass -e "SHOW DATABASES;"
 | v2_save_data_medal_get | 1,534,639 | 47,696 KB | 18,992 KB | utf8mb4_uca1400_ai_ci |
 | v2_save_data_palball_get | 71,063 | 2,576 KB | 1,552 KB | utf8mb4_uca1400_ai_ci |
 | v2_save_data_palball_jp | 58,767 | 2,576 KB | 1,552 KB | utf8mb4_uca1400_ai_ci |
+| v2_save_data_bbox_shop | 0 | 16 KB | 16 KB | utf8mb4_uca1400_ai_ci |
+| v2_save_data_ferlot_item | 0 | 16 KB | 16 KB | utf8mb4_uca1400_ai_ci |
 | v2_save_data_perks | 430,272 | 13,840 KB | 6,672 KB | utf8mb4_uca1400_ai_ci |
 | v2_save_data_perks_credit | 429,880 | 15,920 KB | 6,672 KB | utf8mb4_uca1400_ai_ci |
 | v2_save_data_totems | 0 | 16 KB | 16 KB | utf8mb4_uca1400_ai_ci |
@@ -98,6 +100,8 @@ docker exec myapp_db mariadb -u root -ppass -e "SHOW DATABASES;"
 | v2_save_data_medal_get_ibfk_1 | v2_save_data_medal_get | save_id | v2_save_data | id | ON DELETE CASCADE |
 | v2_save_data_palball_get_ibfk_1 | v2_save_data_palball_get | save_id | v2_save_data | id | ON DELETE CASCADE |
 | v2_save_data_palball_jp_ibfk_1 | v2_save_data_palball_jp | save_id | v2_save_data | id | ON DELETE CASCADE |
+| v2_save_data_bbox_shop_ibfk_1 | v2_save_data_bbox_shop | save_id | v2_save_data | id | ON DELETE CASCADE |
+| v2_save_data_ferlot_item_ibfk_1 | v2_save_data_ferlot_item | save_id | v2_save_data | id | ON DELETE CASCADE |
 | v2_save_data_perks_ibfk_1 | v2_save_data_perks | save_id | v2_save_data | id | ON DELETE CASCADE |
 | v2_save_data_perks_credit_ibfk_1 | v2_save_data_perks_credit | save_id | v2_save_data | id | ON DELETE CASCADE |
 | v2_save_data_totems_ibfk_1 | v2_save_data_totems | save_id | v2_save_data | id | ON DELETE CASCADE |
@@ -221,6 +225,22 @@ CREATE TABLE `v2_save_data` (
   `jacksp_get_t4` int(11) NOT NULL DEFAULT 0,
   `jacksp_startmax` bigint(20) NOT NULL DEFAULT 0,
   `jacksp_totalmax` bigint(20) NOT NULL DEFAULT 0,
+  `ferball_get` int(11) NOT NULL DEFAULT 0,
+  `ferlot_lot` int(11) NOT NULL DEFAULT 0,
+  `jackfr_get_all` int(11) NOT NULL DEFAULT 0,
+  `jackfr_get_t0` int(11) NOT NULL DEFAULT 0,
+  `jackfr_get_t1` int(11) NOT NULL DEFAULT 0,
+  `jackfr_get_t2` int(11) NOT NULL DEFAULT 0,
+  `jackfr_get_t3` int(11) NOT NULL DEFAULT 0,
+  `jackfr_get_t4` int(11) NOT NULL DEFAULT 0,
+  `jackfr_startmax` bigint(20) NOT NULL DEFAULT 0,
+  `jackfr_totalmax` bigint(20) NOT NULL DEFAULT 0,
+  `ferlot_hit` int(11) NOT NULL DEFAULT 0,
+  `ferlot_lose` int(11) NOT NULL DEFAULT 0,
+  `ferlot_chance` int(11) NOT NULL DEFAULT 0,
+  `ferlot_act` int(11) NOT NULL DEFAULT 0,
+  `ferlot_lines` int(11) NOT NULL DEFAULT 0,
+  `bbox_shop` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `idx_save_data_v2_user_created_at` (`user_id`,`created_at`),
   KEY `idx_save_data_v2_user_playtime` (`user_id`,`playtime`),
@@ -390,6 +410,9 @@ CREATE TABLE `v3_user_latest_save_data` (
   `playtime` bigint(20) NOT NULL DEFAULT 0,
   `achievements_count` int(11) NOT NULL DEFAULT 0,
   `jacksp_startmax` bigint(20) NOT NULL DEFAULT 0,
+  `jackfr_startmax` bigint(20) NOT NULL DEFAULT 0,
+  `jackfr_totalmax` bigint(20) NOT NULL DEFAULT 0,
+  `ferlot_lines` int(11) NOT NULL DEFAULT 0,
   `golden_palball_get` int(11) NOT NULL DEFAULT 0,
   `cpm_max` double NOT NULL DEFAULT 0,
   `max_chain_rainbow` int(11) NOT NULL DEFAULT 0,
@@ -405,6 +428,9 @@ CREATE TABLE `v3_user_latest_save_data` (
   KEY `idx_v3_user_latest_save_data_credit_all` (`credit_all` DESC),
   KEY `idx_v3_user_latest_save_data_achievements_count` (`achievements_count` DESC),
   KEY `idx_v3_user_latest_save_data_jacksp_startmax` (`jacksp_startmax` DESC),
+  KEY `idx_v3_user_latest_save_data_jackfr_startmax` (`jackfr_startmax` DESC),
+  KEY `idx_v3_user_latest_save_data_jackfr_totalmax` (`jackfr_totalmax` DESC),
+  KEY `idx_v3_user_latest_save_data_ferlot_lines` (`ferlot_lines` DESC),
   KEY `idx_v3_user_latest_save_data_golden_palball_get` (`golden_palball_get` DESC),
   KEY `idx_v3_user_latest_save_data_cpm_max` (`cpm_max` DESC),
   KEY `idx_v3_user_latest_save_data_max_chain_rainbow` (`max_chain_rainbow` DESC),
@@ -416,6 +442,9 @@ CREATE TABLE `v3_user_latest_save_data` (
   KEY `idx_v3_latest_hide_record` (`hide_record`),
   KEY `idx_v3_latest_achievements_hide` (`hide_record`,`achievements_count` DESC,`created_at`),
   KEY `idx_v3_latest_jacksp_hide` (`hide_record`,`jacksp_startmax` DESC,`created_at`),
+  KEY `idx_v3_latest_jackfr_start_hide` (`hide_record`,`jackfr_startmax` DESC,`created_at`),
+  KEY `idx_v3_latest_jackfr_total_hide` (`hide_record`,`jackfr_totalmax` DESC,`created_at`),
+  KEY `idx_v3_latest_ferlot_lines_hide` (`hide_record`,`ferlot_lines` DESC,`created_at`),
   KEY `idx_v3_latest_golden_hide` (`hide_record`,`golden_palball_get` DESC,`created_at`),
   KEY `idx_v3_latest_cpm_hide` (`hide_record`,`cpm_max` DESC,`created_at`),
   KEY `idx_v3_latest_chain_hide` (`hide_record`,`max_chain_rainbow` DESC,`created_at`),
@@ -440,6 +469,32 @@ CREATE TABLE `v3_user_latest_save_data_achievements` (
   KEY `idx_v3_user_latest_achievements_user_id` (`user_id`),
   KEY `idx_v3_achievements_achievement_user` (`achievement_id`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+### 5.17 v2_save_data_bbox_shop
+
+```sql
+CREATE TABLE `v2_save_data_bbox_shop` (
+  `save_id` int(11) NOT NULL,
+  `item_id` varchar(255) NOT NULL,
+  `count` int(11) NOT NULL,
+  PRIMARY KEY (`save_id`,`item_id`),
+  KEY `idx_v2_save_data_bbox_shop_save` (`save_id`),
+  CONSTRAINT `v2_save_data_bbox_shop_ibfk_1` FOREIGN KEY (`save_id`) REFERENCES `v2_save_data` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+```
+
+### 5.18 v2_save_data_ferlot_item
+
+```sql
+CREATE TABLE `v2_save_data_ferlot_item` (
+  `save_id` int(11) NOT NULL,
+  `item_id` varchar(255) NOT NULL,
+  `count` int(11) NOT NULL,
+  PRIMARY KEY (`save_id`,`item_id`),
+  KEY `idx_v2_save_data_ferlot_item_save` (`save_id`),
+  CONSTRAINT `v2_save_data_ferlot_item_ibfk_1` FOREIGN KEY (`save_id`) REFERENCES `v2_save_data` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 ```
 
 ---
