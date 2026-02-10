@@ -17,7 +17,6 @@ import {
   Badge,
   Anchor,
   ThemeIcon,
-  Highlight,
   Spoiler,
   Box
 } from '@mantine/core';
@@ -117,6 +116,11 @@ const rankingDefinitions: { key: keyof GlobalStats; label: string }[] = [
   { key: 'blackbox_total', label: 'ブラックボックス累計' },
   { key: 'sp_use', label: 'スキルポイント使用数' }
 ];
+
+const unifiedCardStyle = {
+  backgroundColor: '#ffffff',
+  border: '1px solid #dbe7f3'
+} as const;
 
 function HomePage() {
   const [dataUrl, setDataUrl] = useState('');
@@ -232,7 +236,8 @@ function HomePage() {
         <Badge color="gray" variant="light">TOP {data.length}</Badge>
       </Group>
       <div style={{ maxHeight: '240px', overflowY: 'auto' }}>
-        <Table>
+        <Table highlightOnHover>
+          <Table.Caption>{title} ランキング（TOP {data.length}）</Table.Caption>
           <Table.Thead>
             <Table.Tr>
               <Table.Th>順位</Table.Th>
@@ -288,7 +293,6 @@ function HomePage() {
     icon,
     size = 'lg',
     variant = 'filled',
-    gradient,
     color,
     heightMultiplier = 1,
   }: {
@@ -296,53 +300,61 @@ function HomePage() {
     href: string;
     icon: React.ReactNode;
     size?: 'lg' | 'xl';
-    variant?: 'filled' | 'outline' | 'light' | 'gradient';
-    gradient?: { from: string; to: string };
+    variant?: 'filled' | 'outline' | 'light';
     color?: string;
     heightMultiplier?: number;
-  }) => (
-    <Button
-      component="a"
-      href={href}
-      target="_blank"
-      rel="noreferrer"
-      leftSection={icon}
-      size={size}
-      radius="md"
-      fullWidth
-      variant={variant}
-      gradient={gradient}
-      color={color}
-      fw={700}
-      c={variant === 'outline' ? color || 'dark' : 'white'}
-      styles={variant === 'outline' && color === 'black' ? {
-        root: {
-          backgroundColor: 'transparent',
-          border: '1px solid #000',
-          color: '#000',
-          '&:hover': {
+  }) => {
+    const textColor = variant === 'outline'
+      ? color === 'black' ? '#000' : undefined
+      : variant === 'light'
+        ? '#1e3a8a'
+        : '#fff';
+
+    return (
+      <Button
+        component="a"
+        href={href}
+        target="_blank"
+        rel="noreferrer"
+        leftSection={icon}
+        size={size}
+        radius="md"
+        fullWidth
+        variant={variant}
+        color={color}
+        fw={700}
+        c={textColor}
+        aria-label={typeof children === 'string' ? children : undefined}
+        title={typeof children === 'string' ? children : undefined}
+        styles={variant === 'outline' && color === 'black' ? {
+          root: {
             backgroundColor: 'transparent',
-            border: '1px solid #000'
-          }
-        },
-        label: { color: '#000' },
-        section: { color: '#000' }
-      } : undefined}
-      style={{
-        minHeight: `calc(${size === 'xl' ? 52 : 44}px * ${heightMultiplier})`,
-        whiteSpace: 'normal',
-        lineHeight: 1.3,
-        paddingInline: '1.4rem',
-        textAlign: 'center',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        wordBreak: 'break-word'
-      }}
-    >
-      {children}
-    </Button>
-  );
+            border: '1px solid #000',
+            color: '#000',
+            '&:hover': {
+              backgroundColor: 'transparent',
+              border: '1px solid #000'
+            }
+          },
+          label: { color: '#000' },
+          section: { color: '#000' }
+        } : undefined}
+        style={{
+          minHeight: `calc(${size === 'xl' ? 52 : 44}px * ${heightMultiplier})`,
+          whiteSpace: 'normal',
+          lineHeight: 1.3,
+          paddingInline: '1.4rem',
+          textAlign: 'center',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          wordBreak: 'break-word'
+        }}
+      >
+        {children}
+      </Button>
+    );
+  };
 
   return (
     <Stack gap="xl" pt={0}>
@@ -350,7 +362,7 @@ function HomePage() {
       <Center mt={0} pt={0} mb={0}>
         <img
           src="/MMP_logo.webp"
-          alt="MMP Logo"
+          alt="Massive Medal Pusher ロゴ"
           style={{
             maxWidth: '700px',
             width: '100%',
@@ -360,30 +372,27 @@ function HomePage() {
           }}
         />
       </Center>
+      <Title order={1} ta="center" fz={{ base: 28, sm: 34 }}>
+        Massive Medal Pusher データサーバー
+      </Title>
+      <Text size="sm" c="dimmed" ta="center" mt={-10}>
+        公式リンクと統計情報をひとつの画面で確認できます
+      </Text>
 
       {/* ヒーロー */}
-      <Card padding="xl" radius="md" shadow="sm" style={{ background: 'linear-gradient(135deg, #e7f5ff 0%, #d0ebff 100%)' }}>
+      <Card padding="xl" radius="md" shadow="sm" style={unifiedCardStyle}>
         <Stack gap="md">
-          <Highlight
-            highlight={['Massive Medal Pusher']}
-            fw={700}
-            fz={14}
-            c="#1e1e1e"
-            highlightStyles={(theme) => ({
-              backgroundColor: theme.colors.gray[1],
-              color: theme.colors.blue[7],
-            })}
-          >
+          <Title order={2} fz="h3">
             Massive Medal Pusher / リンク集
-          </Highlight>
+          </Title>
           <Grid gutter="md">
             <Grid.Col span={{ base: 12, md: 6 }}>
               <HeroButton
                 href="https://discord.com/invite/CgnYyXecKm"
                 icon={<IconBrandDiscord size={33} />}
                 size="xl"
-                variant="gradient"
-                gradient={{ from: 'grape', to: 'indigo' }}
+                variant="filled"
+                color="blue"
                 heightMultiplier={2}
               >
                 公式Discord でかプ同好会
@@ -406,7 +415,7 @@ function HomePage() {
                 icon={<IconWorld size={20} />}
                 size="lg"
                 variant="filled"
-                color="indigo"
+                color="blue"
               >
                 公式グループ(VRChat)
               </HeroButton>
@@ -416,7 +425,7 @@ function HomePage() {
                   icon={<IconWorld size={20} />}
                   size="lg"
                   variant="filled"
-                  color="indigo"
+                  color="blue"
                 >
                   VRChatワールドリンク
                 </HeroButton>
@@ -426,7 +435,7 @@ function HomePage() {
                   href={twitterHashUrl}
                   icon={<IconExternalLink size={20} />}
                   size="lg"
-                  variant="light"
+                  variant="filled"
                   color="blue"
                   heightMultiplier={1}
                 >
@@ -439,20 +448,11 @@ function HomePage() {
       </Card>
 
       {/* 開発者向けリンク集 */}
-      <Card padding="xl" radius="md" shadow="sm" style={{ background: 'linear-gradient(135deg, #e7f5ff 0%, #d0ebff 100%)' }}>
+      <Card padding="xl" radius="md" shadow="sm" style={unifiedCardStyle}>
         <Stack gap="md">
-          <Highlight
-            highlight={['Massive Medal Pusher']}
-            fw={700}
-            fz={14}
-            c="#1e1e1e"
-            highlightStyles={(theme) => ({
-              backgroundColor: theme.colors.gray[1],
-              color: theme.colors.blue[7],
-            })}
-          >
+          <Title order={2} fz="h3">
             Massive Medal Pusher / 開発者向けリンク集
-          </Highlight>
+          </Title>
           <Grid gutter="sm">
             <Grid.Col span={{ base: 12, sm: 4 }}>
               <HeroButton
@@ -495,7 +495,7 @@ function HomePage() {
       </Card>
 
       <Tabs defaultValue="personal" variant="outline">
-        <Tabs.List>
+        <Tabs.List aria-label="統計情報の切り替え">
           <Tabs.Tab value="personal" leftSection={<IconUsers size="1rem" />}>
             個人統計
           </Tabs.Tab>
@@ -517,6 +517,7 @@ function HomePage() {
               <TextInput
                 placeholder="https://push.trap.games/api/v4/users/xxxx/data?sig=xxxx"
                 label="LoadSaveDataURL"
+                description="クラウドセーブ URL を入力すると、レスポンスを自動で復号して表示します。"
                 value={dataUrl}
                 onChange={(e) => setDataUrl(e.currentTarget.value)}
               />
@@ -540,7 +541,7 @@ function HomePage() {
               )}
 
               {isLoadingPersonal && (
-                <Center>
+                <Center role="status" aria-live="polite">
                   <Loader />
                 </Center>
               )}
@@ -586,7 +587,7 @@ function HomePage() {
             <Title order={2} mb="md">グローバル統計</Title>
 
             {isLoadingGlobal && (
-              <Center>
+              <Center role="status" aria-live="polite">
                 <Loader />
               </Center>
             )}
@@ -642,7 +643,7 @@ function HomePage() {
               https://push.trap.games/api/ping
             </Text>
             <Group gap="sm">
-              <Badge color={pingState === 'ok' ? 'teal' : pingState === 'ng' ? 'red' : 'gray'} radius="sm">
+              <Badge color={pingState === 'ok' ? 'teal' : pingState === 'ng' ? 'red' : 'gray'} radius="sm" aria-live="polite">
                 {pingState === 'idle' && '未実行'}
                 {pingState === 'loading' && '確認中...'}
                 {pingState === 'ok' && '稼働中'}
