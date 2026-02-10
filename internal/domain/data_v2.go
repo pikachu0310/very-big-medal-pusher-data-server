@@ -67,6 +67,22 @@ type SaveData struct {
 	JackpotSuperGetTier4        int       `db:"jacksp_get_t4"`
 	JackpotSuperStartMax        int64     `db:"jacksp_startmax"`
 	JackpotSuperTotalMax        int64     `db:"jacksp_totalmax"`
+	FerrettaBallGet             int       `db:"ferball_get"`
+	FerrettaLotteryAttempt      int       `db:"ferlot_lot"`
+	JackpotFerrettaGetTotal     int       `db:"jackfr_get_all"`
+	JackpotFerrettaGetTier0     int       `db:"jackfr_get_t0"`
+	JackpotFerrettaGetTier1     int       `db:"jackfr_get_t1"`
+	JackpotFerrettaGetTier2     int       `db:"jackfr_get_t2"`
+	JackpotFerrettaGetTier3     int       `db:"jackfr_get_t3"`
+	JackpotFerrettaGetTier4     int       `db:"jackfr_get_t4"`
+	JackpotFerrettaStartMax     int64     `db:"jackfr_startmax"`
+	JackpotFerrettaTotalMax     int64     `db:"jackfr_totalmax"`
+	FerrettaLotteryHit          int       `db:"ferlot_hit"`
+	FerrettaLotteryLose         int       `db:"ferlot_lose"`
+	FerrettaLotteryChance       int       `db:"ferlot_chance"`
+	FerrettaLotteryActives      int       `db:"ferlot_act"`
+	FerrettaLotteryLines        int       `db:"ferlot_lines"`
+	BlackBoxShopUsed            int       `db:"bbox_shop"`
 	TaskCompleteCount           int       `db:"task_cnt"`
 	TotemAltarUnlockCount       int       `db:"totem_altars"`
 	TotemAltarUnlockUsedCredits int64     `db:"totem_altars_credit"`
@@ -74,17 +90,19 @@ type SaveData struct {
 	UpdatedAt                   time.Time `db:"updated_at"`
 
 	// child tables (not loaded via SELECT *)
-	DCMedalGet           map[string]int   `db:"-"`
-	DCBallGet            map[string]int64 `db:"-"`
-	DCBallChain          map[string]int   `db:"-"`
-	LAchieve             []string         `db:"-"`
-	DCPalettaBallGet     map[string]int   `db:"-"`
-	DCPalettaBallJackpot map[string]int   `db:"-"`
-	LPerkLevels          []int            `db:"-"`
-	LPerkUsedCredits     []int64          `db:"-"`
-	LTotemLevels         []int            `db:"-"`
-	LTotemUsedCredits    []int64          `db:"-"`
-	LTotemPlacements     []int            `db:"-"`
+	DCMedalGet            map[string]int   `db:"-"`
+	DCBallGet             map[string]int64 `db:"-"`
+	DCBallChain           map[string]int   `db:"-"`
+	LAchieve              []string         `db:"-"`
+	DCPalettaBallGet      map[string]int   `db:"-"`
+	DCPalettaBallJackpot  map[string]int   `db:"-"`
+	DCBlackBoxShopUsed    map[string]int   `db:"-"`
+	DCFerrettaLotteryItem map[string]int   `db:"-"`
+	LPerkLevels           []int            `db:"-"`
+	LPerkUsedCredits      []int64          `db:"-"`
+	LTotemLevels          []int            `db:"-"`
+	LTotemUsedCredits     []int64          `db:"-"`
+	LTotemPlacements      []int            `db:"-"`
 }
 
 // ParseSaveData decodes URL-encoded JSON into a minimal SaveData for insert.
@@ -146,6 +164,22 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		JackpotSuperGetTier4        *int             `json:"jacksp_get_t4"`
 		JackpotSuperStartMax        *int64           `json:"jacksp_startmax"`
 		JackpotSuperTotalMax        *int64           `json:"jacksp_totalmax"`
+		FerrettaBallGet             *float64         `json:"ferball_get"`
+		FerrettaLotteryAttempt      *float64         `json:"ferlot_lot"`
+		JackpotFerrettaGetTotal     *float64         `json:"jackfr_get_all"`
+		JackpotFerrettaGetTier0     *float64         `json:"jackfr_get_t0"`
+		JackpotFerrettaGetTier1     *float64         `json:"jackfr_get_t1"`
+		JackpotFerrettaGetTier2     *float64         `json:"jackfr_get_t2"`
+		JackpotFerrettaGetTier3     *float64         `json:"jackfr_get_t3"`
+		JackpotFerrettaGetTier4     *float64         `json:"jackfr_get_t4"`
+		JackpotFerrettaStartMax     json.RawMessage  `json:"jackfr_startmax"`
+		JackpotFerrettaTotalMax     json.RawMessage  `json:"jackfr_totalmax"`
+		FerrettaLotteryHit          *float64         `json:"ferlot_hit"`
+		FerrettaLotteryLose         *float64         `json:"ferlot_lose"`
+		FerrettaLotteryChance       *float64         `json:"ferlot_chance"`
+		FerrettaLotteryActives      *float64         `json:"ferlot_act"`
+		FerrettaLotteryLines        *float64         `json:"ferlot_lines"`
+		BlackBoxShopUsed            *float64         `json:"bbox_shop"`
 		TaskCompleteCount           *float64         `json:"task_cnt"`
 		DCMedalGet                  map[string]int   `json:"dc_medal_get"`
 		DCBallGet                   map[string]int64 `json:"dc_ball_get"`
@@ -153,6 +187,8 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		LAchieve                    []interface{}    `json:"l_achieve"`
 		DCPalettaBallGet            map[string]int   `json:"dc_palball_get"`
 		DCPalettaBallJackpot        map[string]int   `json:"dc_palball_jp"`
+		DCBlackBoxShopUsed          map[string]int   `json:"dc_bbox_shop"`
+		DCFerrettaLotteryItem       map[string]int   `json:"dc_ferlot_item"`
 		LPerkLevels                 []interface{}    `json:"l_perks"`
 		LPerkUsedCredits            []interface{}    `json:"l_perks_credit"`
 		TotemAltarUnlockCount       *int             `json:"totem_altars"`
@@ -231,6 +267,22 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		JackpotSuperGetTier4:        safeInt(m.JackpotSuperGetTier4),
 		JackpotSuperStartMax:        safeInt64(m.JackpotSuperStartMax),
 		JackpotSuperTotalMax:        safeInt64(m.JackpotSuperTotalMax),
+		FerrettaBallGet:             int(safeFloat64(m.FerrettaBallGet)),
+		FerrettaLotteryAttempt:      int(safeFloat64(m.FerrettaLotteryAttempt)),
+		JackpotFerrettaGetTotal:     int(safeFloat64(m.JackpotFerrettaGetTotal)),
+		JackpotFerrettaGetTier0:     int(safeFloat64(m.JackpotFerrettaGetTier0)),
+		JackpotFerrettaGetTier1:     int(safeFloat64(m.JackpotFerrettaGetTier1)),
+		JackpotFerrettaGetTier2:     int(safeFloat64(m.JackpotFerrettaGetTier2)),
+		JackpotFerrettaGetTier3:     int(safeFloat64(m.JackpotFerrettaGetTier3)),
+		JackpotFerrettaGetTier4:     int(safeFloat64(m.JackpotFerrettaGetTier4)),
+		JackpotFerrettaStartMax:     parseInt64Message(m.JackpotFerrettaStartMax),
+		JackpotFerrettaTotalMax:     parseInt64Message(m.JackpotFerrettaTotalMax),
+		FerrettaLotteryHit:          int(safeFloat64(m.FerrettaLotteryHit)),
+		FerrettaLotteryLose:         int(safeFloat64(m.FerrettaLotteryLose)),
+		FerrettaLotteryChance:       int(safeFloat64(m.FerrettaLotteryChance)),
+		FerrettaLotteryActives:      int(safeFloat64(m.FerrettaLotteryActives)),
+		FerrettaLotteryLines:        int(safeFloat64(m.FerrettaLotteryLines)),
+		BlackBoxShopUsed:            int(safeFloat64(m.BlackBoxShopUsed)),
 		TaskCompleteCount:           int(safeFloat64(m.TaskCompleteCount)),
 		DCMedalGet:                  m.DCMedalGet,
 		DCBallGet:                   m.DCBallGet,
@@ -238,6 +290,8 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		LAchieve:                    ach,
 		DCPalettaBallGet:            m.DCPalettaBallGet,
 		DCPalettaBallJackpot:        m.DCPalettaBallJackpot,
+		DCBlackBoxShopUsed:          m.DCBlackBoxShopUsed,
+		DCFerrettaLotteryItem:       m.DCFerrettaLotteryItem,
 		LPerkLevels:                 parseIntArray(m.LPerkLevels),
 		LPerkUsedCredits:            parseInt64Array(m.LPerkUsedCredits),
 		TotemAltarUnlockCount:       safeInt(m.TotemAltarUnlockCount),
@@ -339,6 +393,22 @@ func (sd *SaveData) ToModel() *models.SaveDataV2 {
 		jackspGetT4       = float64(sd.JackpotSuperGetTier4)
 		jackspStartmax    = float64(sd.JackpotSuperStartMax)
 		jackspTotalmax    = float64(sd.JackpotSuperTotalMax)
+		ferballGet        = float64(sd.FerrettaBallGet)
+		ferlotLot         = float64(sd.FerrettaLotteryAttempt)
+		jackfrGetAll      = float64(sd.JackpotFerrettaGetTotal)
+		jackfrGetT0       = float64(sd.JackpotFerrettaGetTier0)
+		jackfrGetT1       = float64(sd.JackpotFerrettaGetTier1)
+		jackfrGetT2       = float64(sd.JackpotFerrettaGetTier2)
+		jackfrGetT3       = float64(sd.JackpotFerrettaGetTier3)
+		jackfrGetT4       = float64(sd.JackpotFerrettaGetTier4)
+		jackfrStartmax    = sd.JackpotFerrettaStartMax
+		jackfrTotalmax    = sd.JackpotFerrettaTotalMax
+		ferlotHit         = float64(sd.FerrettaLotteryHit)
+		ferlotLose        = float64(sd.FerrettaLotteryLose)
+		ferlotChance      = float64(sd.FerrettaLotteryChance)
+		ferlotAct         = float64(sd.FerrettaLotteryActives)
+		ferlotLines       = float64(sd.FerrettaLotteryLines)
+		bboxShop          = float64(sd.BlackBoxShopUsed)
 		taskCnt           = float64(sd.TaskCompleteCount)
 		totemAltars       = sd.TotemAltarUnlockCount
 		totemAltarsCredit = sd.TotemAltarUnlockUsedCredits
@@ -395,6 +465,22 @@ func (sd *SaveData) ToModel() *models.SaveDataV2 {
 		JackspGetT4:       &jackspGetT4,
 		JackspStartmax:    &jackspStartmax,
 		JackspTotalmax:    &jackspTotalmax,
+		FerballGet:        &ferballGet,
+		FerlotLot:         &ferlotLot,
+		JackfrGetAll:      &jackfrGetAll,
+		JackfrGetT0:       &jackfrGetT0,
+		JackfrGetT1:       &jackfrGetT1,
+		JackfrGetT2:       &jackfrGetT2,
+		JackfrGetT3:       &jackfrGetT3,
+		JackfrGetT4:       &jackfrGetT4,
+		JackfrStartmax:    &jackfrStartmax,
+		JackfrTotalmax:    &jackfrTotalmax,
+		FerlotHit:         &ferlotHit,
+		FerlotLose:        &ferlotLose,
+		FerlotChance:      &ferlotChance,
+		FerlotAct:         &ferlotAct,
+		FerlotLines:       &ferlotLines,
+		BboxShop:          &bboxShop,
 		TaskCnt:           &taskCnt,
 		TotemAltars:       &totemAltars,
 		TotemAltarsCredit: &totemAltarsCredit,
@@ -406,6 +492,8 @@ func (sd *SaveData) ToModel() *models.SaveDataV2 {
 		LAchieve:      &sd.LAchieve,
 		DcPalballGet:  &sd.DCPalettaBallGet,
 		DcPalballJp:   &sd.DCPalettaBallJackpot,
+		DcBboxShop:    &sd.DCBlackBoxShopUsed,
+		DcFerlotItem:  &sd.DCFerrettaLotteryItem,
 		LPerks:        &sd.LPerkLevels,
 		LPerksCredit:  &sd.LPerkUsedCredits,
 		LTotems:       &sd.LTotemLevels,
