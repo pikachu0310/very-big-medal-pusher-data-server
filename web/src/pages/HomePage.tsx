@@ -117,10 +117,14 @@ const rankingDefinitions: { key: keyof GlobalStats; label: string }[] = [
   { key: 'sp_use', label: 'スキルポイント使用数' }
 ];
 
-const unifiedCardStyle = {
-  backgroundColor: '#ffffff',
-  border: '1px solid #dbe7f3'
+const linkSectionCardStyle = {
+  backgroundColor: '#e9f3ff',
+  border: '1px solid #cddff7'
 } as const;
+
+const sectionTitleColor = '#1f5da8';
+const pageTitleColor = '#2c4256';
+const primaryButtonColor = 'blue';
 
 function HomePage() {
   const [dataUrl, setDataUrl] = useState('');
@@ -305,10 +309,15 @@ function HomePage() {
     heightMultiplier?: number;
   }) => {
     const textColor = variant === 'outline'
-      ? color === 'black' ? '#000' : undefined
+      ? color === 'black' ? '#1f2937' : undefined
       : variant === 'light'
         ? '#1e3a8a'
         : '#fff';
+    const buttonClassName = variant === 'outline' && color === 'black'
+      ? 'mmp-outline-black-button'
+      : variant === 'filled' && color === primaryButtonColor
+        ? 'mmp-primary-button'
+        : undefined;
 
     return (
       <Button
@@ -322,23 +331,11 @@ function HomePage() {
         fullWidth
         variant={variant}
         color={color}
+        className={buttonClassName}
         fw={700}
         c={textColor}
         aria-label={typeof children === 'string' ? children : undefined}
         title={typeof children === 'string' ? children : undefined}
-        styles={variant === 'outline' && color === 'black' ? {
-          root: {
-            backgroundColor: 'transparent',
-            border: '1px solid #000',
-            color: '#000',
-            '&:hover': {
-              backgroundColor: 'transparent',
-              border: '1px solid #000'
-            }
-          },
-          label: { color: '#000' },
-          section: { color: '#000' }
-        } : undefined}
         style={{
           minHeight: `calc(${size === 'xl' ? 52 : 44}px * ${heightMultiplier})`,
           whiteSpace: 'normal',
@@ -372,18 +369,18 @@ function HomePage() {
           }}
         />
       </Center>
-      <Title order={1} ta="center" fz={{ base: 28, sm: 34 }}>
-        Massive Medal Pusher データサーバー
+      <Title order={1} ta="center" fz={{ base: 26, sm: 32 }} c={pageTitleColor}>
+        クソでっけぇプッシャーゲーム 公式ウェブサイト
       </Title>
-      <Text size="sm" c="dimmed" ta="center" mt={-10}>
-        公式リンクと統計情報をひとつの画面で確認できます
+      <Text size="sm" c="#47678f" ta="center" mt={-10}>
+        公式リンクや統計情報、開発者向けの情報をまとめて確認できます
       </Text>
 
       {/* ヒーロー */}
-      <Card padding="xl" radius="md" shadow="sm" style={unifiedCardStyle}>
+      <Card padding="xl" radius="md" shadow="sm" style={linkSectionCardStyle}>
         <Stack gap="md">
-          <Title order={2} fz="h3">
-            Massive Medal Pusher / リンク集
+          <Title order={2} fz="1.35rem" c={sectionTitleColor}>
+            でかプ公式リンク集 / MMP Quick Links
           </Title>
           <Grid gutter="md">
             <Grid.Col span={{ base: 12, md: 6 }}>
@@ -392,7 +389,7 @@ function HomePage() {
                 icon={<IconBrandDiscord size={33} />}
                 size="xl"
                 variant="filled"
-                color="blue"
+                color={primaryButtonColor}
                 heightMultiplier={2}
               >
                 公式Discord でかプ同好会
@@ -403,7 +400,7 @@ function HomePage() {
                   icon={<IconBook2 size={22} />}
                   size="xl"
                   variant="filled"
-                  color="blue"
+                  color={primaryButtonColor}
                 >
                   公式Wiki
                 </HeroButton>
@@ -415,7 +412,7 @@ function HomePage() {
                 icon={<IconWorld size={20} />}
                 size="lg"
                 variant="filled"
-                color="blue"
+                color={primaryButtonColor}
               >
                 公式グループ(VRChat)
               </HeroButton>
@@ -425,7 +422,7 @@ function HomePage() {
                   icon={<IconWorld size={20} />}
                   size="lg"
                   variant="filled"
-                  color="blue"
+                  color={primaryButtonColor}
                 >
                   VRChatワールドリンク
                 </HeroButton>
@@ -436,7 +433,7 @@ function HomePage() {
                   icon={<IconExternalLink size={20} />}
                   size="lg"
                   variant="filled"
-                  color="blue"
+                  color={primaryButtonColor}
                   heightMultiplier={1}
                 >
                   #でかプ / #VRでかプ (X投稿)
@@ -448,10 +445,10 @@ function HomePage() {
       </Card>
 
       {/* 開発者向けリンク集 */}
-      <Card padding="xl" radius="md" shadow="sm" style={unifiedCardStyle}>
+      <Card padding="xl" radius="md" shadow="sm" style={linkSectionCardStyle}>
         <Stack gap="md">
-          <Title order={2} fz="h3">
-            Massive Medal Pusher / 開発者向けリンク集
+          <Title order={2} fz="1.35rem" c={sectionTitleColor}>
+            開発者向けリンク集 / Links for Developers
           </Title>
           <Grid gutter="sm">
             <Grid.Col span={{ base: 12, sm: 4 }}>
@@ -527,7 +524,8 @@ function HomePage() {
                   onClick={handleLoadPersonalData}
                   loading={isLoadingPersonal}
                   leftSection={<IconDownload size="1rem" />}
-                  color="blue"
+                  color={primaryButtonColor}
+                  className="mmp-primary-button"
                   radius="md"
                 >
                   データをロード
@@ -619,19 +617,7 @@ function HomePage() {
                 size="sm"
                 variant="outline"
                 color="black"
-                styles={{
-                  root: {
-                    backgroundColor: 'transparent',
-                    border: '1px solid #000',
-                    color: '#000',
-                    '&:hover': {
-                      backgroundColor: 'transparent',
-                      border: '1px solid #000'
-                    }
-                  },
-                  label: { color: '#000' },
-                  section: { color: '#000' }
-                }}
+                className="mmp-outline-black-button"
                 leftSection={<IconPlugConnected size={14} />}
                 loading={pingState === 'loading'}
                 onClick={handlePing}
