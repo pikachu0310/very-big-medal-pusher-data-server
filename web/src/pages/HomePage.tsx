@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import {
   Title,
   Text,
@@ -101,32 +101,40 @@ function HeroButton({
 
 function HomePage() {
   const [showDeferredSections, setShowDeferredSections] = useState(false);
+  const deferredSectionAnchorRef = useRef<HTMLDivElement | null>(null);
   const twitterHashUrl = 'https://x.com/search?q=%23%E3%81%A7%E3%81%8B%E3%83%97%20OR%20%23VR%E3%81%A7%E3%81%8B%E3%83%97&f=live';
 
   useEffect(() => {
-    const win = window as Window & {
-      requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
-      cancelIdleCallback?: (id: number) => void;
-    };
-    let timeoutId: number | undefined;
-    let idleCallbackId: number | undefined;
-    const revealDeferredSections = () => setShowDeferredSections(true);
-
-    if (typeof win.requestIdleCallback === 'function') {
-      idleCallbackId = win.requestIdleCallback(revealDeferredSections, { timeout: 900 });
-    } else {
-      timeoutId = window.setTimeout(revealDeferredSections, 350);
+    if (showDeferredSections) {
+      return;
     }
 
+    let fallbackTimeoutId: number | undefined;
+    const revealDeferredSections = () => setShowDeferredSections(true);
+    const anchorElement = deferredSectionAnchorRef.current;
+
+    if (anchorElement && typeof window.IntersectionObserver === 'function') {
+      const observer = new window.IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) {
+            revealDeferredSections();
+            observer.disconnect();
+          }
+        },
+        { rootMargin: '320px 0px' }
+      );
+      observer.observe(anchorElement);
+      return () => observer.disconnect();
+    }
+
+    // Fallback for browsers without IntersectionObserver support.
+    fallbackTimeoutId = window.setTimeout(revealDeferredSections, 1200);
     return () => {
-      if (typeof timeoutId === 'number') {
-        window.clearTimeout(timeoutId);
-      }
-      if (typeof idleCallbackId === 'number' && typeof win.cancelIdleCallback === 'function') {
-        win.cancelIdleCallback(idleCallbackId);
+      if (typeof fallbackTimeoutId === 'number') {
+        window.clearTimeout(fallbackTimeoutId);
       }
     };
-  }, []);
+  }, [showDeferredSections]);
 
   return (
     <Stack gap="xl" pt={0}>
@@ -139,27 +147,22 @@ function HomePage() {
             marginTop: 0
           }}
         >
-          <picture>
-            <source
-              srcSet="/MMP_logo_596.webp 596w, /MMP_logo_640.webp 640w, /MMP_logo_768.webp 768w, /MMP_logo_960.webp 960w, /MMP_logo_1192.webp 1192w"
-              sizes="(max-width: 460px) calc(100vw - 2rem), (max-width: 768px) 78vw, 700px"
-              type="image/webp"
-            />
-            <img
-              src="/MMP_logo_640.webp"
-              alt="Massive Medal Pusher ロゴ"
-              width={1192}
-              height={520}
-              loading="eager"
-              fetchPriority="high"
-              decoding="sync"
-              style={{
-                width: '100%',
-                height: '100%',
-                display: 'block'
-              }}
-            />
-          </picture>
+          <img
+            src="/MMP_logo_480.webp"
+            srcSet="/MMP_logo_480.webp 480w, /MMP_logo_596.webp 596w, /MMP_logo_640.webp 640w, /MMP_logo_768.webp 768w, /MMP_logo_960.webp 960w, /MMP_logo_1192.webp 1192w"
+            sizes="(max-width: 732px) calc(100vw - 2rem), 700px"
+            alt="Massive Medal Pusher ロゴ"
+            width={1192}
+            height={520}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            style={{
+              width: '100%',
+              height: '100%',
+              display: 'block'
+            }}
+          />
         </Box>
       </Center>
       <Title order={1} ta="center" fz={{ base: 26, sm: 32 }} c={pageTitleColor}>
@@ -286,6 +289,8 @@ function HomePage() {
           </Grid>
         </Stack>
       </Card>
+
+      <Box ref={deferredSectionAnchorRef} h={1} aria-hidden="true" />
 
       {showDeferredSections ? (
         <Suspense
