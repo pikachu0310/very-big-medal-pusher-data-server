@@ -11,11 +11,17 @@ html {
 
 /* traQing風のシンプルなデザイン */
 body {
+  margin: 0;
   background: #fafafa;
   min-height: 100vh;
-  font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif;
+  overflow-x: hidden;
+  font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
   color: #334155;
   line-height: 1.5;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
 /* カードのスタイル */

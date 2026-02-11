@@ -12,7 +12,7 @@ function App() {
         メインコンテンツへスキップ
       </Anchor>
 
-      <Container component="main" id="main-content" size="md" style={{ flex: 1, padding: '1rem 1rem 2rem 1rem' }}>
+      <Container component="main" id="main-content" size="md" style={{ flex: 1, padding: '1rem 1rem 2rem 1rem', boxSizing: 'border-box' }}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/privacy" element={<Suspense fallback={null}><PrivacyPolicyPage /></Suspense>} />

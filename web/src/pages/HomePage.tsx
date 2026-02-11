@@ -375,7 +375,7 @@ function HomePage() {
         <Box
           style={{
             width: 'min(100%, 700px)',
-            aspectRatio: '1200 / 495',
+            aspectRatio: '1192 / 520',
             marginBottom: '0.5rem',
             marginTop: 0
           }}
@@ -383,8 +383,8 @@ function HomePage() {
           <img
             src="/MMP_logo.webp"
             alt="Massive Medal Pusher ロゴ"
-            width={1200}
-            height={495}
+            width={1192}
+            height={520}
             loading="eager"
             fetchPriority="high"
             decoding="async"
