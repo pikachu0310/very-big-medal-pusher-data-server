@@ -50,6 +50,36 @@ body {
   color: #fff;
 }
 
+.mantine-Button-root.mmp-link-hero-button {
+  line-height: 1.2;
+}
+
+.mantine-Button-root.mmp-link-hero-button .mantine-Button-inner {
+  align-items: center;
+}
+
+.mantine-Button-root.mmp-link-hero-button .mantine-Button-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.mantine-Button-root.mmp-link-hero-button .mantine-Button-section svg {
+  display: block;
+}
+
+.mantine-Button-root.mmp-link-hero-button .mantine-Button-label {
+  font-size: 1.3rem;
+  line-height: 1.18;
+  letter-spacing: 0.01em;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+}
+
 /* 黒枠透明ボタン（開発者向けリンク） */
 .mantine-Button-root.mmp-outline-black-button {
   background: rgba(255, 255, 255, 0.45);

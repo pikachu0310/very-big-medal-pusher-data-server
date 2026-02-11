@@ -141,7 +141,7 @@ function HomePage() {
   const [rawPayload, setRawPayload] = useState<string>('');
 
   useEffect(() => {
-    if (activeTab !== 'global' || globalStats || isLoadingGlobal) {
+    if (activeTab !== 'global' || globalStats) {
       return;
     }
 
@@ -162,15 +162,13 @@ function HomePage() {
         }
         console.error('統計情報の取得エラー:', err);
       } finally {
-        if (!abortController.signal.aborted) {
-          setIsLoadingGlobal(false);
-        }
+        setIsLoadingGlobal(false);
       }
     };
 
     fetchGlobalStats();
     return () => abortController.abort();
-  }, [activeTab, globalStats, isLoadingGlobal]);
+  }, [activeTab, globalStats]);
 
   const handleLoadPersonalData = async () => {
     if (!dataUrl.trim()) {
@@ -313,6 +311,7 @@ function HomePage() {
     variant = 'filled',
     color,
     heightMultiplier = 1,
+    className
   }: {
     children: React.ReactNode;
     href: string;
@@ -321,6 +320,7 @@ function HomePage() {
     variant?: 'filled' | 'outline' | 'light';
     color?: string;
     heightMultiplier?: number;
+    className?: string;
   }) => {
     const textColor = variant === 'outline'
       ? color === 'black' ? '#1f2937' : undefined
@@ -332,6 +332,7 @@ function HomePage() {
       : variant === 'filled' && color === primaryButtonColor
         ? 'mmp-primary-button'
         : undefined;
+    const mergedClassName = [buttonClassName, className].filter(Boolean).join(' ');
 
     return (
       <Button
@@ -345,7 +346,7 @@ function HomePage() {
         fullWidth
         variant={variant}
         color={color}
-        className={buttonClassName}
+        className={mergedClassName || undefined}
         fw={700}
         c={textColor}
         aria-label={typeof children === 'string' ? children : undefined}
@@ -417,6 +418,7 @@ function HomePage() {
                 variant="filled"
                 color={primaryButtonColor}
                 heightMultiplier={2}
+                className="mmp-link-hero-button"
               >
                 公式Discord でかプ同好会
               </HeroButton>
@@ -427,6 +429,7 @@ function HomePage() {
                   size="xl"
                   variant="filled"
                   color={primaryButtonColor}
+                  className="mmp-link-hero-button"
                 >
                   公式Wiki
                 </HeroButton>
@@ -439,6 +442,7 @@ function HomePage() {
                 size="lg"
                 variant="filled"
                 color={primaryButtonColor}
+                className="mmp-link-hero-button"
               >
                 公式グループ(VRChat)
               </HeroButton>
@@ -449,6 +453,7 @@ function HomePage() {
                   size="lg"
                   variant="filled"
                   color={primaryButtonColor}
+                  className="mmp-link-hero-button"
                 >
                   VRChatワールドリンク
                 </HeroButton>
@@ -461,6 +466,7 @@ function HomePage() {
                   variant="filled"
                   color={primaryButtonColor}
                   heightMultiplier={1}
+                  className="mmp-link-hero-button"
                 >
                   #でかプ / #VRでかプ (X投稿)
                 </HeroButton>
