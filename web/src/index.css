@@ -24,6 +24,14 @@ body {
   box-sizing: border-box;
 }
 
+#root {
+  overflow-x: clip;
+}
+
+.app-main-container {
+  width: 100%;
+}
+
 /* カードのスタイル */
 .mantine-Paper-root {
   background: white;
@@ -187,6 +195,32 @@ select:focus-visible,
 .mantine-Table-caption {
   color: #475569;
   font-size: 0.85rem;
+}
+
+.mmp-stats-tabs,
+.mmp-stats-tabs * {
+  min-width: 0;
+}
+
+.mmp-stats-tabs .mantine-Tabs-panel {
+  overflow-x: clip;
+}
+
+.mmp-ranking-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mmp-ranking-table-scroll .mantine-Table-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.mmp-ranking-table-scroll .mantine-Table-th,
+.mmp-ranking-table-scroll .mantine-Table-td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @media (prefers-reduced-motion: reduce) {

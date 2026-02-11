@@ -113,7 +113,7 @@ function HomePage() {
     const revealDeferredSections = () => setShowDeferredSections(true);
 
     if (typeof win.requestIdleCallback === 'function') {
-      idleCallbackId = win.requestIdleCallback(revealDeferredSections, { timeout: 500 });
+      idleCallbackId = win.requestIdleCallback(revealDeferredSections, { timeout: 900 });
     } else {
       timeoutId = window.setTimeout(revealDeferredSections, 350);
     }
@@ -141,12 +141,12 @@ function HomePage() {
         >
           <picture>
             <source
-              srcSet="/MMP_logo_596.webp 596w, /MMP_logo_768.webp 768w, /MMP_logo_1192.webp 1192w"
-              sizes="(max-width: 460px) calc(100vw - 2rem), (max-width: 768px) 85vw, 700px"
+              srcSet="/MMP_logo_596.webp 596w, /MMP_logo_640.webp 640w, /MMP_logo_768.webp 768w, /MMP_logo_960.webp 960w, /MMP_logo_1192.webp 1192w"
+              sizes="(max-width: 460px) calc(100vw - 2rem), (max-width: 768px) 78vw, 700px"
               type="image/webp"
             />
             <img
-              src="/MMP_logo_768.webp"
+              src="/MMP_logo_640.webp"
               alt="Massive Medal Pusher ロゴ"
               width={1192}
               height={520}

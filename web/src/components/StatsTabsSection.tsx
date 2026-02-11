@@ -237,12 +237,12 @@ function StatsTabsSection({ primaryButtonColor }: { primaryButtonColor: string }
         <Title order={4}>{title}</Title>
         <Badge color="gray" variant="light">TOP {data.length}</Badge>
       </Group>
-      <div style={{ maxHeight: '240px', overflowY: 'auto' }}>
-        <Table highlightOnHover>
+      <div className="mmp-ranking-table-scroll" style={{ maxHeight: '240px', overflowY: 'auto' }}>
+        <Table highlightOnHover style={{ tableLayout: 'fixed', width: '100%' }}>
           <Table.Caption>{title} ランキング（TOP {data.length}）</Table.Caption>
           <Table.Thead>
             <Table.Tr>
-              <Table.Th>順位</Table.Th>
+              <Table.Th w={100}>順位</Table.Th>
               <Table.Th>値</Table.Th>
             </Table.Tr>
           </Table.Thead>
@@ -264,7 +264,7 @@ function StatsTabsSection({ primaryButtonColor }: { primaryButtonColor: string }
   );
 
   return (
-    <Tabs value={activeTab} onChange={setActiveTab} keepMounted={false} variant="outline">
+    <Tabs value={activeTab} onChange={setActiveTab} keepMounted={false} variant="outline" className="mmp-stats-tabs">
       <Tabs.List aria-label="統計情報の切り替え">
         <Tabs.Tab value="personal" leftSection={<IconUsers size="1rem" />}>
           個人統計
@@ -275,7 +275,7 @@ function StatsTabsSection({ primaryButtonColor }: { primaryButtonColor: string }
       </Tabs.List>
 
       <Tabs.Panel value="personal" pt="md">
-        <Paper p="xl" shadow="sm" radius="md" mih={360}>
+        <Paper p="xl" shadow="sm" radius="md" mih={360} style={{ overflowX: 'clip' }}>
           <Title order={2} mb="md" ta="center">
             個人統計情報
           </Title>
@@ -329,9 +329,9 @@ function StatsTabsSection({ primaryButtonColor }: { primaryButtonColor: string }
             {personalStats && (
               <Card shadow="sm" padding="lg" radius="md" withBorder>
                 <Title order={4}>個人統計データ</Title>
-                <Grid mt="md" gutter="sm">
+                <Grid mt="md" gutter="sm" style={{ overflowX: 'hidden' }}>
                   {Object.entries(personalStats).map(([key, val]) => (
-                    <Grid.Col span={{ base: 12, sm: 6 }} key={key}>
+                    <Grid.Col span={{ base: 12, sm: 6 }} key={key} style={{ minWidth: 0 }}>
                       <Text size="sm" fw={600}>{key}</Text>
                       {renderValue(key, val)}
                     </Grid.Col>
@@ -344,7 +344,7 @@ function StatsTabsSection({ primaryButtonColor }: { primaryButtonColor: string }
       </Tabs.Panel>
 
       <Tabs.Panel value="global" pt="md">
-        <Paper p="xl" shadow="sm" radius="md" mih={360}>
+        <Paper p="xl" shadow="sm" radius="md" mih={360} style={{ overflowX: 'clip' }}>
           {globalStats && (
             <Card shadow="sm" padding="lg" radius="md" withBorder mb="md">
               <Group justify="space-between">
@@ -364,12 +364,12 @@ function StatsTabsSection({ primaryButtonColor }: { primaryButtonColor: string }
           )}
 
           {globalStats && (
-            <Grid gutter="md">
+            <Grid gutter="md" style={{ overflowX: 'hidden' }}>
               {rankingDefinitions.map((def) => {
                 const entries = globalStats[def.key] as RankingEntry[] | undefined;
                 if (!entries) return null;
                 return (
-                  <Grid.Col span={{ base: 12, md: 6 }} key={def.key}>
+                  <Grid.Col span={{ base: 12, md: 6 }} key={def.key} style={{ minWidth: 0 }}>
                     {renderRankingTable(entries, def.label, def.key)}
                   </Grid.Col>
                 );
