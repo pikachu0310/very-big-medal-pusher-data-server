@@ -150,13 +150,13 @@ function HomePage() {
           <img
             src="/MMP_logo_480.webp"
             srcSet="/MMP_logo_480.webp 480w, /MMP_logo_596.webp 596w, /MMP_logo_640.webp 640w, /MMP_logo_768.webp 768w, /MMP_logo_960.webp 960w, /MMP_logo_1192.webp 1192w"
-            sizes="(max-width: 732px) calc(100vw - 2rem), 700px"
+            sizes="(max-width: 520px) calc(100vw - 2rem), (max-width: 1200px) 60vw, 700px"
             alt="Massive Medal Pusher ロゴ"
             width={1192}
             height={520}
             loading="eager"
             fetchPriority="high"
-            decoding="async"
+            decoding="sync"
             style={{
               width: '100%',
               height: '100%',
