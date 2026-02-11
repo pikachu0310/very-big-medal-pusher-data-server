@@ -58,10 +58,15 @@ body {
 
 .mantine-Button-root.mmp-link-hero-button {
   line-height: 1.2;
+  min-width: 0;
 }
 
 .mantine-Button-root.mmp-link-hero-button .mantine-Button-inner {
+  display: flex;
   align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-width: 0;
 }
 
 .mantine-Button-root.mmp-link-hero-button .mantine-Button-section {
@@ -71,6 +76,7 @@ body {
   align-self: center;
   margin-top: 0;
   margin-bottom: 0;
+  flex-shrink: 0;
 }
 
 .mantine-Button-root.mmp-link-hero-button .mantine-Button-section svg {
@@ -79,11 +85,16 @@ body {
 
 .mantine-Button-root.mmp-link-hero-button .mantine-Button-label {
   font-size: 1.3rem;
-  line-height: 1.18;
+  line-height: 1.12;
   letter-spacing: 0.01em;
   font-weight: 800;
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
+  min-height: 1.2em;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
 }
 
 /* 黒枠透明ボタン（開発者向けリンク） */

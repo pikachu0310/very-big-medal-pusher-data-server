@@ -355,7 +355,7 @@ function HomePage() {
           minHeight: `calc(${size === 'xl' ? 52 : 44}px * ${heightMultiplier})`,
           whiteSpace: 'normal',
           lineHeight: 1.3,
-          paddingInline: '1.4rem',
+          paddingInline: 'clamp(0.75rem, 3vw, 1.4rem)',
           textAlign: 'center',
           display: 'flex',
           alignItems: 'center',
@@ -409,11 +409,11 @@ function HomePage() {
           <Title order={2} fz="1.35rem" c={sectionTitleColor}>
             でかプ公式リンク集 / MMP Quick Links
           </Title>
-          <Grid gutter="md">
+          <Grid gutter={{ base: 'xs', md: 'md' }}>
             <Grid.Col span={{ base: 12, md: 6 }}>
               <HeroButton
                 href="https://discord.com/invite/CgnYyXecKm"
-                icon={<IconBrandDiscord size={33} />}
+                icon={<IconBrandDiscord size={36} />}
                 size="xl"
                 variant="filled"
                 color={primaryButtonColor}
@@ -425,7 +425,7 @@ function HomePage() {
               <Box mt="sm">
                 <HeroButton
                   href="https://wikiwiki.jp/vr_bigpusher/"
-                  icon={<IconBook2 size={22} />}
+                  icon={<IconBook2 size={24} />}
                   size="xl"
                   variant="filled"
                   color={primaryButtonColor}
@@ -438,7 +438,7 @@ function HomePage() {
             <Grid.Col span={{ base: 12, md: 6 }}>
               <HeroButton
                 href="https://vrchat.com/home/group/grp_5900a25d-0bb9-48d4-bab1-f3bd5c9a5e73"
-                icon={<IconWorld size={20} />}
+                icon={<IconWorld size={22} />}
                 size="lg"
                 variant="filled"
                 color={primaryButtonColor}
@@ -449,7 +449,7 @@ function HomePage() {
               <Box mt="sm">
                 <HeroButton
                   href="https://vrchat.com/home/launch?worldId=wrld_1af53798-92a3-4c3f-99ae-a7c42ec6084d"
-                  icon={<IconWorld size={20} />}
+                  icon={<IconWorld size={22} />}
                   size="lg"
                   variant="filled"
                   color={primaryButtonColor}
@@ -461,7 +461,7 @@ function HomePage() {
               <Box mt="sm">
                 <HeroButton
                   href={twitterHashUrl}
-                  icon={<IconExternalLink size={20} />}
+                  icon={<IconExternalLink size={22} />}
                   size="lg"
                   variant="filled"
                   color={primaryButtonColor}
@@ -482,7 +482,7 @@ function HomePage() {
           <Title order={2} fz="1.35rem" c={sectionTitleColor}>
             開発者向けリンク集 / Links for Developers
           </Title>
-          <Grid gutter="sm">
+          <Grid gutter={{ base: 'xs', sm: 'sm' }}>
             <Grid.Col span={{ base: 12, sm: 4 }}>
               <HeroButton
                 href="/swagger/index.html"
