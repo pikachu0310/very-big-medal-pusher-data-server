@@ -1,4 +1,3 @@
-import { MantineProvider } from '@mantine/core';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
@@ -7,10 +6,8 @@ import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <MantineProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </MantineProvider>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </React.StrictMode>,
 );

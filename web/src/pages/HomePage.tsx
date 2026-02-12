@@ -1,17 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import {
-  Title,
-  Text,
-  Button,
-  Stack,
-  Card,
-  Grid,
-  Center,
-  Box,
-  Paper,
-  Loader
-} from '@mantine/core';
-import {
   IconBrandDiscord,
   IconBrandGithub,
   IconWorld,
@@ -20,13 +8,7 @@ import {
   IconLock
 } from '@tabler/icons-react';
 
-const StatsTabsSection = lazy(() => import('../components/StatsTabsSection'));
-const DeveloperToolsSection = lazy(() => import('../components/DeveloperToolsSection'));
-
-const linkSectionCardStyle = {
-  backgroundColor: '#e9f3ff',
-  border: '1px solid #cddff7'
-} as const;
+const DeferredSections = lazy(() => import('../components/DeferredSections'));
 
 const sectionTitleColor = '#1f5da8';
 const pageTitleColor = '#2c4256';
@@ -35,10 +17,9 @@ const primaryButtonColor = 'blue';
 type HeroButtonProps = {
   children: React.ReactNode;
   href: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   size?: 'lg' | 'xl';
-  variant?: 'filled' | 'outline' | 'light';
-  color?: string;
+  variant?: 'filled' | 'outline';
   heightMultiplier?: number;
   className?: string;
 };
@@ -49,53 +30,42 @@ function HeroButton({
   icon,
   size = 'lg',
   variant = 'filled',
-  color,
   heightMultiplier = 1,
   className
 }: HeroButtonProps) {
-  const textColor = variant === 'outline'
-    ? color === 'black' ? '#1f2937' : undefined
-    : variant === 'light'
-      ? '#1e3a8a'
-      : '#fff';
-  const buttonClassName = variant === 'outline' && color === 'black'
-    ? 'mmp-outline-black-button'
-    : variant === 'filled' && color === primaryButtonColor
-      ? 'mmp-primary-button'
-      : undefined;
-  const mergedClassName = [buttonClassName, className].filter(Boolean).join(' ');
+  const mergedClassName = [
+    'hero-link-button',
+    size === 'xl' ? 'hero-link-button-xl' : 'hero-link-button-lg',
+    variant === 'outline' ? 'hero-link-button-outline' : 'hero-link-button-filled',
+    className
+  ].filter(Boolean).join(' ');
 
   return (
-    <Button
-      component="a"
+    <a
       href={href}
       target="_blank"
       rel="noreferrer"
-      leftSection={icon}
-      size={size}
-      radius="md"
-      fullWidth
-      variant={variant}
-      color={color}
-      className={mergedClassName || undefined}
-      fw={700}
-      c={textColor}
-      aria-label={typeof children === 'string' ? children : undefined}
-      title={typeof children === 'string' ? children : undefined}
-      style={{
-        minHeight: `calc(${size === 'xl' ? 52 : 44}px * ${heightMultiplier})`,
-        whiteSpace: 'normal',
-        lineHeight: 1.3,
-        paddingInline: 'clamp(0.75rem, 3vw, 1.4rem)',
-        textAlign: 'center',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        wordBreak: 'break-word'
-      }}
+      className={mergedClassName}
+      style={{ minHeight: `calc(${size === 'xl' ? 52 : 44}px * ${heightMultiplier})` }}
     >
-      {children}
-    </Button>
+      <span className="hero-link-button-content">
+        {icon ? <span className="hero-link-button-icon" aria-hidden="true">{icon}</span> : null}
+        <span className="hero-link-button-label">{children}</span>
+      </span>
+    </a>
+  );
+}
+
+function DeferredPlaceholders() {
+  return (
+    <>
+      <section className="deferred-placeholder deferred-placeholder-lg" aria-live="polite" role="status">
+        <span className="spinner" aria-hidden="true" />
+      </section>
+      <section className="deferred-placeholder" aria-live="polite" role="status">
+        <span className="spinner spinner-sm" aria-hidden="true" />
+      </section>
+    </>
   );
 }
 
@@ -127,7 +97,6 @@ function HomePage() {
       return () => observer.disconnect();
     }
 
-    // Fallback for browsers without IntersectionObserver support.
     fallbackTimeoutId = window.setTimeout(revealDeferredSections, 1200);
     return () => {
       if (typeof fallbackTimeoutId === 'number') {
@@ -137,201 +106,145 @@ function HomePage() {
   }, [showDeferredSections]);
 
   return (
-    <Stack gap="xl" pt={0}>
-      <Center mt={0} pt={0} mb={0}>
-        <Box
-          style={{
-            width: 'min(100%, 700px)',
-            aspectRatio: '1192 / 520',
-            marginBottom: '0.5rem',
-            marginTop: 0
-          }}
-        >
-          <img
-            src="/MMP_logo_480.webp"
-            srcSet="/MMP_logo_480.webp 480w, /MMP_logo_596.webp 596w, /MMP_logo_640.webp 640w, /MMP_logo_768.webp 768w, /MMP_logo_960.webp 960w, /MMP_logo_1192.webp 1192w"
-            sizes="(max-width: 520px) calc(100vw - 2rem), (max-width: 1200px) 60vw, 700px"
-            alt="Massive Medal Pusher ロゴ"
-            width={1192}
-            height={520}
-            loading="eager"
-            fetchPriority="high"
-            decoding="sync"
-            style={{
-              width: '100%',
-              height: '100%',
-              display: 'block'
-            }}
-          />
-        </Box>
-      </Center>
-      <Title order={1} ta="center" fz={{ base: 26, sm: 32 }} c={pageTitleColor}>
+    <div className="home-stack">
+      <div className="logo-center">
+        <div className="logo-box">
+          <picture>
+            <source
+              media="(max-width: 768px)"
+              srcSet="/MMP_logo_480.webp 480w, /MMP_logo_596.webp 596w"
+              sizes="(max-width: 768px) 66vw"
+              type="image/webp"
+            />
+            <source
+              media="(min-width: 769px)"
+              srcSet="/MMP_logo_640.webp 640w, /MMP_logo_768.webp 768w, /MMP_logo_960.webp 960w, /MMP_logo_1192.webp 1192w"
+              sizes="(max-width: 1200px) 48vw, 620px"
+              type="image/webp"
+            />
+            <img
+              src="/MMP_logo_480.webp"
+              alt="Massive Medal Pusher ロゴ"
+              width={1192}
+              height={520}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              className="home-logo-image"
+            />
+          </picture>
+        </div>
+      </div>
+
+      <h1 className="home-title" style={{ color: pageTitleColor }}>
         クソでっけぇプッシャーゲーム 公式ウェブサイト
-      </Title>
-      <Text size="sm" c="#47678f" ta="center" mt={-10}>
-        公式リンクや統計情報、開発者向けの情報をまとめて確認できます
-      </Text>
+      </h1>
+      <p className="home-subtitle">公式リンクや統計情報、開発者向けの情報をまとめて確認できます</p>
 
-      <Card padding="xl" radius="md" shadow="sm" style={linkSectionCardStyle}>
-        <Stack gap="md">
-          <Title order={2} fz="1.35rem" c={sectionTitleColor}>
-            でかプ公式リンク集 / MMP Quick Links
-          </Title>
-          <Grid gutter={{ base: 'xs', md: 'md' }}>
-            <Grid.Col span={{ base: 12, md: 6 }}>
-              <HeroButton
-                href="https://discord.com/invite/CgnYyXecKm"
-                icon={<IconBrandDiscord size={36} />}
-                size="xl"
-                variant="filled"
-                color={primaryButtonColor}
-                heightMultiplier={2}
-                className="mmp-link-hero-button"
-              >
-                公式Discord でかプ同好会
-              </HeroButton>
-              <Box mt="sm">
-                <HeroButton
-                  href="https://wikiwiki.jp/vr_bigpusher/"
-                  icon={<IconBook2 size={24} />}
-                  size="xl"
-                  variant="filled"
-                  color={primaryButtonColor}
-                  className="mmp-link-hero-button"
-                >
-                  公式Wiki
-                </HeroButton>
-              </Box>
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 6 }}>
-              <HeroButton
-                href="https://vrchat.com/home/group/grp_5900a25d-0bb9-48d4-bab1-f3bd5c9a5e73"
-                icon={<IconWorld size={22} />}
-                size="lg"
-                variant="filled"
-                color={primaryButtonColor}
-                className="mmp-link-hero-button"
-              >
-                公式グループ(VRChat)
-              </HeroButton>
-              <Box mt="sm">
-                <HeroButton
-                  href="https://vrchat.com/home/launch?worldId=wrld_1af53798-92a3-4c3f-99ae-a7c42ec6084d"
-                  icon={<IconWorld size={22} />}
-                  size="lg"
-                  variant="filled"
-                  color={primaryButtonColor}
-                  className="mmp-link-hero-button"
-                >
-                  VRChatワールドリンク
-                </HeroButton>
-              </Box>
-              <Box mt="sm">
-                <HeroButton
-                  href={twitterHashUrl}
-                  icon={<IconExternalLink size={22} />}
-                  size="lg"
-                  variant="filled"
-                  color={primaryButtonColor}
-                  heightMultiplier={1}
-                  className="mmp-link-hero-button"
-                >
-                  #でかプ / #VRでかプ (X投稿)
-                </HeroButton>
-              </Box>
-            </Grid.Col>
-          </Grid>
-        </Stack>
-      </Card>
+      <section className="link-card">
+        <h2 className="section-title" style={{ color: sectionTitleColor }}>
+          でかプ公式リンク集 / MMP Quick Links
+        </h2>
+        <div className="link-grid link-grid-two">
+          <div className="link-column">
+            <HeroButton
+              href="https://discord.com/invite/CgnYyXecKm"
+              icon={<IconBrandDiscord size={36} />}
+              size="xl"
+              variant="filled"
+              heightMultiplier={2}
+              className="mmp-link-hero-button"
+            >
+              公式Discord でかプ同好会
+            </HeroButton>
+            <HeroButton
+              href="https://wikiwiki.jp/vr_bigpusher/"
+              icon={<IconBook2 size={24} />}
+              size="xl"
+              variant="filled"
+              className="mmp-link-hero-button"
+            >
+              公式Wiki
+            </HeroButton>
+          </div>
+          <div className="link-column">
+            <HeroButton
+              href="https://vrchat.com/home/group/grp_5900a25d-0bb9-48d4-bab1-f3bd5c9a5e73"
+              icon={<IconWorld size={22} />}
+              size="lg"
+              variant="filled"
+              className="mmp-link-hero-button"
+            >
+              公式グループ(VRChat)
+            </HeroButton>
+            <HeroButton
+              href="https://vrchat.com/home/launch?worldId=wrld_1af53798-92a3-4c3f-99ae-a7c42ec6084d"
+              icon={<IconWorld size={22} />}
+              size="lg"
+              variant="filled"
+              className="mmp-link-hero-button"
+            >
+              VRChatワールドリンク
+            </HeroButton>
+            <HeroButton
+              href={twitterHashUrl}
+              icon={<IconExternalLink size={22} />}
+              size="lg"
+              variant="filled"
+              heightMultiplier={1}
+              className="mmp-link-hero-button"
+            >
+              #でかプ / #VRでかプ (X投稿)
+            </HeroButton>
+          </div>
+        </div>
+      </section>
 
-      <Card padding="xl" radius="md" shadow="sm" style={linkSectionCardStyle}>
-        <Stack gap="md">
-          <Title order={2} fz="1.35rem" c={sectionTitleColor}>
-            開発者向けリンク集 / Links for Developers
-          </Title>
-          <Grid gutter={{ base: 'xs', sm: 'sm' }}>
-            <Grid.Col span={{ base: 12, sm: 4 }}>
-              <HeroButton
-                href="/swagger/index.html"
-                icon={<IconExternalLink size={18} />}
-                size="lg"
-                variant="outline"
-                color="black"
-                heightMultiplier={1.1}
-              >
-                SwaggerUI (API一覧)
-              </HeroButton>
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, sm: 4 }}>
-              <HeroButton
-                href="https://push.trap.show/?server=mariadb.ns-system.svc.cluster.local&username=nsapp_c27d6f571f88ffff360fe2&db=nsapp_c27d6f571f88ffff360fe2"
-                icon={<IconLock size={18} />}
-                size="lg"
-                variant="outline"
-                color="black"
-                heightMultiplier={1.1}
-              >
-                データベース
-              </HeroButton>
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, sm: 4 }}>
-              <HeroButton
-                href="https://github.com/pikachu0310/very-big-medal-pusher-data-server"
-                icon={<IconBrandGithub size={18} />}
-                size="lg"
-                variant="outline"
-                color="black"
-                heightMultiplier={1.1}
-              >
-                Data Server GitHub
-              </HeroButton>
-            </Grid.Col>
-          </Grid>
-        </Stack>
-      </Card>
+      <section className="link-card">
+        <h2 className="section-title" style={{ color: sectionTitleColor }}>
+          開発者向けリンク集 / Links for Developers
+        </h2>
+        <div className="link-grid link-grid-three">
+          <HeroButton
+            href="/swagger/index.html"
+            icon={<IconExternalLink size={18} />}
+            size="lg"
+            variant="outline"
+            heightMultiplier={1.1}
+          >
+            SwaggerUI (API一覧)
+          </HeroButton>
+          <HeroButton
+            href="https://push.trap.show/?server=mariadb.ns-system.svc.cluster.local&username=nsapp_c27d6f571f88ffff360fe2&db=nsapp_c27d6f571f88ffff360fe2"
+            icon={<IconLock size={18} />}
+            size="lg"
+            variant="outline"
+            heightMultiplier={1.1}
+          >
+            データベース
+          </HeroButton>
+          <HeroButton
+            href="https://github.com/pikachu0310/very-big-medal-pusher-data-server"
+            icon={<IconBrandGithub size={18} />}
+            size="lg"
+            variant="outline"
+            heightMultiplier={1.1}
+          >
+            Data Server GitHub
+          </HeroButton>
+        </div>
+      </section>
 
-      <Box ref={deferredSectionAnchorRef} h={1} aria-hidden="true" />
+      <div ref={deferredSectionAnchorRef} className="deferred-anchor" aria-hidden="true" />
 
       {showDeferredSections ? (
-        <Suspense
-          fallback={(
-            <Paper p="xl" shadow="sm" radius="md" mih={360}>
-              <Center role="status" aria-live="polite" mih={300}>
-                <Loader />
-              </Center>
-            </Paper>
-          )}
-        >
-          <StatsTabsSection primaryButtonColor={primaryButtonColor} />
+        <Suspense fallback={<DeferredPlaceholders />}>
+          <DeferredSections primaryButtonColor={primaryButtonColor} />
         </Suspense>
       ) : (
-        <Paper p="xl" shadow="sm" radius="md" mih={360}>
-          <Center role="status" aria-live="polite" mih={300}>
-            <Loader size="sm" />
-          </Center>
-        </Paper>
+        <DeferredPlaceholders />
       )}
-
-      {showDeferredSections ? (
-        <Suspense
-          fallback={(
-            <Paper p="xl" shadow="sm" radius="md">
-              <Center role="status" aria-live="polite" mih={120}>
-                <Loader size="sm" />
-              </Center>
-            </Paper>
-          )}
-        >
-          <DeveloperToolsSection />
-        </Suspense>
-      ) : (
-        <Paper p="xl" shadow="sm" radius="md">
-          <Center role="status" aria-live="polite" mih={120}>
-            <Loader size="sm" />
-          </Center>
-        </Paper>
-      )}
-    </Stack>
+    </div>
   );
 }
 

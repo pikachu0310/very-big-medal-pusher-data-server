@@ -1,5 +1,4 @@
 import { lazy, Suspense } from 'react';
-import { Container, Box, Text, Anchor } from '@mantine/core';
 import { Link, Route, Routes } from 'react-router';
 import HomePage from './pages/HomePage';
 
@@ -7,41 +6,32 @@ const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
 
 function App() {
   return (
-    <Box style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Anchor href="#main-content" className="skip-link">
+    <div className="app-shell">
+      <a href="#main-content" className="skip-link">
         メインコンテンツへスキップ
-      </Anchor>
+      </a>
 
-      <Container component="main" id="main-content" size="58rem" className="app-main-container" style={{ flex: 1, padding: '1rem 1rem 2rem 1rem', boxSizing: 'border-box' }}>
+      <main id="main-content" className="app-main-container">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/privacy" element={<Suspense fallback={null}><PrivacyPolicyPage /></Suspense>} />
         </Routes>
-      </Container>
-      
-      {/* フッター */}
-      <Box
-        component="footer"
-        style={{
-          padding: '1rem',
-          textAlign: 'center',
-          borderTop: '1px solid #e9ecef',
-          marginTop: 'auto'
-        }}
-      >
-        <Text size="sm" c="dimmed" style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <Anchor component={Link} to="/privacy" size="sm" c="dimmed" underline="hover">
+      </main>
+
+      <footer className="app-footer">
+        <p className="app-footer-text">
+          <Link className="app-footer-link" to="/privacy">
             プライバシーポリシー
-          </Anchor>
-          <Text span c="dimmed">|</Text>
-          <Anchor href="https://github.com/pikachu0310/very-big-medal-pusher-data-server" target="_blank" rel="noreferrer" size="sm" c="dimmed" underline="hover">
+          </Link>
+          <span aria-hidden="true">|</span>
+          <a className="app-footer-link" href="https://github.com/pikachu0310/very-big-medal-pusher-data-server" target="_blank" rel="noreferrer">
             GitHub
-          </Anchor>
-          <Text span c="dimmed">|</Text>
-          <Text span c="dimmed">© 2025 Massive Medal Pusher</Text>
-        </Text>
-      </Box>
-    </Box>
+          </a>
+          <span aria-hidden="true">|</span>
+          <span>© 2025 Massive Medal Pusher</span>
+        </p>
+      </footer>
+    </div>
   );
 }
 
