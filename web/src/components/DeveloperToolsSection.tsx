@@ -4,7 +4,6 @@ import {
   Grid,
   Group,
   Title,
-  Button,
   Text,
   Badge,
   ThemeIcon,
@@ -16,6 +15,7 @@ import {
   IconBrandGithub,
   IconLock
 } from '@tabler/icons-react';
+import { MmpOutlineButton } from './MmpButton';
 
 function DeveloperToolsSection() {
   const [pingState, setPingState] = useState<'idle' | 'ok' | 'ng' | 'loading'>('idle');
@@ -37,17 +37,15 @@ function DeveloperToolsSection() {
         <Card withBorder radius="md" padding="lg" shadow="sm">
           <Group justify="space-between" align="center">
             <Title order={3}>サーバーヘルス</Title>
-            <Button
+            <MmpOutlineButton
               size="sm"
-              variant="outline"
-              color="black"
-              className="mmp-outline-black-button"
-              leftSection={<IconPlugConnected size={14} />}
+              icon={<IconPlugConnected size={14} />}
+              className="mmp-health-ping-button"
               loading={pingState === 'loading'}
               onClick={handlePing}
             >
               ping
-            </Button>
+            </MmpOutlineButton>
           </Group>
           <Text size="sm" c="dimmed" mb="sm">
             https://push.trap.games/api/ping

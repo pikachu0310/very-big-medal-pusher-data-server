@@ -7,54 +7,12 @@ import {
   IconExternalLink,
   IconLock
 } from '@tabler/icons-react';
+import { MmpOutlineButton, MmpPrimaryButton } from '../components/MmpButton';
 
 const DeferredSections = lazy(() => import('../components/DeferredSections'));
 
 const sectionTitleColor = '#1f5da8';
 const pageTitleColor = '#2c4256';
-const primaryButtonColor = 'blue';
-
-type HeroButtonProps = {
-  children: React.ReactNode;
-  href: string;
-  icon?: React.ReactNode;
-  size?: 'lg' | 'xl';
-  variant?: 'filled' | 'outline';
-  heightMultiplier?: number;
-  className?: string;
-};
-
-function HeroButton({
-  children,
-  href,
-  icon,
-  size = 'lg',
-  variant = 'filled',
-  heightMultiplier = 1,
-  className
-}: HeroButtonProps) {
-  const mergedClassName = [
-    'hero-link-button',
-    size === 'xl' ? 'hero-link-button-xl' : 'hero-link-button-lg',
-    variant === 'outline' ? 'hero-link-button-outline' : 'hero-link-button-filled',
-    className
-  ].filter(Boolean).join(' ');
-
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noreferrer"
-      className={mergedClassName}
-      style={{ minHeight: `calc(${size === 'xl' ? 52 : 44}px * ${heightMultiplier})` }}
-    >
-      <span className="hero-link-button-content">
-        {icon ? <span className="hero-link-button-icon" aria-hidden="true">{icon}</span> : null}
-        <span className="hero-link-button-label">{children}</span>
-      </span>
-    </a>
-  );
-}
 
 function DeferredPlaceholders() {
   return (
@@ -147,55 +105,57 @@ function HomePage() {
         </h2>
         <div className="link-grid link-grid-two">
           <div className="link-column">
-            <HeroButton
+            <MmpPrimaryButton
               href="https://discord.com/invite/CgnYyXecKm"
+              target="_blank"
               icon={<IconBrandDiscord size={36} />}
               size="xl"
-              variant="filled"
               heightMultiplier={2}
               className="mmp-link-hero-button"
             >
               公式Discord でかプ同好会
-            </HeroButton>
-            <HeroButton
+            </MmpPrimaryButton>
+            <MmpPrimaryButton
               href="https://wikiwiki.jp/vr_bigpusher/"
+              target="_blank"
               icon={<IconBook2 size={24} />}
               size="xl"
-              variant="filled"
               className="mmp-link-hero-button"
             >
               公式Wiki
-            </HeroButton>
+            </MmpPrimaryButton>
           </div>
           <div className="link-column">
-            <HeroButton
+            <MmpPrimaryButton
               href="https://vrchat.com/home/group/grp_5900a25d-0bb9-48d4-bab1-f3bd5c9a5e73"
+              target="_blank"
               icon={<IconWorld size={22} />}
               size="lg"
-              variant="filled"
+              heightMultiplier={1.1}
               className="mmp-link-hero-button"
             >
               公式グループ(VRChat)
-            </HeroButton>
-            <HeroButton
+            </MmpPrimaryButton>
+            <MmpPrimaryButton
               href="https://vrchat.com/home/launch?worldId=wrld_1af53798-92a3-4c3f-99ae-a7c42ec6084d"
+              target="_blank"
               icon={<IconWorld size={22} />}
               size="lg"
-              variant="filled"
+              heightMultiplier={1.1}
               className="mmp-link-hero-button"
             >
               VRChatワールドリンク
-            </HeroButton>
-            <HeroButton
+            </MmpPrimaryButton>
+            <MmpPrimaryButton
               href={twitterHashUrl}
+              target="_blank"
               icon={<IconExternalLink size={22} />}
               size="lg"
-              variant="filled"
-              heightMultiplier={1}
+              heightMultiplier={1.1}
               className="mmp-link-hero-button"
             >
               #でかプ / #VRでかプ (X投稿)
-            </HeroButton>
+            </MmpPrimaryButton>
           </div>
         </div>
       </section>
@@ -205,33 +165,33 @@ function HomePage() {
           開発者向けリンク集 / Links for Developers
         </h2>
         <div className="link-grid link-grid-three">
-          <HeroButton
+          <MmpOutlineButton
             href="/swagger/index.html"
+            target="_blank"
             icon={<IconExternalLink size={18} />}
             size="lg"
-            variant="outline"
             heightMultiplier={1.1}
           >
             SwaggerUI (API一覧)
-          </HeroButton>
-          <HeroButton
+          </MmpOutlineButton>
+          <MmpOutlineButton
             href="https://push.trap.show/?server=mariadb.ns-system.svc.cluster.local&username=nsapp_c27d6f571f88ffff360fe2&db=nsapp_c27d6f571f88ffff360fe2"
+            target="_blank"
             icon={<IconLock size={18} />}
             size="lg"
-            variant="outline"
             heightMultiplier={1.1}
           >
             データベース
-          </HeroButton>
-          <HeroButton
+          </MmpOutlineButton>
+          <MmpOutlineButton
             href="https://github.com/pikachu0310/very-big-medal-pusher-data-server"
+            target="_blank"
             icon={<IconBrandGithub size={18} />}
             size="lg"
-            variant="outline"
             heightMultiplier={1.1}
           >
             Data Server GitHub
-          </HeroButton>
+          </MmpOutlineButton>
         </div>
       </section>
 
@@ -239,7 +199,7 @@ function HomePage() {
 
       {showDeferredSections ? (
         <Suspense fallback={<DeferredPlaceholders />}>
-          <DeferredSections primaryButtonColor={primaryButtonColor} />
+          <DeferredSections />
         </Suspense>
       ) : (
         <DeferredPlaceholders />

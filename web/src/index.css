@@ -151,6 +151,17 @@ body {
   word-break: break-word;
 }
 
+button.hero-link-button {
+  border: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+button.hero-link-button:disabled {
+  opacity: 0.76;
+  cursor: not-allowed;
+}
+
 .hero-link-button-content {
   width: 100%;
   min-width: 0;
@@ -174,6 +185,11 @@ body {
 
 .hero-link-button-label {
   min-width: 0;
+}
+
+.hero-link-button-sm {
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
 .hero-link-button-lg {
@@ -227,6 +243,34 @@ body {
 .hero-link-button-outline:active {
   transform: translateY(0);
   box-shadow: 0 1px 4px rgba(17, 24, 39, 0.1);
+}
+
+.mmp-health-ping-button {
+  width: auto;
+  min-width: 0;
+  padding: 0.38rem 0.7rem;
+  font-size: 0.84rem;
+  line-height: 1.1;
+}
+
+.mmp-health-ping-button.hero-link-button-outline {
+  border: 1px solid #1f2937;
+  background: rgba(255, 255, 255, 0.45);
+  color: #1f2937;
+}
+
+.hero-link-button-spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-top-color: currentColor;
+  animation: mmp-spin 0.8s linear infinite;
+}
+
+.hero-link-button-outline .hero-link-button-spinner {
+  border-color: rgba(31, 41, 55, 0.25);
+  border-top-color: currentColor;
 }
 
 .deferred-anchor {
@@ -330,58 +374,6 @@ body {
 .mantine-Paper-root {
   background: #fff;
   border: 1px solid #e5e7eb;
-}
-
-.mantine-Button-root.mmp-primary-button {
-  background: var(--mantine-color-blue-6);
-  border: none;
-  color: #ffffff;
-  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-  box-shadow: 0 2px 0 rgba(24, 100, 171, 0.55), 0 4px 10px rgba(34, 139, 230, 0.22);
-}
-
-.mantine-Button-root.mmp-primary-button:hover,
-.mantine-Button-root.mmp-primary-button[data-hovered] {
-  background: var(--mantine-color-blue-7);
-  transform: translateY(-1px);
-}
-
-.mantine-Button-root.mmp-primary-button:active,
-.mantine-Button-root.mmp-primary-button[data-active] {
-  transform: translateY(0);
-  box-shadow: 0 1px 0 rgba(24, 100, 171, 0.55), 0 2px 5px rgba(34, 139, 230, 0.18);
-}
-
-.mantine-Button-root.mmp-primary-button .mantine-Button-label,
-.mantine-Button-root.mmp-primary-button .mantine-Button-section {
-  color: #fff;
-}
-
-.mantine-Button-root.mmp-outline-black-button {
-  background: rgba(255, 255, 255, 0.45);
-  border: 1px solid #1f2937;
-  color: #1f2937;
-  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-}
-
-.mantine-Button-root.mmp-outline-black-button:hover,
-.mantine-Button-root.mmp-outline-black-button[data-hovered],
-.mantine-Button-root.mmp-outline-black-button:focus-visible {
-  background: #e5e7eb;
-  border-color: #111827;
-  box-shadow: 0 3px 10px rgba(17, 24, 39, 0.16);
-  transform: translateY(-1px);
-}
-
-.mantine-Button-root.mmp-outline-black-button:active,
-.mantine-Button-root.mmp-outline-black-button[data-active] {
-  transform: translateY(0);
-  box-shadow: 0 1px 4px rgba(17, 24, 39, 0.1);
-}
-
-.mantine-Button-root.mmp-outline-black-button .mantine-Button-label,
-.mantine-Button-root.mmp-outline-black-button .mantine-Button-section {
-  color: #1f2937;
 }
 
 .mantine-TextInput-input {

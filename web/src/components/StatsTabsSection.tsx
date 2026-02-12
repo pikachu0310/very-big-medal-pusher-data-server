@@ -4,7 +4,6 @@ import {
   Text,
   Paper,
   TextInput,
-  Button,
   Stack,
   Group,
   Card,
@@ -23,6 +22,7 @@ import {
   IconTrophy,
   IconUsers
 } from '@tabler/icons-react';
+import { MmpPrimaryButton } from './MmpButton';
 
 interface PersonalStats {
   legacy?: number;
@@ -96,14 +96,14 @@ interface GlobalStats {
 
 const rankingDefinitions: { key: keyof GlobalStats; label: string }[] = [
   { key: 'achievements_count', label: '実績解除数' },
-  { key: 'jacksp_startmax', label: 'ジャックポット開始値' },
-  { key: 'golden_palball_get', label: 'ゴールデンパレット獲得数' },
+  { key: 'jacksp_startmax', label: '最大ジャックポット開始値' },
+  { key: 'golden_palball_get', label: 'ゴールデンパレッタ獲得数' },
   { key: 'cpm_max', label: '最大CPM' },
   { key: 'max_chain_rainbow', label: '最大レインボーチェイン' },
-  { key: 'jack_totalmax_v2', label: '最大ジャックポット(v2)' },
+  { key: 'jack_totalmax_v2', label: 'ジャックポット最大WIN' },
   { key: 'ult_combomax', label: '最大アルティメットコンボ' },
-  { key: 'ult_totalmax_v2', label: 'アルティメット合計(v2)' },
-  { key: 'blackbox_total', label: 'ブラックボックス累計' },
+  { key: 'ult_totalmax_v2', label: 'アルティメット最大WIN' },
+  { key: 'blackbox_total', label: 'ブラックボックス獲得数' },
   { key: 'sp_use', label: 'スキルポイント使用数' }
 ];
 
@@ -150,7 +150,7 @@ function renderValue(key: string, val: unknown) {
   );
 }
 
-function StatsTabsSection({ primaryButtonColor }: { primaryButtonColor: string }) {
+function StatsTabsSection() {
   const [dataUrl, setDataUrl] = useState('');
   const [activeTab, setActiveTab] = useState<string | null>('personal');
   const [isLoadingPersonal, setIsLoadingPersonal] = useState(false);
@@ -293,16 +293,15 @@ function StatsTabsSection({ primaryButtonColor }: { primaryButtonColor: string }
             />
 
             <Group justify="center">
-              <Button
+              <MmpPrimaryButton
                 onClick={handleLoadPersonalData}
                 loading={isLoadingPersonal}
-                leftSection={<IconDownload size="1rem" />}
-                color={primaryButtonColor}
-                className="mmp-primary-button"
-                radius="md"
+                icon={<IconDownload size={18} />}
+                size="lg"
+                className="mmp-link-hero-button"
               >
                 データをロード
-              </Button>
+              </MmpPrimaryButton>
             </Group>
 
             {error && (
