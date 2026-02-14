@@ -289,6 +289,26 @@ button.hero-link-button:disabled {
   color: var(--app-dev-link-color);
 }
 
+.mmp-health-status-badge {
+  font-weight: 700;
+}
+
+.mmp-health-status-badge-idle,
+.mmp-health-status-badge-loading {
+  background-color: #334155 !important;
+  color: #ffffff !important;
+}
+
+.mmp-health-status-badge-ok {
+  background-color: #2f7d32 !important;
+  color: #ffffff !important;
+}
+
+.mmp-health-status-badge-ng {
+  background-color: #b42318 !important;
+  color: #ffffff !important;
+}
+
 .hero-link-button-spinner {
   width: 14px;
   height: 14px;

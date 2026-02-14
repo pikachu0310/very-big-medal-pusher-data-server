@@ -52,7 +52,12 @@ function DeveloperToolsSection() {
             https://push.trap.games/api/ping
           </Text>
           <Group gap="sm">
-            <Badge color={pingState === 'ok' ? 'teal' : pingState === 'ng' ? 'red' : 'dark'} radius="sm" aria-live="polite">
+            <Badge
+              color="dark"
+              radius="sm"
+              aria-live="polite"
+              className={`mmp-health-status-badge mmp-health-status-badge-${pingState}`}
+            >
               {pingState === 'idle' && '未実行'}
               {pingState === 'loading' && '確認中...'}
               {pingState === 'ok' && '稼働中'}
