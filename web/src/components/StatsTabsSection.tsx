@@ -279,7 +279,7 @@ function StatsTabsSection() {
           <Title order={2} mb="md" ta="center">
             個人統計情報
           </Title>
-          <Text size="sm" c="dimmed" mb="md" ta="center">
+          <Text size="sm" mb="md" ta="center" className="mmp-readable-support-text">
             クラウドセーブで取得した URL を入力してください（Base64 応答を自動復号します）
           </Text>
 
@@ -288,6 +288,7 @@ function StatsTabsSection() {
               placeholder="https://push.trap.games/api/v4/users/xxxx/data?sig=xxxx"
               label="LoadSaveDataURL"
               description="クラウドセーブ URL を入力すると、レスポンスを自動で復号して表示します。"
+              classNames={{ description: 'mmp-readable-support-text' }}
               value={dataUrl}
               onChange={(e) => setDataUrl(e.currentTarget.value)}
             />

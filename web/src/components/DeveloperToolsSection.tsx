@@ -13,7 +13,8 @@ import {
 import {
   IconPlugConnected,
   IconBrandGithub,
-  IconLock
+  IconLock,
+  IconLockOpen
 } from '@tabler/icons-react';
 import { MmpOutlineButton } from './MmpButton';
 
@@ -47,11 +48,11 @@ function DeveloperToolsSection() {
               ping
             </MmpOutlineButton>
           </Group>
-          <Text size="sm" c="dimmed" mb="sm">
+          <Text size="sm" mb="sm" className="mmp-readable-support-text">
             https://push.trap.games/api/ping
           </Text>
           <Group gap="sm">
-            <Badge color={pingState === 'ok' ? 'teal' : pingState === 'ng' ? 'red' : 'gray'} radius="sm" aria-live="polite">
+            <Badge color={pingState === 'ok' ? 'teal' : pingState === 'ng' ? 'red' : 'dark'} radius="sm" aria-live="polite">
               {pingState === 'idle' && '未実行'}
               {pingState === 'loading' && '確認中...'}
               {pingState === 'ok' && '稼働中'}
@@ -68,19 +69,22 @@ function DeveloperToolsSection() {
             </ThemeIcon>
             <Stack gap={4}>
               <Text fw={600} fz="sm">GitHub</Text>
-              <Anchor href="https://github.com/pikachu0310/very-big-medal-pusher-data-server" target="_blank" rel="noreferrer" c="blue">
-                very-big-medal-pusher-data-server
-              </Anchor>
-              <Anchor href="https://github.com/pikachu0310/VRCWorld-MassiveMedalPusher" target="_blank" rel="noreferrer" c="blue">
+              <Anchor href="https://github.com/pikachu0310/very-big-medal-pusher-data-server" target="_blank" rel="noreferrer" className="mmp-dev-link">
                 <Group gap={6}>
-                  <IconLock size={14} />
-                  <Text component="span" size="sm" c="blue">VRCWorld-MassiveMedalPusher</Text>
+                  <IconLockOpen size={14} />
+                  <Text component="span" size="sm" className="mmp-dev-link-text">very-big-medal-pusher-data-server</Text>
                 </Group>
               </Anchor>
-              <Anchor href="https://github.com/pikariku/VRCWorld-VeryBigMedalPusher" target="_blank" rel="noreferrer" c="blue">
+              <Anchor href="https://github.com/pikachu0310/VRCWorld-MassiveMedalPusher" target="_blank" rel="noreferrer" className="mmp-dev-link">
                 <Group gap={6}>
                   <IconLock size={14} />
-                  <Text component="span" size="sm" c="blue">VRCWorld-VeryBigMedalPusher</Text>
+                  <Text component="span" size="sm" className="mmp-dev-link-text">VRCWorld-MassiveMedalPusher</Text>
+                </Group>
+              </Anchor>
+              <Anchor href="https://github.com/pikariku/VRCWorld-VeryBigMedalPusher" target="_blank" rel="noreferrer" className="mmp-dev-link">
+                <Group gap={6}>
+                  <IconLock size={14} />
+                  <Text component="span" size="sm" className="mmp-dev-link-text">VRCWorld-VeryBigMedalPusher</Text>
                 </Group>
               </Anchor>
             </Stack>

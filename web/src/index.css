@@ -1,5 +1,8 @@
 :root {
   --app-focus-ring: #2f6ebf;
+  --app-readable-support-text: #3f5f86;
+  --app-dev-link-color: #1a4f8f;
+  --app-dev-link-hover-color: #154381;
 }
 
 html {
@@ -99,7 +102,7 @@ body {
 .home-subtitle {
   margin: -0.5rem 0 0;
   text-align: center;
-  color: #47678f;
+  color: var(--app-readable-support-text);
   font-size: 0.875rem;
 }
 
@@ -257,6 +260,33 @@ button.hero-link-button:disabled {
   border: 1px solid #1f2937;
   background: rgba(255, 255, 255, 0.45);
   color: #1f2937;
+}
+
+.mmp-readable-support-text {
+  color: var(--app-readable-support-text);
+}
+
+.mantine-Text-root.mmp-readable-support-text,
+.mantine-InputWrapper-description.mmp-readable-support-text {
+  color: var(--app-readable-support-text) !important;
+}
+
+.mmp-dev-link,
+.mantine-Anchor-root.mmp-dev-link {
+  color: var(--app-dev-link-color);
+  text-decoration-color: currentColor;
+}
+
+.mmp-dev-link:hover,
+.mmp-dev-link:focus-visible,
+.mantine-Anchor-root.mmp-dev-link:hover,
+.mantine-Anchor-root.mmp-dev-link:focus-visible {
+  color: var(--app-dev-link-hover-color);
+}
+
+.mmp-dev-link-text,
+.mantine-Anchor-root.mmp-dev-link .mmp-dev-link-text {
+  color: var(--app-dev-link-color);
 }
 
 .hero-link-button-spinner {
