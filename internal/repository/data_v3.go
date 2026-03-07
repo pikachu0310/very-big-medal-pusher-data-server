@@ -35,7 +35,7 @@ INSERT INTO v2_save_data (
     jacksp_get_all, jacksp_get_t0, jacksp_get_t1, jacksp_get_t2, jacksp_get_t3, jacksp_get_t4,
     jacksp_startmax, jacksp_totalmax, ferball_get, ferlot_lot,
     jackfr_get_all, jackfr_get_t0, jackfr_get_t1, jackfr_get_t2, jackfr_get_t3, jackfr_get_t4,
-    jackfr_startmax, jackfr_totalmax, ferlot_hit, ferlot_lose, ferlot_chance, ferlot_act, ferlot_lines, bbox_shop,
+    jackfr_startmax, jackfr_totalmax, ferlot_hit, ferlot_lose, ferlot_chance, ferlot_act, ferlot_lines, bbox_shop, ferlot_maxln, bbox_used_ferlot,
     task_cnt, totem_altars, totem_altars_credit, buy_shbi,
     firstboot, lastsave, playtime
 	) VALUES (
@@ -51,7 +51,7 @@ INSERT INTO v2_save_data (
 	    ?, ?, ?, ?, ?, ?,
 	    ?, ?, ?, ?,
 	    ?, ?, ?, ?, ?, ?,
-	    ?, ?, ?, ?, ?, ?, ?, ?,
+	    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
 	    ?, ?, ?, ?,
 	    ?, ?, ?
 	)`,
@@ -67,7 +67,7 @@ INSERT INTO v2_save_data (
 		sd.JackpotSuperGetTotal, sd.JackpotSuperGetTier0, sd.JackpotSuperGetTier1, sd.JackpotSuperGetTier2, sd.JackpotSuperGetTier3, sd.JackpotSuperGetTier4,
 		sd.JackpotSuperStartMax, sd.JackpotSuperTotalMax, sd.FerrettaBallGet, sd.FerrettaLotteryAttempt,
 		sd.JackpotFerrettaGetTotal, sd.JackpotFerrettaGetTier0, sd.JackpotFerrettaGetTier1, sd.JackpotFerrettaGetTier2, sd.JackpotFerrettaGetTier3, sd.JackpotFerrettaGetTier4,
-		sd.JackpotFerrettaStartMax, sd.JackpotFerrettaTotalMax, sd.FerrettaLotteryHit, sd.FerrettaLotteryLose, sd.FerrettaLotteryChance, sd.FerrettaLotteryActives, sd.FerrettaLotteryLines, sd.BlackBoxShopUsed,
+		sd.JackpotFerrettaStartMax, sd.JackpotFerrettaTotalMax, sd.FerrettaLotteryHit, sd.FerrettaLotteryLose, sd.FerrettaLotteryChance, sd.FerrettaLotteryActives, sd.FerrettaLotteryLines, sd.BlackBoxShopUsed, sd.FerrettaLotteryMaxLines, sd.BlackBoxUsedFerrettaItem,
 		sd.TaskCompleteCount, sd.TotemAltarUnlockCount, sd.TotemAltarUnlockUsedCredits, sd.BuyShbi,
 		sd.FirstBoot, sd.LastSave, sd.Playtime,
 	)
@@ -127,6 +127,13 @@ INSERT INTO v2_save_data (
 	// ferlot_item
 	for id, cnt := range sd.DCFerrettaLotteryItem {
 		if _, err := tx.ExecContext(ctx, `INSERT INTO v2_save_data_ferlot_item(save_id, item_id, count) VALUES(?,?,?)`, saveID, id, cnt); err != nil {
+			return err
+		}
+	}
+
+	// ferlot_useitem
+	for id, cnt := range sd.DCFerrettaLotteryItemUsed {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO v2_save_data_ferlot_useitem(save_id, item_id, count) VALUES(?,?,?)`, saveID, id, cnt); err != nil {
 			return err
 		}
 	}

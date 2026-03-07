@@ -83,6 +83,8 @@ type SaveData struct {
 	FerrettaLotteryActives      int       `db:"ferlot_act"`
 	FerrettaLotteryLines        int       `db:"ferlot_lines"`
 	BlackBoxShopUsed            int       `db:"bbox_shop"`
+	FerrettaLotteryMaxLines     int       `db:"ferlot_maxln"`
+	BlackBoxUsedFerrettaItem    int       `db:"bbox_used_ferlot"`
 	TaskCompleteCount           int       `db:"task_cnt"`
 	TotemAltarUnlockCount       int       `db:"totem_altars"`
 	TotemAltarUnlockUsedCredits int64     `db:"totem_altars_credit"`
@@ -90,19 +92,20 @@ type SaveData struct {
 	UpdatedAt                   time.Time `db:"updated_at"`
 
 	// child tables (not loaded via SELECT *)
-	DCMedalGet            map[string]int   `db:"-"`
-	DCBallGet             map[string]int64 `db:"-"`
-	DCBallChain           map[string]int   `db:"-"`
-	LAchieve              []string         `db:"-"`
-	DCPalettaBallGet      map[string]int   `db:"-"`
-	DCPalettaBallJackpot  map[string]int   `db:"-"`
-	DCBlackBoxShopUsed    map[string]int   `db:"-"`
-	DCFerrettaLotteryItem map[string]int   `db:"-"`
-	LPerkLevels           []int            `db:"-"`
-	LPerkUsedCredits      []int64          `db:"-"`
-	LTotemLevels          []int            `db:"-"`
-	LTotemUsedCredits     []int64          `db:"-"`
-	LTotemPlacements      []int            `db:"-"`
+	DCMedalGet                map[string]int   `db:"-"`
+	DCBallGet                 map[string]int64 `db:"-"`
+	DCBallChain               map[string]int   `db:"-"`
+	LAchieve                  []string         `db:"-"`
+	DCPalettaBallGet          map[string]int   `db:"-"`
+	DCPalettaBallJackpot      map[string]int   `db:"-"`
+	DCBlackBoxShopUsed        map[string]int   `db:"-"`
+	DCFerrettaLotteryItem     map[string]int   `db:"-"`
+	DCFerrettaLotteryItemUsed map[string]int   `db:"-"`
+	LPerkLevels               []int            `db:"-"`
+	LPerkUsedCredits          []int64          `db:"-"`
+	LTotemLevels              []int            `db:"-"`
+	LTotemUsedCredits         []int64          `db:"-"`
+	LTotemPlacements          []int            `db:"-"`
 }
 
 // ParseSaveData decodes URL-encoded JSON into a minimal SaveData for insert.
@@ -180,6 +183,8 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		FerrettaLotteryActives      *float64         `json:"ferlot_act"`
 		FerrettaLotteryLines        *float64         `json:"ferlot_lines"`
 		BlackBoxShopUsed            *float64         `json:"bbox_shop"`
+		FerrettaLotteryMaxLines     *float64         `json:"ferlot_maxln"`
+		BlackBoxUsedFerrettaItem    *float64         `json:"bbox_used_ferlot"`
 		TaskCompleteCount           *float64         `json:"task_cnt"`
 		DCMedalGet                  map[string]int   `json:"dc_medal_get"`
 		DCBallGet                   map[string]int64 `json:"dc_ball_get"`
@@ -189,6 +194,7 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		DCPalettaBallJackpot        map[string]int   `json:"dc_palball_jp"`
 		DCBlackBoxShopUsed          map[string]int   `json:"dc_bbox_shop"`
 		DCFerrettaLotteryItem       map[string]int   `json:"dc_ferlot_item"`
+		DCFerrettaLotteryItemUsed   map[string]int   `json:"dc_ferlot_useitem"`
 		LPerkLevels                 []interface{}    `json:"l_perks"`
 		LPerkUsedCredits            []interface{}    `json:"l_perks_credit"`
 		TotemAltarUnlockCount       *int             `json:"totem_altars"`
@@ -283,6 +289,8 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		FerrettaLotteryActives:      int(safeFloat64(m.FerrettaLotteryActives)),
 		FerrettaLotteryLines:        int(safeFloat64(m.FerrettaLotteryLines)),
 		BlackBoxShopUsed:            int(safeFloat64(m.BlackBoxShopUsed)),
+		FerrettaLotteryMaxLines:     int(safeFloat64(m.FerrettaLotteryMaxLines)),
+		BlackBoxUsedFerrettaItem:    int(safeFloat64(m.BlackBoxUsedFerrettaItem)),
 		TaskCompleteCount:           int(safeFloat64(m.TaskCompleteCount)),
 		DCMedalGet:                  m.DCMedalGet,
 		DCBallGet:                   m.DCBallGet,
@@ -292,6 +300,7 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		DCPalettaBallJackpot:        m.DCPalettaBallJackpot,
 		DCBlackBoxShopUsed:          m.DCBlackBoxShopUsed,
 		DCFerrettaLotteryItem:       m.DCFerrettaLotteryItem,
+		DCFerrettaLotteryItemUsed:   m.DCFerrettaLotteryItemUsed,
 		LPerkLevels:                 parseIntArray(m.LPerkLevels),
 		LPerkUsedCredits:            parseInt64Array(m.LPerkUsedCredits),
 		TotemAltarUnlockCount:       safeInt(m.TotemAltarUnlockCount),
@@ -409,6 +418,8 @@ func (sd *SaveData) ToModel() *models.SaveDataV2 {
 		ferlotAct         = float64(sd.FerrettaLotteryActives)
 		ferlotLines       = float64(sd.FerrettaLotteryLines)
 		bboxShop          = float64(sd.BlackBoxShopUsed)
+		ferlotMaxln       = float64(sd.FerrettaLotteryMaxLines)
+		bboxUsedFerlot    = float64(sd.BlackBoxUsedFerrettaItem)
 		taskCnt           = float64(sd.TaskCompleteCount)
 		totemAltars       = sd.TotemAltarUnlockCount
 		totemAltarsCredit = sd.TotemAltarUnlockUsedCredits
@@ -481,24 +492,27 @@ func (sd *SaveData) ToModel() *models.SaveDataV2 {
 		FerlotAct:         &ferlotAct,
 		FerlotLines:       &ferlotLines,
 		BboxShop:          &bboxShop,
+		FerlotMaxln:       &ferlotMaxln,
+		BboxUsedFerlot:    &bboxUsedFerlot,
 		TaskCnt:           &taskCnt,
 		TotemAltars:       &totemAltars,
 		TotemAltarsCredit: &totemAltarsCredit,
 
 		// dictionaries and list
-		DcMedalGet:    &sd.DCMedalGet,
-		DcBallGet:     &sd.DCBallGet,
-		DcBallChain:   &sd.DCBallChain,
-		LAchieve:      &sd.LAchieve,
-		DcPalballGet:  &sd.DCPalettaBallGet,
-		DcPalballJp:   &sd.DCPalettaBallJackpot,
-		DcBboxShop:    &sd.DCBlackBoxShopUsed,
-		DcFerlotItem:  &sd.DCFerrettaLotteryItem,
-		LPerks:        &sd.LPerkLevels,
-		LPerksCredit:  &sd.LPerkUsedCredits,
-		LTotems:       &sd.LTotemLevels,
-		LTotemsCredit: &sd.LTotemUsedCredits,
-		LTotemsSet:    &sd.LTotemPlacements,
+		DcMedalGet:      &sd.DCMedalGet,
+		DcBallGet:       &sd.DCBallGet,
+		DcBallChain:     &sd.DCBallChain,
+		LAchieve:        &sd.LAchieve,
+		DcPalballGet:    &sd.DCPalettaBallGet,
+		DcPalballJp:     &sd.DCPalettaBallJackpot,
+		DcBboxShop:      &sd.DCBlackBoxShopUsed,
+		DcFerlotItem:    &sd.DCFerrettaLotteryItem,
+		DcFerlotUseitem: &sd.DCFerrettaLotteryItemUsed,
+		LPerks:          &sd.LPerkLevels,
+		LPerksCredit:    &sd.LPerkUsedCredits,
+		LTotems:         &sd.LTotemLevels,
+		LTotemsCredit:   &sd.LTotemUsedCredits,
+		LTotemsSet:      &sd.LTotemPlacements,
 	}
 
 	return m

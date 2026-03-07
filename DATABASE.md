@@ -79,6 +79,7 @@ docker exec myapp_db mariadb -u root -ppass -e "SHOW DATABASES;"
 | v2_save_data_palball_jp | 58,767 | 2,576 KB | 1,552 KB | utf8mb4_uca1400_ai_ci |
 | v2_save_data_bbox_shop | 0 | 16 KB | 16 KB | utf8mb4_uca1400_ai_ci |
 | v2_save_data_ferlot_item | 0 | 16 KB | 16 KB | utf8mb4_uca1400_ai_ci |
+| v2_save_data_ferlot_useitem | 0 | 16 KB | 16 KB | utf8mb4_uca1400_ai_ci |
 | v2_save_data_perks | 430,272 | 13,840 KB | 6,672 KB | utf8mb4_uca1400_ai_ci |
 | v2_save_data_perks_credit | 429,880 | 15,920 KB | 6,672 KB | utf8mb4_uca1400_ai_ci |
 | v2_save_data_totems | 0 | 16 KB | 16 KB | utf8mb4_uca1400_ai_ci |
@@ -102,6 +103,7 @@ docker exec myapp_db mariadb -u root -ppass -e "SHOW DATABASES;"
 | v2_save_data_palball_jp_ibfk_1 | v2_save_data_palball_jp | save_id | v2_save_data | id | ON DELETE CASCADE |
 | v2_save_data_bbox_shop_ibfk_1 | v2_save_data_bbox_shop | save_id | v2_save_data | id | ON DELETE CASCADE |
 | v2_save_data_ferlot_item_ibfk_1 | v2_save_data_ferlot_item | save_id | v2_save_data | id | ON DELETE CASCADE |
+| v2_save_data_ferlot_useitem_ibfk_1 | v2_save_data_ferlot_useitem | save_id | v2_save_data | id | ON DELETE CASCADE |
 | v2_save_data_perks_ibfk_1 | v2_save_data_perks | save_id | v2_save_data | id | ON DELETE CASCADE |
 | v2_save_data_perks_credit_ibfk_1 | v2_save_data_perks_credit | save_id | v2_save_data | id | ON DELETE CASCADE |
 | v2_save_data_totems_ibfk_1 | v2_save_data_totems | save_id | v2_save_data | id | ON DELETE CASCADE |
@@ -241,6 +243,8 @@ CREATE TABLE `v2_save_data` (
   `ferlot_act` int(11) NOT NULL DEFAULT 0,
   `ferlot_lines` int(11) NOT NULL DEFAULT 0,
   `bbox_shop` int(11) NOT NULL DEFAULT 0,
+  `ferlot_maxln` int(11) NOT NULL DEFAULT 0,
+  `bbox_used_ferlot` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `idx_save_data_v2_user_created_at` (`user_id`,`created_at`),
   KEY `idx_save_data_v2_user_playtime` (`user_id`,`playtime`),
@@ -494,6 +498,19 @@ CREATE TABLE `v2_save_data_ferlot_item` (
   PRIMARY KEY (`save_id`,`item_id`),
   KEY `idx_v2_save_data_ferlot_item_save` (`save_id`),
   CONSTRAINT `v2_save_data_ferlot_item_ibfk_1` FOREIGN KEY (`save_id`) REFERENCES `v2_save_data` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+```
+
+### 5.19 v2_save_data_ferlot_useitem
+
+```sql
+CREATE TABLE `v2_save_data_ferlot_useitem` (
+  `save_id` int(11) NOT NULL,
+  `item_id` varchar(255) NOT NULL,
+  `count` int(11) NOT NULL,
+  PRIMARY KEY (`save_id`,`item_id`),
+  KEY `idx_v2_save_data_ferlot_useitem_save` (`save_id`),
+  CONSTRAINT `v2_save_data_ferlot_useitem_ibfk_1` FOREIGN KEY (`save_id`) REFERENCES `v2_save_data` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 ```
 

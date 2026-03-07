@@ -1020,6 +1020,14 @@ components:
           type: number
           format: double
           x-oapi-codegen-extra-tags: { db: 'bbox_shop' }
+        ferlot_maxln:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'ferlot_maxln' }
+        bbox_used_ferlot:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'bbox_used_ferlot' }
         task_cnt:
           type: number
           format: double
@@ -1032,6 +1040,10 @@ components:
           type: object
           additionalProperties: { type: integer }
           x-oapi-codegen-extra-tags: { table: 'save_data_v2_ferlot_item' }
+        dc_ferlot_useitem:
+          type: object
+          additionalProperties: { type: integer }
+          x-oapi-codegen-extra-tags: { table: 'save_data_v2_ferlot_useitem' }
         totem_altars:
           type: integer
           x-oapi-codegen-extra-tags: { db: 'totem_altars' }

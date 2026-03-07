@@ -40,7 +40,7 @@ INSERT INTO v2_save_data (
     jacksp_get_all, jacksp_get_t0, jacksp_get_t1, jacksp_get_t2, jacksp_get_t3, jacksp_get_t4,
     jacksp_startmax, jacksp_totalmax, ferball_get, ferlot_lot,
     jackfr_get_all, jackfr_get_t0, jackfr_get_t1, jackfr_get_t2, jackfr_get_t3, jackfr_get_t4,
-    jackfr_startmax, jackfr_totalmax, ferlot_hit, ferlot_lose, ferlot_chance, ferlot_act, ferlot_lines, bbox_shop,
+    jackfr_startmax, jackfr_totalmax, ferlot_hit, ferlot_lose, ferlot_chance, ferlot_act, ferlot_lines, bbox_shop, ferlot_maxln, bbox_used_ferlot,
     task_cnt, totem_altars, totem_altars_credit, buy_shbi,
     firstboot, lastsave, playtime
 	) VALUES (
@@ -56,7 +56,7 @@ INSERT INTO v2_save_data (
 	    ?, ?, ?, ?, ?, ?,
 	    ?, ?, ?, ?,
 	    ?, ?, ?, ?, ?, ?,
-	    ?, ?, ?, ?, ?, ?, ?, ?,
+	    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
 	    ?, ?, ?, ?,
 	    ?, ?, ?
 	)`,
@@ -72,7 +72,7 @@ INSERT INTO v2_save_data (
 		sd.JackpotSuperGetTotal, sd.JackpotSuperGetTier0, sd.JackpotSuperGetTier1, sd.JackpotSuperGetTier2, sd.JackpotSuperGetTier3, sd.JackpotSuperGetTier4,
 		sd.JackpotSuperStartMax, sd.JackpotSuperTotalMax, sd.FerrettaBallGet, sd.FerrettaLotteryAttempt,
 		sd.JackpotFerrettaGetTotal, sd.JackpotFerrettaGetTier0, sd.JackpotFerrettaGetTier1, sd.JackpotFerrettaGetTier2, sd.JackpotFerrettaGetTier3, sd.JackpotFerrettaGetTier4,
-		sd.JackpotFerrettaStartMax, sd.JackpotFerrettaTotalMax, sd.FerrettaLotteryHit, sd.FerrettaLotteryLose, sd.FerrettaLotteryChance, sd.FerrettaLotteryActives, sd.FerrettaLotteryLines, sd.BlackBoxShopUsed,
+		sd.JackpotFerrettaStartMax, sd.JackpotFerrettaTotalMax, sd.FerrettaLotteryHit, sd.FerrettaLotteryLose, sd.FerrettaLotteryChance, sd.FerrettaLotteryActives, sd.FerrettaLotteryLines, sd.BlackBoxShopUsed, sd.FerrettaLotteryMaxLines, sd.BlackBoxUsedFerrettaItem,
 		sd.TaskCompleteCount, sd.TotemAltarUnlockCount, sd.TotemAltarUnlockUsedCredits, sd.BuyShbi,
 		sd.FirstBoot, sd.LastSave, sd.Playtime,
 	)
@@ -133,6 +133,13 @@ INSERT INTO v2_save_data (
 	// ferlot_item
 	for id, cnt := range sd.DCFerrettaLotteryItem {
 		if _, err := tx.ExecContext(ctx, `INSERT INTO v2_save_data_ferlot_item(save_id, item_id, count) VALUES(?,?,?)`, saveID, id, cnt); err != nil {
+			return err
+		}
+	}
+
+	// ferlot_useitem
+	for id, cnt := range sd.DCFerrettaLotteryItemUsed {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO v2_save_data_ferlot_useitem(save_id, item_id, count) VALUES(?,?,?)`, saveID, id, cnt); err != nil {
 			return err
 		}
 	}
@@ -370,7 +377,29 @@ WHERE save_id = ?
 		return nil, err
 	}
 
-	// 10) perks
+	// 10) ferlot_useitem
+	sd.DCFerrettaLotteryItemUsed = make(map[string]int)
+	rows, err = r.db.QueryxContext(ctx, `
+SELECT item_id, count
+FROM v2_save_data_ferlot_useitem
+WHERE save_id = ?
+`, sd.ID)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id string
+		var cnt int
+		if err := rows.Scan(&id, &cnt); err != nil {
+			return nil, err
+		}
+		sd.DCFerrettaLotteryItemUsed[id] = cnt
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+
+	// 11) perks
 	rows, err = r.db.QueryxContext(ctx, `
 SELECT perk_id, level 
 FROM v2_save_data_perks 
@@ -400,7 +429,7 @@ ORDER BY perk_id
 		return nil, err
 	}
 
-	// 11) perks_credit
+	// 12) perks_credit
 	rows, err = r.db.QueryxContext(ctx, `
 SELECT perk_id, credits 
 FROM v2_save_data_perks_credit 
@@ -430,7 +459,7 @@ ORDER BY perk_id
 		return nil, err
 	}
 
-	// 12) totems
+	// 13) totems
 	rows, err = r.db.QueryxContext(ctx, `
 SELECT totem_id, level 
 FROM v2_save_data_totems 
@@ -458,10 +487,10 @@ ORDER BY totem_id
 		return nil, err
 	}
 
-	// 13) totems_credit
+	// 14) totems_credit
 	rows, err = r.db.QueryxContext(ctx, `
 SELECT totem_id, credits 
-FROM v2_save_data_totems_credit 
+FROM v2_save_data_totems_credit
 WHERE save_id = ?
 ORDER BY totem_id
 `, sd.ID)
@@ -486,10 +515,10 @@ ORDER BY totem_id
 		return nil, err
 	}
 
-	// 14) totems_placement
+	// 15) totems_placement
 	rows, err = r.db.QueryxContext(ctx, `
 SELECT placement_idx, totem_id 
-FROM v2_save_data_totems_placement 
+FROM v2_save_data_totems_placement
 WHERE save_id = ?
 ORDER BY placement_idx
 `, sd.ID)

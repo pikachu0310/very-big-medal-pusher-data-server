@@ -83,6 +83,7 @@ func cleanupTables(t *testing.T, db *sqlx.DB) {
 		"v2_save_data_palball_jp",
 		"v2_save_data_bbox_shop",
 		"v2_save_data_ferlot_item",
+		"v2_save_data_ferlot_useitem",
 		"v2_save_data_perks",
 		"v2_save_data_perks_credit",
 		"v2_save_data_totems",
@@ -175,6 +176,8 @@ func newSaveData(userID string, playtime int64, creditAll int64, achievements []
 		FerrettaLotteryActives:      14,
 		FerrettaLotteryLines:        int(playtime),
 		BlackBoxShopUsed:            15,
+		FerrettaLotteryMaxLines:     int(playtime) + 1,
+		BlackBoxUsedFerrettaItem:    16,
 		TaskCompleteCount:           2,
 		TotemAltarUnlockCount:       1,
 		TotemAltarUnlockUsedCredits: 20,
@@ -185,6 +188,7 @@ func newSaveData(userID string, playtime int64, creditAll int64, achievements []
 		DCPalettaBallGet:            map[string]int{"100": 4},
 		DCBlackBoxShopUsed:          map[string]int{"item-1": 2},
 		DCFerrettaLotteryItem:       map[string]int{"item-2": 3},
+		DCFerrettaLotteryItemUsed:   map[string]int{"item-3": 4},
 	}
 }
 
@@ -250,6 +254,15 @@ func TestRepositoryV4_InsertLatestAndExists(t *testing.T) {
 	}
 	if latest.DCFerrettaLotteryItem["item-2"] != 3 {
 		t.Fatalf("latest dc_ferlot_item: got %#v", latest.DCFerrettaLotteryItem)
+	}
+	if latest.FerrettaLotteryMaxLines != 21 {
+		t.Fatalf("latest ferlot_maxln: got %d", latest.FerrettaLotteryMaxLines)
+	}
+	if latest.BlackBoxUsedFerrettaItem != 16 {
+		t.Fatalf("latest bbox_used_ferlot: got %d", latest.BlackBoxUsedFerrettaItem)
+	}
+	if latest.DCFerrettaLotteryItemUsed["item-3"] != 4 {
+		t.Fatalf("latest dc_ferlot_useitem: got %#v", latest.DCFerrettaLotteryItemUsed)
 	}
 
 	wantAchievements := []string{"ach-1", "ach-2", "ach-3"}
