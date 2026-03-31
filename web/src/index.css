@@ -193,6 +193,22 @@ body {
   font-size: 0.92rem;
 }
 
+.april-live-ticker {
+  margin-top: 0.7rem;
+  border-radius: 0.45rem;
+  border: 1px dashed rgba(37, 99, 235, 0.33);
+  background: rgba(239, 246, 255, 0.82);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.april-live-ticker span {
+  display: inline-block;
+  padding: 0.37rem 0;
+  animation: april-ticker-scroll 11s linear infinite;
+  color: #1f3f71;
+}
+
 .april-chaos-panel {
   margin-top: 0.95rem;
   display: grid;
@@ -265,6 +281,12 @@ body {
   filter: saturate(1.09);
 }
 
+.april-action-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .april-mascot-button {
   width: 50px;
   height: 50px;
@@ -313,6 +335,12 @@ body {
   font-size: 0.92rem;
 }
 
+.april-streak-note {
+  margin: 0.15rem 0 0;
+  color: #304762;
+  font-size: 0.8rem;
+}
+
 .april-card-loud {
   border: 2px dashed rgba(239, 68, 68, 0.5);
   background: linear-gradient(165deg, rgba(255, 243, 224, 0.92), rgba(255, 252, 245, 0.92));
@@ -328,6 +356,102 @@ body {
   text-align: center;
   font-family: 'Mochiy Pop One', sans-serif;
   letter-spacing: 0.08em;
+}
+
+.april-boss-log {
+  min-height: 3.1em;
+}
+
+.april-boss-hp {
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.3);
+  overflow: hidden;
+}
+
+.april-boss-hp span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #4ade80 0%, #facc15 45%, #fb7185 100%);
+  transition: width 0.25s ease;
+}
+
+.april-boss-percent {
+  margin-top: 0.45rem;
+  color: #29405f;
+}
+
+.april-update-bar {
+  height: 11px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.28);
+  overflow: hidden;
+}
+
+.april-update-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #22d3ee, #38bdf8, #2563eb);
+  transition: width 0.2s ease;
+}
+
+.april-update-text {
+  margin: 0.45rem 0 0.2rem;
+  font-size: 0.8rem;
+}
+
+.april-update-result {
+  margin: 0.2rem 0 0.65rem;
+  font-size: 0.8rem;
+  color: #23537f;
+}
+
+.april-alert-feed {
+  border-radius: 1rem;
+  border: 1px solid rgba(251, 146, 60, 0.35);
+  background: rgba(255, 251, 235, 0.86);
+  padding: 1rem;
+  box-shadow: 0 10px 24px rgba(120, 53, 15, 0.13);
+}
+
+.april-alert-feed h2 {
+  margin: 0;
+  font-size: 1.07rem;
+  color: #8a4a00;
+  font-family: 'Mochiy Pop One', sans-serif;
+}
+
+.april-alert-feed p {
+  margin: 0.6rem 0 0;
+  font-size: 0.9rem;
+  color: #684726;
+}
+
+.april-alert-feed ul {
+  margin: 0.75rem 0 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.42rem;
+}
+
+.april-alert-feed li {
+  color: #4a3620;
+  font-size: 0.87rem;
+}
+
+.april-alert-feed li.tone-info {
+  color: #1d4ed8;
+}
+
+.april-alert-feed li.tone-warn {
+  color: #b45309;
+}
+
+.april-alert-feed li.tone-critical {
+  color: #b91c1c;
+  font-weight: 700;
 }
 
 .april-mission-board {
@@ -620,10 +744,61 @@ button.hero-link-button {
   color: #475569;
 }
 
+.april-ad-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 320;
+  display: grid;
+  place-items: end center;
+  padding: 1rem;
+  pointer-events: none;
+}
+
+.april-ad-card {
+  width: min(100%, 24rem);
+  border-radius: 1rem;
+  border: 2px solid rgba(22, 78, 99, 0.4);
+  background: linear-gradient(140deg, #fef3c7, #fde68a 45%, #ddd6fe 100%);
+  padding: 0.9rem 1rem;
+  box-shadow: 0 18px 30px rgba(15, 23, 42, 0.28);
+  pointer-events: auto;
+}
+
+.april-ad-label {
+  margin: 0;
+  color: #0f3e5f;
+  font-size: 0.72rem;
+  letter-spacing: 0.07em;
+}
+
+.april-ad-card strong {
+  display: block;
+  margin-top: 0.5rem;
+  color: #1e293b;
+}
+
+.april-ad-card button {
+  margin-top: 0.75rem;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.75rem;
+  font: inherit;
+  cursor: pointer;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(90deg, #d97706, #ef4444);
+}
+
 .april-glitch .april-title,
 .april-glitch .april-slot-result,
 .april-glitch .april-breaking {
   animation: april-glitch 0.34s steps(2, end) infinite;
+}
+
+.april-god-mode .april-hero,
+.april-god-mode .april-card {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8), 0 0 22px rgba(56, 189, 248, 0.48), 0 12px 26px rgba(37, 99, 235, 0.22);
+  animation: april-god-glow 1.8s ease-in-out infinite;
 }
 
 .deferred-anchor {
@@ -930,5 +1105,29 @@ select:focus-visible,
   100% {
     transform: translate(0);
     text-shadow: none;
+  }
+}
+
+@keyframes april-ticker-scroll {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(-110%);
+  }
+}
+
+@keyframes april-god-glow {
+  0% {
+    filter: saturate(1);
+  }
+
+  50% {
+    filter: saturate(1.16);
+  }
+
+  100% {
+    filter: saturate(1);
   }
 }
