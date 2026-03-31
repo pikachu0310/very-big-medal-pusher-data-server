@@ -22,7 +22,7 @@ function App() {
 
       {!isClassicRoute && (
         <header className="app-global-notice" aria-label="イベント通知">
-          <p>Happy April Fool&apos;s Day!! にぎやか版は `/`、通常版は `/classic` で見られます。</p>
+          <p>Happy April Fool&apos;s Day!!</p>
         </header>
       )}
 

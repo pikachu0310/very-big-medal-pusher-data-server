@@ -84,7 +84,9 @@ body {
 .app-global-notice p {
   margin: 0;
   text-align: center;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
+  font-size: 1rem;
+  font-weight: 800;
 }
 
 .app-main-container {
@@ -246,7 +248,7 @@ body {
 .april-live-ticker span {
   display: inline-block;
   padding: 0.37rem 0 0.37rem 100%;
-  animation: april-ticker-scroll 11s linear infinite;
+  animation: april-ticker-scroll 4.4s linear infinite;
   color: #1f3f71;
 }
 
@@ -347,13 +349,14 @@ body {
 }
 
 .april-mini-logo {
-  width: clamp(64px, 8vw, 98px);
+  width: clamp(96px, 12vw, 148px);
   height: auto;
   object-fit: contain;
   border-radius: 0.45rem;
   border: 1px solid rgba(148, 163, 184, 0.4);
   background: rgba(255, 255, 255, 0.9);
   padding: 0.2rem;
+  animation: april-logo-shiver 1.1s ease-in-out infinite;
 }
 
 .april-gimmick-grid {
@@ -803,24 +806,27 @@ button.hero-link-button {
   color: #475569;
 }
 
-.april-ad-popup {
+.april-ad-cloud {
   position: fixed;
   inset: 0;
   z-index: 320;
-  display: grid;
-  place-items: end center;
-  padding: 1rem;
   pointer-events: none;
 }
 
+.april-ad-popup {
+  position: fixed;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  animation: april-ad-pop 0.45s ease;
+}
+
 .april-ad-card {
-  width: min(100%, 24rem);
+  width: min(86vw, 22rem);
   border-radius: 1rem;
   border: 2px solid rgba(22, 78, 99, 0.4);
   background: linear-gradient(140deg, #fef3c7, #fde68a 45%, #ddd6fe 100%);
-  padding: 0.9rem 1rem;
+  padding: 0.8rem 0.9rem;
   box-shadow: 0 18px 30px rgba(15, 23, 42, 0.28);
-  pointer-events: auto;
 }
 
 .april-ad-label {
@@ -913,6 +919,33 @@ button.hero-link-button {
 .april-jackpot-fever p {
   font-size: clamp(1.4rem, 8vw, 4rem);
   text-shadow: 0 0 16px rgba(255, 255, 255, 0.7), 0 0 30px rgba(245, 158, 11, 0.84);
+}
+
+.april-achievement-complete {
+  position: fixed;
+  inset: 0;
+  z-index: 340;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  background: radial-gradient(circle at center, rgba(56, 189, 248, 0.18), transparent 58%);
+}
+
+.april-achievement-complete p {
+  margin: 0;
+  font-family: 'Mochiy Pop One', sans-serif;
+  font-size: clamp(1.6rem, 7.8vw, 3.9rem);
+  color: #fff;
+  text-shadow: 0 0 18px rgba(15, 23, 42, 0.8), 0 0 36px rgba(250, 204, 21, 0.8);
+}
+
+.april-achievement-complete span {
+  margin-top: 0.6rem;
+  display: block;
+  color: #fff7ed;
+  font-weight: 700;
+  text-shadow: 0 0 12px rgba(15, 23, 42, 0.65);
 }
 
 .classic-page {
@@ -1339,5 +1372,39 @@ select:focus-visible,
 
   100% {
     opacity: 0.3;
+  }
+}
+
+@keyframes april-logo-shiver {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  25% {
+    transform: translate(0.6px, -0.5px) rotate(0.35deg);
+  }
+
+  50% {
+    transform: translate(-0.7px, 0.4px) rotate(-0.35deg);
+  }
+
+  75% {
+    transform: translate(0.5px, 0.3px) rotate(0.28deg);
+  }
+
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes april-ad-pop {
+  0% {
+    transform: translate(-50%, -50%) scale(0.88);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
   }
 }
