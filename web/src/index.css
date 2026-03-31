@@ -15,6 +15,7 @@
   --app-readable-support-text: #204260;
   --app-dev-link-color: #0f5db8;
   --app-dev-link-hover-color: #08478f;
+  --chaos-intensity: 1;
 }
 
 html {
@@ -184,6 +185,11 @@ body {
   color: #234363;
 }
 
+.april-inline-link {
+  color: #0f4aa0;
+  font-weight: 700;
+}
+
 .april-breaking {
   margin: 0.9rem 0 0;
   border-left: 5px solid #ef4444;
@@ -200,11 +206,12 @@ body {
   background: rgba(239, 246, 255, 0.82);
   overflow: hidden;
   white-space: nowrap;
+  position: relative;
 }
 
 .april-live-ticker span {
   display: inline-block;
-  padding: 0.37rem 0;
+  padding: 0.37rem 0 0.37rem 100%;
   animation: april-ticker-scroll 11s linear infinite;
   color: #1f3f71;
 }
@@ -307,13 +314,13 @@ body {
 
 .april-gimmick-grid {
   display: grid;
-  gap: 0.9rem;
+  gap: 0.82rem;
   grid-template-columns: 1fr;
 }
 
 .april-card {
   border-radius: 1rem;
-  padding: 1rem;
+  padding: 0.95rem;
   border: 1px solid rgba(37, 99, 235, 0.18);
   background: var(--april-panel);
   box-shadow: 0 10px 24px rgba(18, 29, 51, 0.12);
@@ -421,6 +428,9 @@ body {
   font-size: 1.07rem;
   color: #8a4a00;
   font-family: 'Mochiy Pop One', sans-serif;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .april-alert-feed p {
@@ -693,6 +703,11 @@ button.hero-link-button {
   z-index: 200;
 }
 
+.april-coin-layer {
+  position: absolute;
+  inset: 0;
+}
+
 .april-coin {
   position: absolute;
   top: -4.5rem;
@@ -795,10 +810,111 @@ button.hero-link-button {
   animation: april-glitch 0.34s steps(2, end) infinite;
 }
 
+.april-glitch .april-card,
+.april-glitch .april-action-button,
+.april-glitch .hero-link-button,
+.april-glitch .april-alert-feed,
+.april-glitch .april-jackpot-strip,
+.april-glitch .april-maintenance-card {
+  animation: april-wobble calc(0.82s - var(--chaos-intensity) * 0.12s) ease-in-out infinite;
+}
+
 .april-god-mode .april-hero,
 .april-god-mode .april-card {
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8), 0 0 22px rgba(56, 189, 248, 0.48), 0 12px 26px rgba(37, 99, 235, 0.22);
   animation: april-god-glow 1.8s ease-in-out infinite;
+}
+
+.april-chaos-overdrive .april-hero,
+.april-chaos-overdrive .april-card {
+  border-color: rgba(239, 68, 68, 0.55);
+}
+
+.april-overdrive-overlay,
+.april-jackpot-fever {
+  position: fixed;
+  inset: 0;
+  z-index: 330;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+}
+
+.april-overdrive-overlay {
+  background:
+    radial-gradient(circle at center, rgba(239, 68, 68, 0.18), transparent 56%),
+    repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.08) 0, rgba(255, 255, 255, 0.08) 14px, transparent 14px, transparent 30px);
+  animation: april-overdrive-flash 0.42s steps(2, end) infinite;
+}
+
+.april-overdrive-overlay p,
+.april-jackpot-fever p {
+  margin: 0;
+  font-family: 'Mochiy Pop One', sans-serif;
+  letter-spacing: 0.11em;
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 0 16px rgba(255, 255, 255, 0.66), 0 0 28px rgba(239, 68, 68, 0.84);
+}
+
+.april-overdrive-overlay p {
+  font-size: clamp(2rem, 10vw, 5rem);
+}
+
+.april-jackpot-fever {
+  background: radial-gradient(circle at center, rgba(255, 213, 79, 0.2), transparent 58%);
+  animation: april-fever-flash 0.36s steps(2, end) infinite;
+}
+
+.april-jackpot-fever p {
+  font-size: clamp(1.4rem, 8vw, 4rem);
+  text-shadow: 0 0 16px rgba(255, 255, 255, 0.7), 0 0 30px rgba(245, 158, 11, 0.84);
+}
+
+.classic-page {
+  gap: 1rem;
+}
+
+.classic-hero {
+  border-radius: 1rem;
+  border: 1px solid rgba(30, 64, 175, 0.2);
+  background: rgba(255, 255, 255, 0.88);
+  padding: clamp(1rem, 3vw, 1.6rem);
+  box-shadow: 0 10px 24px rgba(20, 35, 61, 0.1);
+}
+
+.classic-badge {
+  margin: 0;
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  background: #dbeafe;
+  color: #1e3a8a;
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+}
+
+.classic-title {
+  margin: 0.65rem 0 0;
+  font-size: clamp(1.45rem, 4vw, 2.15rem);
+  font-family: 'Mochiy Pop One', sans-serif;
+  color: #1d3557;
+}
+
+.classic-subtitle {
+  margin: 0.62rem 0 0;
+  color: #345274;
+}
+
+.classic-inline-link {
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.classic-links-card .section-title {
+  margin: 0 0 0.8rem;
+  color: #1d3557;
+  font-size: 1.13rem;
 }
 
 .deferred-anchor {
@@ -1110,11 +1226,11 @@ select:focus-visible,
 
 @keyframes april-ticker-scroll {
   from {
-    transform: translateX(100%);
+    transform: translateX(0);
   }
 
   to {
-    transform: translateX(-110%);
+    transform: translateX(-100%);
   }
 }
 
@@ -1129,5 +1245,55 @@ select:focus-visible,
 
   100% {
     filter: saturate(1);
+  }
+}
+
+@keyframes april-wobble {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  25% {
+    transform: translate(calc(var(--chaos-intensity) * 1px), calc(var(--chaos-intensity) * -0.8px)) rotate(calc(var(--chaos-intensity) * 0.4deg));
+  }
+
+  50% {
+    transform: translate(calc(var(--chaos-intensity) * -1.1px), calc(var(--chaos-intensity) * 0.9px)) rotate(calc(var(--chaos-intensity) * -0.45deg));
+  }
+
+  75% {
+    transform: translate(calc(var(--chaos-intensity) * 0.8px), calc(var(--chaos-intensity) * 0.7px)) rotate(calc(var(--chaos-intensity) * 0.35deg));
+  }
+
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes april-overdrive-flash {
+  0% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 0.92;
+  }
+
+  100% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes april-fever-flash {
+  0% {
+    opacity: 0.3;
+  }
+
+  50% {
+    opacity: 0.85;
+  }
+
+  100% {
+    opacity: 0.3;
   }
 }

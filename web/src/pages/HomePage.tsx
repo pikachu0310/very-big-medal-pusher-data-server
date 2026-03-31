@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import {
   IconAlertTriangle,
   IconBook2,
@@ -29,13 +29,22 @@ type CoinParticle = {
   rotate: number;
 };
 
+type CoinBurst = {
+  id: number;
+  particles: CoinParticle[];
+};
+
 type FakeAlert = {
   id: number;
   text: string;
   tone: 'info' | 'warn' | 'critical';
 };
 
-const rouletteFaces = ['7', '🍒', '🎰', '💥', '🪙', '🐟', '🍣', '👑'];
+type AchievementKey = 'redEngineer' | 'slotWinner' | 'bossSlayer' | 'overdrive' | 'godMode' | 'mascotFriend';
+
+type AchievementState = Record<AchievementKey, boolean>;
+
+const rouletteFaces = ['7', '7', '🍒', '🍒', '🪙', '👑'];
 const coinEmojis = ['🪙', '🥇', '🎖️', '💿', '🍩'];
 const fortunePool = [
   '大吉: 今日のあなたは1クリックで777メダル分の顔をします。',
@@ -53,9 +62,9 @@ const fakeHeadlines = [
   '特報: でかプ史上初「押すほど軽くなるUI」実装へ'
 ];
 const fakeTickerMessages = [
-  '速報: 今日だけメダル税 0%。明日は未定。',
+  '春イベント期間: 2026/04/01 - 2026/04/13',
   '注意: 赤ボタンは押した分だけ赤くなります。',
-  '運営からのお知らせ: 仕様書は今日だけ俳句形式です。',
+  '運営メモ: 連打は1日30回まで推奨(推奨なだけ)。',
   '臨時告知: クリックしすぎると画面に友情が芽生えます。',
   '豆知識: 連打は哲学、放置は美学。'
 ];
@@ -66,7 +75,7 @@ const fakeAdMessages = [
   '新機能: ボタンを見つめるとボタンも見つめ返します。'
 ];
 const fakeAlertPool: { text: string; tone: FakeAlert['tone'] }[] = [
-  { text: '偽速報: メダルが自我を持ったため会議中です。', tone: 'warn' },
+  { text: '通知: 大量連打を検知、演出負荷を解禁しました。', tone: 'warn' },
   { text: '業務連絡: 開発者は現在カフェインで稼働しています。', tone: 'info' },
   { text: '緊急: 押しすぎ検知。指に休暇を与えてください。', tone: 'critical' },
   { text: '朗報: 今日のバグは全部エンタメ扱いです。', tone: 'info' },
@@ -84,11 +93,11 @@ function buildCoinBurst(count: number) {
   return Array.from({ length: count }, (_, index) => ({
     id: index,
     x: Math.random() * 100,
-    drift: (Math.random() - 0.5) * 36,
-    duration: 2.5 + Math.random() * 2,
-    delay: Math.random() * 0.8,
+    drift: (Math.random() - 0.5) * 46,
+    duration: 2.3 + Math.random() * 2,
+    delay: Math.random() * 0.7,
     emoji: coinEmojis[Math.floor(Math.random() * coinEmojis.length)],
-    size: 1 + Math.random() * 1.15,
+    size: 1.1 + Math.random() * 1.5,
     rotate: Math.random() * 360
   } satisfies CoinParticle));
 }
@@ -121,49 +130,101 @@ function DeferredPlaceholders() {
 function HomePage() {
   const [showDeferredSections, setShowDeferredSections] = useState(false);
   const [chaosLevel, setChaosLevel] = useState(8);
+  const [chaosOverdrive, setChaosOverdrive] = useState(false);
   const [todayFortune, setTodayFortune] = useState('「運勢を受け取る」を押すと未来が雑に確定します。');
   const [slotResult, setSlotResult] = useState(rollSlotFaces().join(''));
   const [headline, setHeadline] = useState(makeHeadline());
   const [tickerMessage, setTickerMessage] = useState(randomFrom(fakeTickerMessages));
-  const [coinBurst, setCoinBurst] = useState<CoinParticle[]>([]);
+  const [tickerKey, setTickerKey] = useState(0);
+  const [coinBursts, setCoinBursts] = useState<CoinBurst[]>([]);
   const [flipMode, setFlipMode] = useState(false);
   const [glitchMode, setGlitchMode] = useState(false);
-  const [partyMode, setPartyMode] = useState(false);
   const [godMode, setGodMode] = useState(false);
   const [maintenanceVisible, setMaintenanceVisible] = useState(false);
-  const [maintenanceMessage, setMaintenanceMessage] = useState('サーバー再起動のフリをしています...');
+  const [maintenanceMessage, setMaintenanceMessage] = useState('メンテナンス処理を開始しました...');
   const [jackpotCount, setJackpotCount] = useState(18427001);
   const [mascotClickCount, setMascotClickCount] = useState(0);
   const [fakeAlerts, setFakeAlerts] = useState<FakeAlert[]>([]);
   const [bossHp, setBossHp] = useState(100);
   const [bossLog, setBossLog] = useState('ボス「巨大メダル山」が待機中');
   const [clickStreak, setClickStreak] = useState(0);
+  const [redButtonCount, setRedButtonCount] = useState(0);
   const [adPopupVisible, setAdPopupVisible] = useState(false);
   const [adMessage, setAdMessage] = useState(randomFrom(fakeAdMessages));
   const [isUpdateChecking, setIsUpdateChecking] = useState(false);
   const [updateProgress, setUpdateProgress] = useState(0);
   const [updateResult, setUpdateResult] = useState('');
+  const [jackpotFever, setJackpotFever] = useState(false);
+  const [achievements, setAchievements] = useState<AchievementState>({
+    redEngineer: false,
+    slotWinner: false,
+    bossSlayer: false,
+    overdrive: false,
+    godMode: false,
+    mascotFriend: false
+  });
 
   const deferredSectionAnchorRef = useRef<HTMLDivElement | null>(null);
-  const coinClearTimerRef = useRef<number | null>(null);
   const maintenanceTimersRef = useRef<number[]>([]);
+  const chaosActionAtRef = useRef(Date.now());
   const alertIdRef = useRef(0);
+  const burstIdRef = useRef(0);
+  const burstTimersRef = useRef<number[]>([]);
   const konamiProgressRef = useRef(0);
 
-  const missionState = useMemo(
-    () => ({
-      rain: coinBurst.length > 0,
-      wild: chaosLevel >= 45,
-      flip: flipMode,
-      mascot: mascotClickCount >= 7,
-      boss: bossHp === 0,
-      god: godMode
-    }),
-    [coinBurst.length, chaosLevel, flipMode, mascotClickCount, bossHp, godMode]
-  );
+  const setTicker = useCallback((message: string) => {
+    setTickerMessage(message);
+    setTickerKey((value) => value + 1);
+  }, []);
 
-  const completedMissions = Object.values(missionState).filter(Boolean).length;
-  const chaosGauge = Math.min(100, chaosLevel);
+  const registerChaosAction = useCallback((delta: number) => {
+    chaosActionAtRef.current = Date.now();
+    setChaosLevel((value) => Math.min(100, value + delta));
+  }, []);
+
+  const updateAchievement = useCallback((key: AchievementKey) => {
+    setAchievements((current) => {
+      if (current[key]) {
+        return current;
+      }
+      return { ...current, [key]: true };
+    });
+  }, []);
+
+  const triggerCoinRain = useCallback((count = 70, chaosGain = 9, durationMs = 5200) => {
+    const burstId = ++burstIdRef.current;
+    const burst: CoinBurst = {
+      id: burstId,
+      particles: buildCoinBurst(count)
+    };
+
+    setCoinBursts((current) => [...current, burst]);
+
+    if (chaosGain > 0) {
+      registerChaosAction(chaosGain);
+    }
+
+    const timerId = window.setTimeout(() => {
+      setCoinBursts((current) => current.filter((item) => item.id !== burstId));
+    }, durationMs);
+
+    burstTimersRef.current.push(timerId);
+  }, [registerChaosAction]);
+
+  const pushFakeAlert = useCallback(() => {
+    const source = randomFrom(fakeAlertPool);
+    const nextAlert: FakeAlert = {
+      id: ++alertIdRef.current,
+      text: source.text,
+      tone: source.tone
+    };
+
+    setFakeAlerts((current) => [nextAlert, ...current].slice(0, 6));
+  }, []);
+
+  const completedAchievements = Object.values(achievements).filter(Boolean).length;
+  const chaosGauge = Math.round(Math.min(100, chaosLevel));
+  const chaosIntensity = Math.max(0.45, Math.min(2.2, chaosLevel / 46));
 
   const streakComment =
     clickStreak >= 35
@@ -212,30 +273,77 @@ function HomePage() {
 
   useEffect(() => {
     const timerId = window.setInterval(() => {
-      setJackpotCount((current) => current + Math.floor(Math.random() * 6000) + 1400 + chaosLevel * 2 + (partyMode ? 1300 : 0));
+      setJackpotCount((current) => current + Math.floor(Math.random() * 6000) + 1400 + chaosLevel * 2 + (chaosOverdrive ? 2200 : 0));
     }, 1700);
 
     return () => window.clearInterval(timerId);
-  }, [chaosLevel, partyMode]);
+  }, [chaosLevel, chaosOverdrive]);
 
   useEffect(() => {
     const tickerId = window.setInterval(() => {
-      setTickerMessage(randomFrom(fakeTickerMessages));
+      setTicker(randomFrom(fakeTickerMessages));
     }, 5000);
 
     return () => window.clearInterval(tickerId);
-  }, []);
+  }, [setTicker]);
 
   useEffect(() => {
     const adId = window.setInterval(() => {
-      if (Math.random() > 0.45) {
+      if (Math.random() > 0.48) {
         setAdMessage(randomFrom(fakeAdMessages));
         setAdPopupVisible(true);
       }
-    }, 23000);
+    }, 24000);
 
     return () => window.clearInterval(adId);
   }, []);
+
+  useEffect(() => {
+    const decayId = window.setInterval(() => {
+      const idleMs = Date.now() - chaosActionAtRef.current;
+      if (idleMs < 1400 || chaosOverdrive) {
+        return;
+      }
+
+      setChaosLevel((value) => {
+        if (value <= 5) {
+          return 5;
+        }
+        const drop = value > 80 ? 2.6 : value > 45 ? 1.8 : 1.1;
+        return Math.max(5, value - drop);
+      });
+    }, 1000);
+
+    return () => window.clearInterval(decayId);
+  }, [chaosOverdrive]);
+
+  useEffect(() => {
+    if (chaosLevel < 100 || chaosOverdrive) {
+      return;
+    }
+
+    setChaosOverdrive(true);
+    setGlitchMode(true);
+    updateAchievement('overdrive');
+    setTicker('OVERDRIVE発動: 演出負荷リミッターを解除しました。');
+    pushFakeAlert();
+
+    triggerCoinRain(160, 0, 3800);
+    const stormId = window.setInterval(() => {
+      triggerCoinRain(55, 0, 2800);
+    }, 900);
+
+    const endId = window.setTimeout(() => {
+      window.clearInterval(stormId);
+      setChaosOverdrive(false);
+      setChaosLevel(82);
+    }, 7500);
+
+    return () => {
+      window.clearInterval(stormId);
+      window.clearTimeout(endId);
+    };
+  }, [chaosLevel, chaosOverdrive, pushFakeAlert, setTicker, triggerCoinRain, updateAchievement]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -254,9 +362,10 @@ function HomePage() {
           konamiProgressRef.current = 0;
           setGodMode(true);
           setGlitchMode(true);
-          setChaosLevel((value) => Math.min(100, value + 20));
+          updateAchievement('godMode');
+          registerChaosAction(20);
           setTodayFortune('隠しコマンド成功: GOD MODE 解禁。今日だけ何を押しても演出が勝ちます。');
-          setTickerMessage('隠しコマンド検知: 運営が静かに拍手しています。');
+          setTicker('隠しコマンド検知: 運営が静かに拍手しています。');
         }
       } else {
         konamiProgressRef.current = key === konamiCode[0] ? 1 : 0;
@@ -265,29 +374,7 @@ function HomePage() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  useEffect(() => {
-    if (!partyMode) {
-      return;
-    }
-
-    const partyTimerId = window.setInterval(() => {
-      setCoinBurst(buildCoinBurst(24));
-      setChaosLevel((value) => Math.min(100, value + 2));
-
-      if (coinClearTimerRef.current !== null) {
-        window.clearTimeout(coinClearTimerRef.current);
-      }
-
-      coinClearTimerRef.current = window.setTimeout(() => {
-        setCoinBurst([]);
-        coinClearTimerRef.current = null;
-      }, 2100);
-    }, 4600);
-
-    return () => window.clearInterval(partyTimerId);
-  }, [partyMode]);
+  }, [registerChaosAction, setTicker, updateAchievement]);
 
   useEffect(() => {
     if (!isUpdateChecking) {
@@ -304,50 +391,21 @@ function HomePage() {
           window.clearInterval(progressId);
           setIsUpdateChecking(false);
           setUpdateResult(randomFrom(updateResults));
-          setChaosLevel((value) => Math.min(100, value + 6));
+          registerChaosAction(6);
         }
         return next;
       });
     }, 300);
 
     return () => window.clearInterval(progressId);
-  }, [isUpdateChecking]);
+  }, [isUpdateChecking, registerChaosAction]);
 
   useEffect(() => {
     return () => {
-      if (coinClearTimerRef.current !== null) {
-        window.clearTimeout(coinClearTimerRef.current);
-      }
+      burstTimersRef.current.forEach((timerId) => window.clearTimeout(timerId));
       maintenanceTimersRef.current.forEach((timerId) => window.clearTimeout(timerId));
     };
   }, []);
-
-  const triggerCoinRain = () => {
-    setCoinBurst(buildCoinBurst(70));
-    setChaosLevel((value) => Math.min(100, value + 9));
-
-    if (coinClearTimerRef.current !== null) {
-      window.clearTimeout(coinClearTimerRef.current);
-    }
-
-    coinClearTimerRef.current = window.setTimeout(() => {
-      setCoinBurst([]);
-      coinClearTimerRef.current = null;
-    }, 4700);
-  };
-
-  const pushFakeAlert = () => {
-    const source = randomFrom(fakeAlertPool);
-    const nextAlert: FakeAlert = {
-      id: ++alertIdRef.current,
-      text: source.text,
-      tone: source.tone
-    };
-
-    setFakeAlerts((current) => [nextAlert, ...current].slice(0, 6));
-    setHeadline(makeHeadline());
-    setChaosLevel((value) => Math.min(100, value + 3));
-  };
 
   const triggerEmergencyMaintenance = () => {
     if (maintenanceVisible) {
@@ -355,11 +413,11 @@ function HomePage() {
     }
 
     setMaintenanceVisible(true);
-    setMaintenanceMessage('サーバー再起動のフリをしています...');
-    setChaosLevel((value) => Math.min(100, value + 12));
+    setMaintenanceMessage('メンテナンス処理を開始しました...');
+    registerChaosAction(12);
 
     const firstTimer = window.setTimeout(() => {
-      setMaintenanceMessage('うそです。通常営業です。驚いた?');
+      setMaintenanceMessage('メンテナンス完了。再接続ありがとうございます。');
     }, 1600);
     const secondTimer = window.setTimeout(() => {
       setMaintenanceVisible(false);
@@ -370,36 +428,55 @@ function HomePage() {
 
   const rollFortune = () => {
     setTodayFortune(randomFrom(fortunePool));
-    setChaosLevel((value) => Math.min(100, value + 4));
+    registerChaosAction(4);
   };
 
   const runSlot = () => {
     const faces = rollSlotFaces();
     const result = faces.join('');
     setSlotResult(result);
-    setChaosLevel((value) => Math.min(100, value + 5));
+    registerChaosAction(6);
 
     if (faces.every((face) => face === faces[0])) {
       setTodayFortune('777演出発生: 今日はなにを押しても正解です。');
       setJackpotCount((value) => value + 777777);
-      triggerCoinRain();
+      updateAchievement('slotWinner');
+      setJackpotFever(true);
+      registerChaosAction(18);
+      triggerCoinRain(160, 0, 3600);
+      const feverTimer = window.setTimeout(() => setJackpotFever(false), 3600);
+      burstTimersRef.current.push(feverTimer);
       pushFakeAlert();
     }
   };
 
   const jamRedButton = () => {
     setClickStreak((value) => value + 1);
-    setChaosLevel((value) => Math.min(100, value + Math.floor(Math.random() * 11) + 8));
+    setRedButtonCount((value) => {
+      const next = value + 1;
+      if (next >= 10) {
+        updateAchievement('redEngineer');
+      }
+      return next;
+    });
+    registerChaosAction(Math.floor(Math.random() * 11) + 8);
     if (Math.random() > 0.62) {
       setHeadline(makeHeadline());
     }
-    if (Math.random() > 0.7) {
+    if (Math.random() > 0.74) {
       pushFakeAlert();
     }
   };
 
   const mascotClick = () => {
-    setMascotClickCount((value) => value + 1);
+    setMascotClickCount((value) => {
+      const next = value + 1;
+      if (next >= 7) {
+        updateAchievement('mascotFriend');
+      }
+      return next;
+    });
+
     if (mascotClickCount >= 6) {
       setGlitchMode(true);
       setTodayFortune('隠し条件達成: マスコットがページを乗っ取りました。');
@@ -417,12 +494,13 @@ function HomePage() {
     const nextHp = Math.max(0, bossHp - damage);
     setBossHp(nextHp);
     setBossLog(`あなたの連打が ${damage}% のダメージを与えた!`);
-    setChaosLevel((value) => Math.min(100, value + 4));
+    registerChaosAction(5);
 
     if (nextHp === 0) {
       setBossLog('撃破成功: 巨大メダル山は「また明日」と言い残して崩れ落ちた。');
       setTodayFortune('ボス討伐ボーナス: 今日のあなたは演出面で最強です。');
-      triggerCoinRain();
+      updateAchievement('bossSlayer');
+      triggerCoinRain(120, 0, 3200);
       pushFakeAlert();
     }
   };
@@ -433,25 +511,28 @@ function HomePage() {
   };
 
   return (
-    <div className={`home-stack april-home ${glitchMode ? 'april-glitch' : ''} ${godMode ? 'april-god-mode' : ''}`}>
+    <div
+      className={`home-stack april-home ${glitchMode ? 'april-glitch' : ''} ${godMode ? 'april-god-mode' : ''} ${chaosOverdrive ? 'april-chaos-overdrive' : ''}`}
+      style={{ '--chaos-intensity': chaosIntensity.toFixed(2) } as CSSProperties}
+    >
       <section className="april-hero" aria-labelledby="april-title">
-        <p className="april-ribbon">2026 APRIL FOOLS SPECIAL MODE</p>
+        <p className="april-ribbon">Spring Event Mode 2026 / 4.01 - 4.13</p>
         <div className="april-hero-headline-row">
           <h1 id="april-title" className="home-title april-title">
             クソでっけぇプッシャーゲーム
-            <span>嘘アプデ祭り会場</span>
+            <span>イベント会場</span>
           </h1>
           <button className="april-mascot-button" onClick={mascotClick} type="button" aria-label="マスコットをつつく">
             🐟
           </button>
         </div>
         <p className="home-subtitle april-subtitle">
-          文言、見た目、テンション、すべて4月1日仕様です。まともな顔は明日戻る予定です。
+          ギミック強化版の特設ページです。通常版は <a href="/classic" className="april-inline-link">/classic</a> からアクセスできます。
         </p>
         <p className="april-breaking">📰 {headline}</p>
 
         <div className="april-live-ticker" aria-live="polite">
-          <span>{tickerMessage}</span>
+          <span key={tickerKey}>{tickerMessage}</span>
         </div>
 
         <div className="april-chaos-panel" role="status" aria-live="polite">
@@ -470,11 +551,11 @@ function HomePage() {
         </div>
       </section>
 
-      <section className="april-gimmick-grid" aria-label="エイプリルフールギミック">
+      <section className="april-gimmick-grid" aria-label="イベントギミック">
         <article className="april-card april-card-loud">
           <h2><IconConfetti size={18} /> メダル豪雨ボタン</h2>
-          <p>押すとだいたい景気が良くなります。CPU使用率も少し景気良くなります。</p>
-          <button type="button" className="april-action-button" onClick={triggerCoinRain}>
+          <p>押すたびに新しい豪雨を重ねて発動します。重なるほど派手です。</p>
+          <button type="button" className="april-action-button" onClick={() => triggerCoinRain()}>
             メダルを降らせる
           </button>
         </article>
@@ -505,25 +586,17 @@ function HomePage() {
 
         <article className="april-card">
           <h2><IconBolt size={18} /> 緊急メンテ演出</h2>
-          <p>押すと一瞬だけ運営の気持ちになれます。</p>
+          <p>運営画面の緊張感を3秒で疑似体験できます。</p>
           <button type="button" className="april-action-button" onClick={triggerEmergencyMaintenance}>
-            メンテ開始(うそ)
+            メンテ開始
           </button>
         </article>
 
         <article className="april-card">
           <h2><IconSparkles size={18} /> 覚醒モード</h2>
-          <p>文字が暴れます。責任は4月1日が持ちます。</p>
+          <p>ページ全体が揺れます。カオス指数が高いほど揺れ幅も上がります。</p>
           <button type="button" className="april-action-button" onClick={() => setGlitchMode((value) => !value)}>
-            {glitchMode ? '正気を取り戻す' : '覚醒する'}
-          </button>
-        </article>
-
-        <article className="april-card">
-          <h2><IconAlertTriangle size={18} /> 偽ニュース生成機</h2>
-          <p>最新のそれっぽい速報を自動生成して、みんなを軽く混乱させます。</p>
-          <button type="button" className="april-action-button" onClick={pushFakeAlert}>
-            偽速報を投下
+            {glitchMode ? '覚醒を解除' : '覚醒する'}
           </button>
         </article>
 
@@ -546,7 +619,7 @@ function HomePage() {
         </article>
 
         <article className="april-card">
-          <h2><IconRefresh size={18} /> 嘘アップデート確認</h2>
+          <h2><IconRefresh size={18} /> 更新チェック</h2>
           <p>チェックするたびに、ちょっとだけ意味のない達成感を得られます。</p>
           <div className="april-update-bar" aria-hidden="true">
             <span style={{ width: `${updateProgress}%` }} />
@@ -557,20 +630,12 @@ function HomePage() {
             {isUpdateChecking ? '確認中...' : '更新を確認'}
           </button>
         </article>
-
-        <article className="april-card">
-          <h2><IconConfetti size={18} /> パーティーモード</h2>
-          <p>ONにすると定期的にメダルが降ります。理性は降りません。</p>
-          <button type="button" className="april-action-button" onClick={() => setPartyMode((value) => !value)}>
-            {partyMode ? 'パーティー終了' : 'パーティー開始'}
-          </button>
-        </article>
       </section>
 
-      <section className="april-alert-feed" aria-live="polite" aria-label="偽速報フィード">
-        <h2>偽速報フィード</h2>
+      <section className="april-alert-feed" aria-live="polite" aria-label="通知フィード">
+        <h2><IconAlertTriangle size={18} /> 通知フィード</h2>
         {fakeAlerts.length === 0 ? (
-          <p>まだ速報はありません。ボタンを押して世間をざわつかせてください。</p>
+          <p>まだ通知はありません。遊ぶほど通知が増えます。</p>
         ) : (
           <ul>
             {fakeAlerts.map((alert) => (
@@ -580,24 +645,24 @@ function HomePage() {
         )}
       </section>
 
-      <section className="april-mission-board" aria-labelledby="mission-title">
+      <section className="april-mission-board" aria-labelledby="achievement-title">
         <div>
-          <h2 id="mission-title">本日のミッション</h2>
-          <p>クリアしても称号はもらえません。達成感だけ配布します。</p>
+          <h2 id="achievement-title">イベント実績</h2>
+          <p>条件を満たすと自動達成。進行はこのページ内で管理されます。</p>
         </div>
         <ul>
-          <li className={missionState.rain ? 'done' : ''}>メダル豪雨を1回発動</li>
-          <li className={missionState.wild ? 'done' : ''}>カオス指数45%以上</li>
-          <li className={missionState.flip ? 'done' : ''}>逆さまモードを体験</li>
-          <li className={missionState.mascot ? 'done' : ''}>マスコットを7回つつく</li>
-          <li className={missionState.boss ? 'done' : ''}>レイドボスを撃破</li>
-          <li className={missionState.god ? 'done' : ''}>隠しコマンドでGOD MODE発動</li>
+          <li className={achievements.redEngineer ? 'done' : ''}>赤ボタンを10回押す ({Math.min(redButtonCount, 10)}/10)</li>
+          <li className={achievements.slotWinner ? 'done' : ''}>3秒スロットで当たりを引く</li>
+          <li className={achievements.bossSlayer ? 'done' : ''}>レイドボスを撃破する</li>
+          <li className={achievements.overdrive ? 'done' : ''}>カオス指数100%でOVERDRIVEを発動</li>
+          <li className={achievements.godMode ? 'done' : ''}>隠しコマンドでGOD MODEを解禁</li>
+          <li className={achievements.mascotFriend ? 'done' : ''}>マスコットを7回つつく</li>
         </ul>
-        <p className="april-mission-progress">達成率: {completedMissions}/6</p>
+        <p className="april-mission-progress">達成率: {completedAchievements}/6</p>
       </section>
 
       <section className="link-card april-links-card">
-        <h2 className="section-title">メイン導線(ここだけ真面目)</h2>
+        <h2 className="section-title">メイン導線</h2>
         <div className="link-grid link-grid-two">
           <div className="link-column">
             <MmpPrimaryButton
@@ -647,8 +712,8 @@ function HomePage() {
         <strong>{jackpotCount.toLocaleString()} 枚</strong>
       </section>
 
-      <section className="april-patchnote-card" aria-label="嘘パッチノート">
-        <h2>4/1 嘘パッチノート</h2>
+      <section className="april-patchnote-card" aria-label="イベントパッチノート">
+        <h2>イベントパッチノート</h2>
         <ul>
           <li>メダルの角を丸くしてやさしい握り心地に改善。</li>
           <li>押すと鳴るボタンの効果音を「ﾄﾞﾔｧ」に変更。</li>
@@ -664,7 +729,7 @@ function HomePage() {
 
       <section className="april-serious-zone" aria-label="真面目ゾーン">
         <h2>真面目ゾーン (統計・開発者向け)</h2>
-        <p>この先は通常機能です。エイプリルフールに疲れたらここへ避難してください。</p>
+        <p>この先は通常機能です。イベント演出に疲れたらここへ避難してください。</p>
       </section>
 
       {showDeferredSections ? (
@@ -675,23 +740,27 @@ function HomePage() {
         <DeferredPlaceholders />
       )}
 
-      {coinBurst.length > 0 && (
+      {coinBursts.length > 0 && (
         <div className="april-coin-rain" aria-hidden="true">
-          {coinBurst.map((coin) => (
-            <span
-              key={coin.id}
-              className="april-coin"
-              style={{
-                left: `${coin.x}%`,
-                '--coin-drift': `${coin.drift}px`,
-                '--coin-duration': `${coin.duration}s`,
-                '--coin-delay': `${coin.delay}s`,
-                '--coin-size': `${coin.size}rem`,
-                '--coin-rotate': `${coin.rotate}deg`
-              } as CSSProperties}
-            >
-              {coin.emoji}
-            </span>
+          {coinBursts.map((burst) => (
+            <div key={burst.id} className="april-coin-layer">
+              {burst.particles.map((coin) => (
+                <span
+                  key={`${burst.id}-${coin.id}`}
+                  className="april-coin"
+                  style={{
+                    left: `${coin.x}%`,
+                    '--coin-drift': `${coin.drift}px`,
+                    '--coin-duration': `${coin.duration}s`,
+                    '--coin-delay': `${coin.delay}s`,
+                    '--coin-size': `${coin.size}rem`,
+                    '--coin-rotate': `${coin.rotate}deg`
+                  } as CSSProperties}
+                >
+                  {coin.emoji}
+                </span>
+              ))}
+            </div>
           ))}
         </div>
       )}
@@ -699,7 +768,7 @@ function HomePage() {
       {maintenanceVisible && (
         <div className="april-maintenance-overlay" role="alertdialog" aria-modal="true" aria-live="assertive">
           <div className="april-maintenance-card">
-            <p>⚠ 緊急メンテナンス速報 ⚠</p>
+            <p>⚠ メンテナンス通知 ⚠</p>
             <strong>{maintenanceMessage}</strong>
             <span>この演出は 4.2 秒で自動終了します。</span>
           </div>
@@ -715,6 +784,18 @@ function HomePage() {
               閉じる(勇気)
             </button>
           </div>
+        </div>
+      )}
+
+      {chaosOverdrive && (
+        <div className="april-overdrive-overlay" aria-hidden="true">
+          <p>OVERDRIVE</p>
+        </div>
+      )}
+
+      {jackpotFever && (
+        <div className="april-jackpot-fever" aria-hidden="true">
+          <p>JACKPOT FEVER</p>
         </div>
       )}
     </div>
