@@ -9,6 +9,8 @@ import {
   IconCalendarSmile,
   IconConfetti,
   IconDeviceGamepad2,
+  IconExternalLink,
+  IconLock,
   IconRefresh,
   IconRotateClockwise2,
   IconSparkles,
@@ -62,11 +64,11 @@ const fakeHeadlines = [
   '特報: でかプ史上初「押すほど軽くなるUI」実装へ'
 ];
 const fakeTickerMessages = [
-  '春イベント期間: 2026/04/01 - 2026/04/13',
-  '注意: 赤ボタンは押した分だけ赤くなります。',
-  '運営メモ: 連打は1日30回まで推奨(推奨なだけ)。',
-  '臨時告知: クリックしすぎると画面に友情が芽生えます。',
-  '豆知識: 連打は哲学、放置は美学。'
+  "Happy April Fool's Day!! 今年は4/13ごろまでゆるっとイベント運用中です。",
+  '赤いボタンは押した分だけ盛り上がるタイプです。遠慮なくどうぞ。',
+  '連打してる姿、けっこうカッコいいです。たぶん。',
+  'いっぱい遊ぶほど演出がはしゃぎます。仕様です。',
+  '今日の豆知識: 連打は哲学、放置は美学。'
 ];
 const fakeAdMessages = [
   '期間限定: メダル1枚でメダル1枚が当たる激アツ抽選会!',
@@ -82,10 +84,10 @@ const fakeAlertPool: { text: string; tone: FakeAlert['tone'] }[] = [
   { text: '注意: その演出、意味はありませんが勢いはあります。', tone: 'warn' }
 ];
 const updateResults = [
-  '更新完了: バグを2件増やして臨場感を強化しました。',
-  '更新完了: 何も変わっていません。気のせいです。',
-  '更新完了: 表示だけ1.0.0.0.1になりました。',
-  '更新完了: 演出が0.7秒だけドラマチックになりました。'
+  '更新完了: 演出がさらに元気になりました。',
+  '更新完了: 何も変わってないようで、なんかいい感じです。',
+  '更新完了: バージョン表記だけちょっと伸びました。',
+  '更新完了: 0.7秒だけドラマチック成分を増量しました。'
 ];
 const konamiCode = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'];
 
@@ -128,10 +130,11 @@ function DeferredPlaceholders() {
 }
 
 function HomePage() {
+  const twitterHashUrl = 'https://x.com/search?q=%23%E3%81%A7%E3%81%8B%E3%83%97%20OR%20%23VR%E3%81%A7%E3%81%8B%E3%83%97&f=live';
   const [showDeferredSections, setShowDeferredSections] = useState(false);
   const [chaosLevel, setChaosLevel] = useState(8);
   const [chaosOverdrive, setChaosOverdrive] = useState(false);
-  const [todayFortune, setTodayFortune] = useState('「運勢を受け取る」を押すと未来が雑に確定します。');
+  const [todayFortune, setTodayFortune] = useState('「運勢を受け取る」を押すと、今日の流れをゆるく占えます。');
   const [slotResult, setSlotResult] = useState(rollSlotFaces().join(''));
   const [headline, setHeadline] = useState(makeHeadline());
   const [tickerMessage, setTickerMessage] = useState(randomFrom(fakeTickerMessages));
@@ -141,12 +144,12 @@ function HomePage() {
   const [glitchMode, setGlitchMode] = useState(false);
   const [godMode, setGodMode] = useState(false);
   const [maintenanceVisible, setMaintenanceVisible] = useState(false);
-  const [maintenanceMessage, setMaintenanceMessage] = useState('メンテナンス処理を開始しました...');
+  const [maintenanceMessage, setMaintenanceMessage] = useState('メンテナンス処理をゆるっと開始しました...');
   const [jackpotCount, setJackpotCount] = useState(18427001);
   const [mascotClickCount, setMascotClickCount] = useState(0);
   const [fakeAlerts, setFakeAlerts] = useState<FakeAlert[]>([]);
   const [bossHp, setBossHp] = useState(100);
-  const [bossLog, setBossLog] = useState('ボス「巨大メダル山」が待機中');
+  const [bossLog, setBossLog] = useState('ボス「巨大メダル山」がやる気満々で待機中');
   const [clickStreak, setClickStreak] = useState(0);
   const [redButtonCount, setRedButtonCount] = useState(0);
   const [adPopupVisible, setAdPopupVisible] = useState(false);
@@ -228,12 +231,12 @@ function HomePage() {
 
   const streakComment =
     clickStreak >= 35
-      ? '連打神: 指先がサーバーより先に温まっています。'
+      ? '連打神: 指先がサーバーより先に温まってます。'
       : clickStreak >= 20
-        ? '連打職人: いいリズムです。近所には配慮してください。'
+        ? '連打職人: いいリズム! その調子です。'
         : clickStreak >= 8
-          ? '連打見習い: だいぶ押せてます。いい汗です。'
-          : 'ウォームアップ中: まずは押して慣らしましょう。';
+          ? '連打見習い: だいぶノってきました。'
+          : 'ウォームアップ中: まずは気楽に押してみましょう。';
 
   useEffect(() => {
     if (showDeferredSections) {
@@ -301,7 +304,7 @@ function HomePage() {
   useEffect(() => {
     const decayId = window.setInterval(() => {
       const idleMs = Date.now() - chaosActionAtRef.current;
-      if (idleMs < 1400 || chaosOverdrive) {
+      if (idleMs < 5000 || chaosOverdrive) {
         return;
       }
 
@@ -309,8 +312,7 @@ function HomePage() {
         if (value <= 5) {
           return 5;
         }
-        const drop = value > 80 ? 2.6 : value > 45 ? 1.8 : 1.1;
-        return Math.max(5, value - drop);
+        return Math.max(5, value * 0.9);
       });
     }, 1000);
 
@@ -325,7 +327,7 @@ function HomePage() {
     setChaosOverdrive(true);
     setGlitchMode(true);
     updateAchievement('overdrive');
-    setTicker('OVERDRIVE発動: 演出負荷リミッターを解除しました。');
+    setTicker('OVERDRIVE発動! 演出が本気モードに入りました。');
     pushFakeAlert();
 
     triggerCoinRain(160, 0, 3800);
@@ -364,8 +366,8 @@ function HomePage() {
           setGlitchMode(true);
           updateAchievement('godMode');
           registerChaosAction(20);
-          setTodayFortune('隠しコマンド成功: GOD MODE 解禁。今日だけ何を押しても演出が勝ちます。');
-          setTicker('隠しコマンド検知: 運営が静かに拍手しています。');
+          setTodayFortune('隠しコマンド成功! GOD MODEになりました。今日は演出が勝ち確です。');
+          setTicker('隠しコマンドを検知! 運営が静かにガッツポーズしています。');
         }
       } else {
         konamiProgressRef.current = key === konamiCode[0] ? 1 : 0;
@@ -413,11 +415,11 @@ function HomePage() {
     }
 
     setMaintenanceVisible(true);
-    setMaintenanceMessage('メンテナンス処理を開始しました...');
+    setMaintenanceMessage('メンテナンス処理をゆるっと開始しました...');
     registerChaosAction(12);
 
     const firstTimer = window.setTimeout(() => {
-      setMaintenanceMessage('メンテナンス完了。再接続ありがとうございます。');
+      setMaintenanceMessage('メンテナンス完了! お待たせしました。');
     }, 1600);
     const secondTimer = window.setTimeout(() => {
       setMaintenanceVisible(false);
@@ -479,9 +481,9 @@ function HomePage() {
 
     if (mascotClickCount >= 6) {
       setGlitchMode(true);
-      setTodayFortune('隠し条件達成: マスコットがページを乗っ取りました。');
+      setTodayFortune('隠し条件クリア! マスコットがページを楽しんでいます。');
       setAdPopupVisible(true);
-      setAdMessage('マスコット広告: つついてくれてありがとう。もう3回どうぞ。');
+      setAdMessage('マスコットより: つついてくれてありがとう! もう3回いける?');
     }
   };
 
@@ -493,12 +495,12 @@ function HomePage() {
     const damage = Math.floor(Math.random() * 22) + 9;
     const nextHp = Math.max(0, bossHp - damage);
     setBossHp(nextHp);
-    setBossLog(`あなたの連打が ${damage}% のダメージを与えた!`);
+    setBossLog(`あなたの連打が ${damage}% のダメージを与えました!`);
     registerChaosAction(5);
 
     if (nextHp === 0) {
-      setBossLog('撃破成功: 巨大メダル山は「また明日」と言い残して崩れ落ちた。');
-      setTodayFortune('ボス討伐ボーナス: 今日のあなたは演出面で最強です。');
+      setBossLog('撃破成功! 巨大メダル山は「また明日」と言って崩れました。');
+      setTodayFortune('ボス討伐ボーナス! 今日は演出面でほぼ最強です。');
       updateAchievement('bossSlayer');
       triggerCoinRain(120, 0, 3200);
       pushFakeAlert();
@@ -507,7 +509,7 @@ function HomePage() {
 
   const resetBoss = () => {
     setBossHp(100);
-    setBossLog('ボス「巨大メダル山」が再召喚された!');
+    setBossLog('ボス「巨大メダル山」を再召喚しました!');
   };
 
   return (
@@ -516,18 +518,21 @@ function HomePage() {
       style={{ '--chaos-intensity': chaosIntensity.toFixed(2) } as CSSProperties}
     >
       <section className="april-hero" aria-labelledby="april-title">
-        <p className="april-ribbon">Spring Event Mode 2026 / 4.01 - 4.13</p>
+        <p className="april-ribbon">Happy April Fool's Day!! (4/1〜4/13ごろまでイベント中)</p>
         <div className="april-hero-headline-row">
           <h1 id="april-title" className="home-title april-title">
             クソでっけぇプッシャーゲーム
             <span>イベント会場</span>
           </h1>
-          <button className="april-mascot-button" onClick={mascotClick} type="button" aria-label="マスコットをつつく">
-            🐟
-          </button>
+          <div className="april-hero-side">
+            <button className="april-mascot-button" onClick={mascotClick} type="button" aria-label="マスコットをつつく">
+              🐟
+            </button>
+            <img src="/MMP_logo_480.webp" alt="Massive Medal Pusher ロゴ" className="april-mini-logo" />
+          </div>
         </div>
         <p className="home-subtitle april-subtitle">
-          ギミック強化版の特設ページです。通常版は <a href="/classic" className="april-inline-link">/classic</a> からアクセスできます。
+          今日はちょっとお祭りテンションのページです。落ち着いた通常版は <a href="/classic" className="april-inline-link">/classic</a> からどうぞ。
         </p>
         <p className="april-breaking">📰 {headline}</p>
 
@@ -554,7 +559,7 @@ function HomePage() {
       <section className="april-gimmick-grid" aria-label="イベントギミック">
         <article className="april-card april-card-loud">
           <h2><IconConfetti size={18} /> メダル豪雨ボタン</h2>
-          <p>押すたびに新しい豪雨を重ねて発動します。重なるほど派手です。</p>
+          <p>押すたびに新しい豪雨を追加発動。重なるほどド派手になります。</p>
           <button type="button" className="april-action-button" onClick={() => triggerCoinRain()}>
             メダルを降らせる
           </button>
@@ -578,7 +583,7 @@ function HomePage() {
 
         <article className="april-card">
           <h2><IconRotateClockwise2 size={18} /> 逆さまモード</h2>
-          <p>画面全体をひっくり返します。酔いやすい方はご注意ください。</p>
+          <p>画面全体をひっくり返します。酔いやすい方はゆっくりどうぞ。</p>
           <button type="button" className="april-action-button" onClick={() => setFlipMode((value) => !value)}>
             {flipMode ? '元に戻す' : '世界をひっくり返す'}
           </button>
@@ -586,7 +591,7 @@ function HomePage() {
 
         <article className="april-card">
           <h2><IconBolt size={18} /> 緊急メンテ演出</h2>
-          <p>運営画面の緊張感を3秒で疑似体験できます。</p>
+          <p>運営画面の緊張感を、3秒でちょっとだけ体験できます。</p>
           <button type="button" className="april-action-button" onClick={triggerEmergencyMaintenance}>
             メンテ開始
           </button>
@@ -594,7 +599,7 @@ function HomePage() {
 
         <article className="april-card">
           <h2><IconSparkles size={18} /> 覚醒モード</h2>
-          <p>ページ全体が揺れます。カオス指数が高いほど揺れ幅も上がります。</p>
+          <p>ページ全体がぶるぶるします。カオス指数が高いほど揺れ幅もアップ。</p>
           <button type="button" className="april-action-button" onClick={() => setGlitchMode((value) => !value)}>
             {glitchMode ? '覚醒を解除' : '覚醒する'}
           </button>
@@ -620,7 +625,7 @@ function HomePage() {
 
         <article className="april-card">
           <h2><IconRefresh size={18} /> 更新チェック</h2>
-          <p>チェックするたびに、ちょっとだけ意味のない達成感を得られます。</p>
+          <p>押すたびに、なんか進んだ気分になれます。</p>
           <div className="april-update-bar" aria-hidden="true">
             <span style={{ width: `${updateProgress}%` }} />
           </div>
@@ -635,7 +640,7 @@ function HomePage() {
       <section className="april-alert-feed" aria-live="polite" aria-label="通知フィード">
         <h2><IconAlertTriangle size={18} /> 通知フィード</h2>
         {fakeAlerts.length === 0 ? (
-          <p>まだ通知はありません。遊ぶほど通知が増えます。</p>
+          <p>まだ通知はありません。遊ぶほどにぎやかになります。</p>
         ) : (
           <ul>
             {fakeAlerts.map((alert) => (
@@ -648,7 +653,7 @@ function HomePage() {
       <section className="april-mission-board" aria-labelledby="achievement-title">
         <div>
           <h2 id="achievement-title">イベント実績</h2>
-          <p>条件を満たすと自動達成。進行はこのページ内で管理されます。</p>
+          <p>条件を満たすと自動で達成。気楽に集めてください。</p>
         </div>
         <ul>
           <li className={achievements.redEngineer ? 'done' : ''}>赤ボタンを10回押す ({Math.min(redButtonCount, 10)}/10)</li>
@@ -662,7 +667,7 @@ function HomePage() {
       </section>
 
       <section className="link-card april-links-card">
-        <h2 className="section-title">メイン導線</h2>
+        <h2 className="section-title">でかプ公式リンク集 / MMP Quick Links</h2>
         <div className="link-grid link-grid-two">
           <div className="link-column">
             <MmpPrimaryButton
@@ -695,15 +700,58 @@ function HomePage() {
             >
               公式グループ(VRChat)
             </MmpPrimaryButton>
-            <MmpOutlineButton
-              href="https://github.com/pikachu0310/very-big-medal-pusher-data-server"
+            <MmpPrimaryButton
+              href="https://vrchat.com/home/launch?worldId=wrld_1af53798-92a3-4c3f-99ae-a7c42ec6084d"
               target="_blank"
-              icon={<IconBrandGithub size={20} />}
+              icon={<IconWorld size={22} />}
               size="lg"
+              className="mmp-link-hero-button"
             >
-              Data Server GitHub
-            </MmpOutlineButton>
+              VRChatワールドリンク
+            </MmpPrimaryButton>
+            <MmpPrimaryButton
+              href={twitterHashUrl}
+              target="_blank"
+              icon={<IconExternalLink size={22} />}
+              size="lg"
+              className="mmp-link-hero-button"
+            >
+              #でかプ / #VRでかプ (X投稿)
+            </MmpPrimaryButton>
           </div>
+        </div>
+      </section>
+
+      <section className="link-card april-links-card">
+        <h2 className="section-title">開発者向けリンク集 / Links for Developers</h2>
+        <div className="link-grid link-grid-three">
+          <MmpOutlineButton
+            href="/swagger/index.html"
+            target="_blank"
+            icon={<IconExternalLink size={18} />}
+            size="lg"
+            heightMultiplier={1.1}
+          >
+            SwaggerUI (API一覧)
+          </MmpOutlineButton>
+          <MmpOutlineButton
+            href="https://push.trap.show/?server=mariadb.ns-system.svc.cluster.local&username=nsapp_c27d6f571f88ffff360fe2&db=nsapp_c27d6f571f88ffff360fe2"
+            target="_blank"
+            icon={<IconLock size={18} />}
+            size="lg"
+            heightMultiplier={1.1}
+          >
+            データベース
+          </MmpOutlineButton>
+          <MmpOutlineButton
+            href="https://github.com/pikachu0310/very-big-medal-pusher-data-server"
+            target="_blank"
+            icon={<IconBrandGithub size={18} />}
+            size="lg"
+            heightMultiplier={1.1}
+          >
+            Data Server GitHub
+          </MmpOutlineButton>
         </div>
       </section>
 

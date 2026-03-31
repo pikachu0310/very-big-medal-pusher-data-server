@@ -36,6 +36,12 @@ body {
     linear-gradient(120deg, #fffdf5 0%, #f4fbff 45%, #fff6ec 100%);
 }
 
+.classic-mode-body {
+  background: #fafafa;
+  color: #334155;
+  font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -88,12 +94,22 @@ body {
   flex: 1;
 }
 
+.app-main-container.classic-main-container {
+  width: min(100%, 58rem);
+  padding: 1rem 1rem 2rem;
+}
+
 .app-footer {
   margin-top: auto;
   padding: 1rem;
   text-align: center;
   border-top: 2px dashed rgba(17, 24, 39, 0.2);
   background: rgba(255, 255, 255, 0.65);
+}
+
+.classic-mode-body .app-footer {
+  border-top: 1px solid #e9ecef;
+  background: transparent;
 }
 
 .app-footer-text {
@@ -107,10 +123,21 @@ body {
   color: #34455e;
 }
 
+.classic-mode-body .app-footer-text {
+  color: #6b7280;
+  font-size: 0.875rem;
+  gap: 0.5rem;
+}
+
 .app-footer-link {
   color: #304e80;
   text-decoration: none;
   font-weight: 700;
+}
+
+.classic-mode-body .app-footer-link {
+  color: #6b7280;
+  font-weight: 400;
 }
 
 .app-footer-link:hover {
@@ -160,6 +187,13 @@ body {
   display: flex;
   align-items: flex-start;
   gap: 0.8rem;
+}
+
+.april-hero-side {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.5rem;
 }
 
 .april-title {
@@ -310,6 +344,16 @@ body {
 
 .april-mascot-button:hover {
   transform: rotate(-7deg) scale(1.07);
+}
+
+.april-mini-logo {
+  width: clamp(64px, 8vw, 98px);
+  height: auto;
+  object-fit: contain;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.2rem;
 }
 
 .april-gimmick-grid {
