@@ -232,6 +232,7 @@ function HomePage() {
   const alertIdRef = useRef(0);
   const burstIdRef = useRef(0);
   const adIdRef = useRef(0);
+  const overdriveGuardRef = useRef(false);
   const burstTimersRef = useRef<number[]>([]);
 
   const setTicker = useCallback((message: string) => {
@@ -433,10 +434,11 @@ function HomePage() {
   }, [chaosLocked]);
 
   useEffect(() => {
-    if (chaosLevel < 100 || chaosLocked) {
+    if (chaosLevel < 100 || overdriveGuardRef.current) {
       return;
     }
 
+    overdriveGuardRef.current = true;
     setChaosLevel(100);
     setChaosLocked(true);
     setChaosOverdrive(true);
@@ -457,13 +459,15 @@ function HomePage() {
       setChaosLocked(false);
       setChaosLevel(85);
       setTicker('OVERDRIVE終了。ここからまたカオスが落ち着いていきます。');
+      overdriveGuardRef.current = false;
     }, 10000);
 
     return () => {
       window.clearInterval(stormId);
       window.clearTimeout(endId);
+      overdriveGuardRef.current = false;
     };
-  }, [chaosLevel, chaosLocked, pushFakeAlert, setTicker, spawnAdPopup, triggerCoinRain, updateAchievement]);
+  }, [chaosLevel, pushFakeAlert, setTicker, spawnAdPopup, triggerCoinRain, updateAchievement]);
 
   useEffect(() => {
     if (!isUpdateChecking) {
