@@ -551,6 +551,12 @@ body {
   font-family: 'Mochiy Pop One', sans-serif;
 }
 
+.april-mission-complete-note {
+  margin-top: 0.55rem;
+  color: #c2410c;
+  font-weight: 800;
+}
+
 .link-card {
   border-radius: 1rem;
   padding: clamp(1rem, 3vw, 1.5rem);
@@ -880,6 +886,17 @@ button.hero-link-button {
   border-color: rgba(239, 68, 68, 0.55);
 }
 
+.april-chaos-overdrive .april-title,
+.april-chaos-overdrive .april-breaking,
+.april-chaos-overdrive .april-card,
+.april-chaos-overdrive .april-action-button,
+.april-chaos-overdrive .april-danger-button,
+.april-chaos-overdrive .hero-link-button,
+.april-chaos-overdrive .april-alert-feed,
+.april-chaos-overdrive .april-jackpot-strip {
+  animation: april-overdrive-wobble 0.2s ease-in-out infinite !important;
+}
+
 .april-overdrive-overlay,
 .april-jackpot-fever {
   position: fixed;
@@ -892,9 +909,9 @@ button.hero-link-button {
 
 .april-overdrive-overlay {
   background:
-    radial-gradient(circle at center, rgba(239, 68, 68, 0.18), transparent 56%),
+    radial-gradient(circle at center, rgba(239, 68, 68, 0.28), transparent 56%),
     repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.08) 0, rgba(255, 255, 255, 0.08) 14px, transparent 14px, transparent 30px);
-  animation: april-overdrive-flash 0.42s steps(2, end) infinite;
+  animation: april-overdrive-flash 0.2s steps(2, end) infinite;
 }
 
 .april-overdrive-overlay p,
@@ -1372,6 +1389,28 @@ select:focus-visible,
 
   100% {
     opacity: 0.3;
+  }
+}
+
+@keyframes april-overdrive-wobble {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+
+  25% {
+    transform: translate(2px, -2px) rotate(1.2deg) scale(1.01);
+  }
+
+  50% {
+    transform: translate(-2px, 2px) rotate(-1.4deg) scale(1.02);
+  }
+
+  75% {
+    transform: translate(2px, 1px) rotate(1deg) scale(1.01);
+  }
+
+  100% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
   }
 }
 

@@ -49,7 +49,15 @@ type AdPopup = {
   y: number;
 };
 
-type AchievementKey = 'redEngineer' | 'slotWinner' | 'bossSlayer' | 'overdrive' | 'godMode' | 'heavenJackpot';
+type AchievementKey =
+  | 'redEngineer'
+  | 'slotWinner'
+  | 'bossSlayer'
+  | 'overdrive'
+  | 'heavenJackpot'
+  | 'adCleaner'
+  | 'rainMaker'
+  | 'flipRookie';
 
 type AchievementState = Record<AchievementKey, boolean>;
 
@@ -77,7 +85,10 @@ const fakeTickerMessages = [
   '赤いボタンは押した分だけ盛り上がるタイプです。遠慮なくどうぞ。',
   '連打してる姿、けっこうカッコいいです。たぶん。',
   'いっぱい遊ぶほど演出がはしゃぎます。仕様です。',
-  '今日の豆知識: 連打は哲学、放置は美学。'
+  '今日の豆知識: 連打は哲学、放置は美学。',
+  '速報: でかプ広告委員会が今日も元気に活動中。',
+  '速報: レイドボスが「ちょっと休ませて」と言っています。',
+  'お知らせ: メダル雨は気持ちが上がるので推奨です。'
 ];
 const fakeAdMessages = [
   '期間限定: メダル1枚でメダル1枚が当たる激アツ抽選会!',
@@ -86,7 +97,10 @@ const fakeAdMessages = [
   '新機能: ボタンを見つめるとボタンも見つめ返します。',
   '告知: この広告、増殖します。たぶんすぐ増えます。',
   'ピックアップ: 連打のしすぎに注意しつつ、もっと連打しよう。',
-  'キャンペーン: 今日だけ体感ジャックポット率120%。体感です。'
+  'キャンペーン: 今日だけ体感ジャックポット率120%。体感です。',
+  '速報: お祭り中につき広告もテンション高めでお送りします。',
+  '限定オファー: レイドボス応援セット(気持ち)配布中。',
+  '目撃情報: メダル雨の下で願うと気分が上がります。'
 ];
 const fakeAlertPool: { text: string; tone: FakeAlert['tone'] }[] = [
   { text: '通知: 大量連打を検知、演出負荷を解禁しました。', tone: 'warn' },
@@ -99,9 +113,38 @@ const updateResults = [
   '更新完了: 演出がさらに元気になりました。',
   '更新完了: 何も変わってないようで、なんかいい感じです。',
   '更新完了: バージョン表記だけちょっと伸びました。',
-  '更新完了: 0.7秒だけドラマチック成分を増量しました。'
+  '更新完了: 0.7秒だけドラマチック成分を増量しました。',
+  '更新完了: いつもよりちょっとキラキラしています。',
+  '更新完了: ボタンの押し心地が気持ちの中で向上しました。',
+  '更新完了: だいたい良い感じです。たぶん。'
 ];
-const konamiCode = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'];
+const maintenanceStartMessages = [
+  'メンテナンス処理をゆるっと開始しました...',
+  '緊急メンテ突入! まずは深呼吸します...',
+  'メンテモードON! ネジを締め直しています...',
+  'メンテ開始! いま全員で画面を見つめています...'
+];
+
+const maintenanceEndMessages = [
+  'メンテナンス完了! お待たせしました。',
+  '復旧しました! ただいま通常運転です。',
+  '調整完了! さあ、また遊びましょう。',
+  'おまたせ! いい感じに戻りました。'
+];
+
+const bossHitMessages = [
+  'いい一撃! 連打の圧が伝わった!',
+  '会心ヒット! ボスがぐらついている!',
+  'クリティカル気味! その調子!',
+  'ナイス連打! ちゃんと効いてる!'
+];
+
+const bossDefeatMessages = [
+  '撃破成功! 巨大メダル山は「また明日」と言って崩れました。',
+  '討伐完了! ボスは拍手しながら退場しました。',
+  'やった! ボスが「今日は負けた!」と叫んで消えました。',
+  '勝利! ボスはメダルを置いて帰りました。'
+];
 
 function buildCoinBurst(count: number) {
   return Array.from({ length: count }, (_, index) => ({
@@ -155,7 +198,6 @@ function HomePage() {
   const [coinBursts, setCoinBursts] = useState<CoinBurst[]>([]);
   const [flipMode, setFlipMode] = useState(false);
   const [glitchMode, setGlitchMode] = useState(false);
-  const [godMode, setGodMode] = useState(false);
   const [maintenanceVisible, setMaintenanceVisible] = useState(false);
   const [maintenanceMessage, setMaintenanceMessage] = useState('メンテナンス処理をゆるっと開始しました...');
   const [jackpotCount, setJackpotCount] = useState(18427001);
@@ -164,6 +206,8 @@ function HomePage() {
   const [bossLog, setBossLog] = useState('ボス「巨大メダル山」がやる気満々で待機中');
   const [clickStreak, setClickStreak] = useState(0);
   const [redButtonCount, setRedButtonCount] = useState(0);
+  const [manualRainCount, setManualRainCount] = useState(0);
+  const [adClosedCount, setAdClosedCount] = useState(0);
   const [adPopups, setAdPopups] = useState<AdPopup[]>([]);
   const [isUpdateChecking, setIsUpdateChecking] = useState(false);
   const [updateProgress, setUpdateProgress] = useState(0);
@@ -177,8 +221,10 @@ function HomePage() {
     slotWinner: false,
     bossSlayer: false,
     overdrive: false,
-    godMode: false,
-    heavenJackpot: false
+    heavenJackpot: false,
+    adCleaner: false,
+    rainMaker: false,
+    flipRookie: false
   });
 
   const deferredSectionAnchorRef = useRef<HTMLDivElement | null>(null);
@@ -187,7 +233,6 @@ function HomePage() {
   const burstIdRef = useRef(0);
   const adIdRef = useRef(0);
   const burstTimersRef = useRef<number[]>([]);
-  const konamiProgressRef = useRef(0);
 
   const setTicker = useCallback((message: string) => {
     setTickerMessage(message);
@@ -207,7 +252,7 @@ function HomePage() {
     });
   }, []);
 
-  const triggerCoinRain = useCallback((count = 70, chaosGain = 9, durationMs = 5200) => {
+  const triggerCoinRain = useCallback((count = 70, chaosGain = 9, durationMs = 5200, source: 'manual' | 'auto' = 'auto') => {
     const burstId = ++burstIdRef.current;
     const burst: CoinBurst = {
       id: burstId,
@@ -220,12 +265,22 @@ function HomePage() {
       registerChaosAction(chaosGain);
     }
 
+    if (source === 'manual') {
+      setManualRainCount((current) => {
+        const next = current + 1;
+        if (next >= 10) {
+          updateAchievement('rainMaker');
+        }
+        return next;
+      });
+    }
+
     const timerId = window.setTimeout(() => {
       setCoinBursts((current) => current.filter((item) => item.id !== burstId));
     }, durationMs);
 
     burstTimersRef.current.push(timerId);
-  }, [registerChaosAction]);
+  }, [registerChaosAction, updateAchievement]);
 
   const pushFakeAlert = useCallback(() => {
     const source = randomFrom(fakeAlertPool);
@@ -246,12 +301,19 @@ function HomePage() {
       y: 8 + Math.random() * 78
     };
 
-    setAdPopups((current) => [...current.slice(-9), popup]);
+    setAdPopups((current) => [...current.slice(-5), popup]);
   }, []);
 
   const removeAdPopup = useCallback((id: number) => {
     setAdPopups((current) => current.filter((popup) => popup.id !== id));
-  }, []);
+    setAdClosedCount((current) => {
+      const next = current + 1;
+      if (next >= 5) {
+        updateAchievement('adCleaner');
+      }
+      return next;
+    });
+  }, [updateAchievement]);
 
   const completedAchievements = Object.values(achievements).filter(Boolean).length;
   const chaosGauge = Math.round(Math.min(100, chaosLevel));
@@ -267,7 +329,7 @@ function HomePage() {
           : 'ウォームアップ中: まずは気楽に押してみましょう。';
 
   useEffect(() => {
-    if (achievementCelebrationDone || completedAchievements < 6) {
+    if (achievementCelebrationDone || completedAchievements < 8) {
       return;
     }
 
@@ -341,11 +403,14 @@ function HomePage() {
 
   useEffect(() => {
     const adId = window.setInterval(() => {
-      const burstCount = Math.random() > 0.72 ? 2 : 1;
+      if (Math.random() > 0.78) {
+        return;
+      }
+      const burstCount = Math.random() > 0.9 ? 2 : 1;
       for (let i = 0; i < burstCount; i += 1) {
         spawnAdPopup();
       }
-    }, 7500);
+    }, 12000);
 
     return () => window.clearInterval(adId);
   }, [spawnAdPopup]);
@@ -379,6 +444,7 @@ function HomePage() {
     updateAchievement('overdrive');
     setTicker('OVERDRIVE発動! 演出が本気モードに入りました。');
     pushFakeAlert();
+    spawnAdPopup('OVERDRIVE発動！！！ 画面が本気になりました。');
 
     triggerCoinRain(180, 0, 4600);
     const stormId = window.setInterval(() => {
@@ -389,44 +455,15 @@ function HomePage() {
       window.clearInterval(stormId);
       setChaosOverdrive(false);
       setChaosLocked(false);
+      setChaosLevel(85);
+      setTicker('OVERDRIVE終了。ここからまたカオスが落ち着いていきます。');
     }, 10000);
 
     return () => {
       window.clearInterval(stormId);
       window.clearTimeout(endId);
     };
-  }, [chaosLevel, chaosLocked, pushFakeAlert, setTicker, triggerCoinRain, updateAchievement]);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement | null;
-      if (target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA') {
-        return;
-      }
-
-      const key = event.key.toLowerCase();
-      const expected = konamiCode[konamiProgressRef.current];
-
-      if (key === expected) {
-        konamiProgressRef.current += 1;
-
-        if (konamiProgressRef.current === konamiCode.length) {
-          konamiProgressRef.current = 0;
-          setGodMode(true);
-          setGlitchMode(true);
-          updateAchievement('godMode');
-          registerChaosAction(20);
-          setTodayFortune('隠しコマンド成功! GOD MODEになりました。今日は演出が勝ち確です。');
-          setTicker('隠しコマンドを検知! 運営が静かにガッツポーズしています。');
-        }
-      } else {
-        konamiProgressRef.current = key === konamiCode[0] ? 1 : 0;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [registerChaosAction, setTicker, updateAchievement]);
+  }, [chaosLevel, chaosLocked, pushFakeAlert, setTicker, spawnAdPopup, triggerCoinRain, updateAchievement]);
 
   useEffect(() => {
     if (!isUpdateChecking) {
@@ -465,11 +502,12 @@ function HomePage() {
     }
 
     setMaintenanceVisible(true);
-    setMaintenanceMessage('メンテナンス処理をゆるっと開始しました...');
+    setMaintenanceMessage(randomFrom(maintenanceStartMessages));
     registerChaosAction(12);
+    spawnAdPopup('緊急メンテ速報: いったん確認します！');
 
     const firstTimer = window.setTimeout(() => {
-      setMaintenanceMessage('メンテナンス完了! お待たせしました。');
+      setMaintenanceMessage(randomFrom(maintenanceEndMessages));
     }, 1600);
     const secondTimer = window.setTimeout(() => {
       setMaintenanceVisible(false);
@@ -502,7 +540,7 @@ function HomePage() {
     registerChaosAction(6);
 
     if (faces.every((face) => face === faces[0])) {
-      setTodayFortune('777演出発生: 今日はなにを押しても正解です。');
+      setTodayFortune('Shirbe Jackpot！！！ 今日はノリで全部うまくいきそう。');
       setJackpotCount((value) => value + 777777);
       updateAchievement('slotWinner');
       setJackpotFeverText('Shirbe Jackpot！！！');
@@ -546,15 +584,16 @@ function HomePage() {
     const damage = Math.floor(Math.random() * 41) + 40;
     const nextHp = Math.max(0, bossHp - damage);
     setBossHp(nextHp);
-    setBossLog(`あなたの連打が ${damage}% のダメージを与えました!`);
+    setBossLog(`${randomFrom(bossHitMessages)} (${damage}ダメージ)`);
     registerChaosAction(5);
 
     if (nextHp === 0) {
-      setBossLog('撃破成功! 巨大メダル山は「また明日」と言って崩れました。');
+      setBossLog(randomFrom(bossDefeatMessages));
       setTodayFortune('ボス討伐ボーナス! 今日は演出面でほぼ最強です。');
       updateAchievement('bossSlayer');
       triggerCoinRain(120, 0, 3200);
       pushFakeAlert();
+      spawnAdPopup('ボス討伐おめでとう！！ 勝利広告をお届けします。');
     }
   };
 
@@ -563,9 +602,19 @@ function HomePage() {
     setBossLog('ボス「巨大メダル山」を再召喚しました!');
   };
 
+  const toggleFlipMode = () => {
+    setFlipMode((current) => {
+      const next = !current;
+      if (next) {
+        updateAchievement('flipRookie');
+      }
+      return next;
+    });
+  };
+
   return (
     <div
-      className={`home-stack april-home ${glitchMode ? 'april-glitch' : ''} ${godMode ? 'april-god-mode' : ''} ${chaosOverdrive ? 'april-chaos-overdrive' : ''}`}
+      className={`home-stack april-home ${glitchMode ? 'april-glitch' : ''} ${chaosOverdrive ? 'april-chaos-overdrive' : ''}`}
       style={{ '--chaos-intensity': chaosIntensity.toFixed(2) } as CSSProperties}
     >
       <section className="april-hero" aria-labelledby="april-title">
@@ -608,7 +657,7 @@ function HomePage() {
         <article className="april-card april-card-loud">
           <h2><IconConfetti size={18} /> メダル豪雨ボタン</h2>
           <p>押すたびに新しい豪雨を追加発動。重なるほどド派手になります。</p>
-          <button type="button" className="april-action-button" onClick={() => triggerCoinRain()}>
+          <button type="button" className="april-action-button" onClick={() => triggerCoinRain(70, 9, 5200, 'manual')}>
             メダルを降らせる
           </button>
         </article>
@@ -632,7 +681,7 @@ function HomePage() {
         <article className="april-card">
           <h2><IconRotateClockwise2 size={18} /> 逆さまモード</h2>
           <p>画面全体をひっくり返します。酔いやすい方はゆっくりどうぞ。</p>
-          <button type="button" className="april-action-button" onClick={() => setFlipMode((value) => !value)}>
+          <button type="button" className="april-action-button" onClick={toggleFlipMode}>
             {flipMode ? '元に戻す' : '世界をひっくり返す'}
           </button>
         </article>
@@ -705,13 +754,16 @@ function HomePage() {
         </div>
         <ul>
           <li className={achievements.redEngineer ? 'done' : ''}>赤ボタンを10回押す ({Math.min(redButtonCount, 10)}/10)</li>
+          <li className={achievements.rainMaker ? 'done' : ''}>メダルを10回降らせる ({Math.min(manualRainCount, 10)}/10)</li>
+          <li className={achievements.flipRookie ? 'done' : ''}>逆さまモードを1回体験する</li>
+          <li className={achievements.adCleaner ? 'done' : ''}>広告を5個閉じる ({Math.min(adClosedCount, 5)}/5)</li>
           <li className={achievements.slotWinner ? 'done' : ''}>3秒スロットで当たりを引く</li>
           <li className={achievements.bossSlayer ? 'done' : ''}>レイドボスを撃破する</li>
           <li className={achievements.overdrive ? 'done' : ''}>カオス指数100%でOVERDRIVEを発動</li>
-          <li className={achievements.godMode ? 'done' : ''}>隠しコマンドでGOD MODEを解禁</li>
           <li className={achievements.heavenJackpot ? 'done' : ''}>本日の運勢で Heaven Jackpot！！！を引く</li>
         </ul>
-        <p className="april-mission-progress">達成率: {completedAchievements}/6</p>
+        <p className="april-mission-progress">達成率: {completedAchievements}/8</p>
+        {completedAchievements >= 8 && <p className="april-mission-complete-note">実績コンプリート済み！ 今日の主役はあなたです。</p>}
       </section>
 
       <section className="link-card april-links-card">
@@ -809,7 +861,7 @@ function HomePage() {
       </section>
 
       <section className="april-patchnote-card" aria-label="イベントパッチノート">
-        <h2>イベントパッチノート</h2>
+        <h2>イベントパッチノート (ウソ)</h2>
         <ul>
           <li>メダルの角を丸くしてやさしい握り心地に改善。</li>
           <li>押すと鳴るボタンの効果音を「ﾄﾞﾔｧ」に変更。</li>
