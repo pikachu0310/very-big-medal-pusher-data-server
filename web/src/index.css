@@ -68,25 +68,56 @@ body {
 }
 
 .app-global-notice {
-  padding: 0.7rem 1rem;
-  background: repeating-linear-gradient(
-    -45deg,
-    #111827 0,
-    #111827 18px,
-    #1f2937 18px,
-    #1f2937 36px
-  );
-  color: #fef3c7;
-  font-size: 0.86rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  padding: 0.72rem 1rem;
+  background: linear-gradient(120deg, #fff4b8 0%, #ffd8f0 46%, #d6ecff 100%);
+  color: #5c3110;
   border-bottom: 2px solid #f59e0b;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.2);
 }
 
 .app-global-notice p {
   margin: 0;
-  text-align: center;
   letter-spacing: 0.03em;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 800;
+}
+
+.app-april-cta-link {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.42rem 0.95rem;
+  border-radius: 999px;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  background: linear-gradient(120deg, #ff2d6f 0%, #ff8a00 52%, #ffd500 100%);
+  box-shadow: 0 8px 18px rgba(255, 79, 43, 0.35);
+  animation: april-cta-pulse 1.3s ease-in-out infinite;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.app-april-cta-link::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 15%, rgba(255, 255, 255, 0.72) 50%, transparent 85%);
+  transform: translateX(-140%) skewX(-25deg);
+  animation: april-cta-shine 2.3s ease-in-out infinite;
+}
+
+.app-april-cta-link:hover,
+.app-april-cta-link:focus-visible {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 10px 20px rgba(255, 79, 43, 0.46);
 }
 
 .app-main-container {
@@ -1411,6 +1442,34 @@ select:focus-visible,
 
   100% {
     transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+}
+
+@keyframes april-cta-pulse {
+  0% {
+    filter: saturate(1);
+  }
+
+  50% {
+    filter: saturate(1.28);
+  }
+
+  100% {
+    filter: saturate(1);
+  }
+}
+
+@keyframes april-cta-shine {
+  0% {
+    transform: translateX(-140%) skewX(-25deg);
+  }
+
+  45% {
+    transform: translateX(140%) skewX(-25deg);
+  }
+
+  100% {
+    transform: translateX(140%) skewX(-25deg);
   }
 }
 

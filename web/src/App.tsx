@@ -4,15 +4,17 @@ import HomePage from './pages/HomePage';
 import ClassicHomePage from './pages/ClassicHomePage';
 
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
+const aprilFoolsPath = '/april-fools';
 
 function App() {
   const location = useLocation();
-  const isClassicRoute = location.pathname.startsWith('/classic');
+  const isAprilFoolsRoute = location.pathname.startsWith(aprilFoolsPath);
+  const isClassicMode = !isAprilFoolsRoute;
 
   useEffect(() => {
-    document.body.classList.toggle('classic-mode-body', isClassicRoute);
+    document.body.classList.toggle('classic-mode-body', isClassicMode);
     return () => document.body.classList.remove('classic-mode-body');
-  }, [isClassicRoute]);
+  }, [isClassicMode]);
 
   return (
     <div className="app-shell">
@@ -20,16 +22,20 @@ function App() {
         メインコンテンツへスキップ
       </a>
 
-      {!isClassicRoute && (
+      {!isAprilFoolsRoute && (
         <header className="app-global-notice" aria-label="イベント通知">
-          <p>Happy April Fool&apos;s Day!!</p>
+          <p>エイプリルフール特別版はこちら！</p>
+          <Link className="app-april-cta-link" to={aprilFoolsPath}>
+            ド派手版を見る
+          </Link>
         </header>
       )}
 
-      <main id="main-content" className={`app-main-container ${isClassicRoute ? 'classic-main-container' : ''}`}>
+      <main id="main-content" className={`app-main-container ${isClassicMode ? 'classic-main-container' : ''}`}>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<ClassicHomePage />} />
           <Route path="/classic" element={<ClassicHomePage />} />
+          <Route path={aprilFoolsPath} element={<HomePage />} />
           <Route path="/privacy" element={<Suspense fallback={null}><PrivacyPolicyPage /></Suspense>} />
         </Routes>
       </main>
@@ -37,12 +43,12 @@ function App() {
       <footer className="app-footer">
         <p className="app-footer-text">
           <Link className="app-footer-link" to="/privacy">
-            {isClassicRoute ? 'プライバシーポリシー' : 'プライバシーポリシー(やや真面目)'}
+            プライバシーポリシー
           </Link>
-          {!isClassicRoute && (
+          {isAprilFoolsRoute && (
             <>
               <span aria-hidden="true">|</span>
-              <Link className="app-footer-link" to="/classic">
+              <Link className="app-footer-link" to="/">
                 通常版ページ
               </Link>
             </>
@@ -52,7 +58,7 @@ function App() {
             GitHub
           </a>
           <span aria-hidden="true">|</span>
-          <span>{isClassicRoute ? '© 2025 Massive Medal Pusher' : '© 2026 Massive Medal Pusher April Fools Dept.'}</span>
+          <span>{isAprilFoolsRoute ? '© 2026 Massive Medal Pusher April Fools Dept.' : '© 2025 Massive Medal Pusher'}</span>
         </p>
       </footer>
     </div>
