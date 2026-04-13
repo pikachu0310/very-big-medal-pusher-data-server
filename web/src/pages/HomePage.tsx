@@ -633,7 +633,7 @@ function HomePage() {
           </div>
         </div>
         <p className="home-subtitle april-subtitle">
-          今はお祭りテンションのページだよ。落ち着いた通常版は <a href="/classic" className="april-inline-link">/classic</a> からどうぞ。
+          今はお祭りテンションのページだよ。落ち着いた通常版は <a href="/" className="april-inline-link">こちら</a> からどうぞ。
         </p>
         <p className="april-breaking">📰 {headline}</p>
 
@@ -881,7 +881,7 @@ function HomePage() {
 
       <section className="april-serious-zone" aria-label="真面目ゾーン">
         <h2>真面目ゾーン (統計・開発者向け)</h2>
-        <p>この先は通常機能です。イベント演出に疲れたらここへ避難してください。(<a href="/classic" className="april-inline-link">通常版はこちら</a>)</p>
+        <p>この先は通常機能です。イベント演出に疲れたらここへ避難してください。(<a href="/" className="april-inline-link">通常版はこちら</a>)</p>
       </section>
 
       {showDeferredSections ? (
