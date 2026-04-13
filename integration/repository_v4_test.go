@@ -178,6 +178,7 @@ func newSaveData(userID string, playtime int64, creditAll int64, achievements []
 		BlackBoxShopUsed:            15,
 		FerrettaLotteryMaxLines:     int(playtime) + 1,
 		BlackBoxUsedFerrettaItem:    16,
+		GetMedalTower:               int(playtime) + 2,
 		TaskCompleteCount:           2,
 		TotemAltarUnlockCount:       1,
 		TotemAltarUnlockUsedCredits: 20,
@@ -260,6 +261,9 @@ func TestRepositoryV4_InsertLatestAndExists(t *testing.T) {
 	}
 	if latest.BlackBoxUsedFerrettaItem != 16 {
 		t.Fatalf("latest bbox_used_ferlot: got %d", latest.BlackBoxUsedFerrettaItem)
+	}
+	if latest.GetMedalTower != 22 {
+		t.Fatalf("latest get_medaltower: got %d", latest.GetMedalTower)
 	}
 	if latest.DCFerrettaLotteryItemUsed["item-3"] != 4 {
 		t.Fatalf("latest dc_ferlot_useitem: got %#v", latest.DCFerrettaLotteryItemUsed)

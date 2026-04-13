@@ -1028,6 +1028,10 @@ components:
           type: number
           format: double
           x-oapi-codegen-extra-tags: { db: 'bbox_used_ferlot' }
+        get_medaltower:
+          type: number
+          format: double
+          x-oapi-codegen-extra-tags: { db: 'get_medaltower' }
         task_cnt:
           type: number
           format: double

@@ -245,6 +245,7 @@ CREATE TABLE `v2_save_data` (
   `bbox_shop` int(11) NOT NULL DEFAULT 0,
   `ferlot_maxln` int(11) NOT NULL DEFAULT 0,
   `bbox_used_ferlot` int(11) NOT NULL DEFAULT 0,
+  `get_medaltower` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `idx_save_data_v2_user_created_at` (`user_id`,`created_at`),
   KEY `idx_save_data_v2_user_playtime` (`user_id`,`playtime`),

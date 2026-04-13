@@ -164,6 +164,7 @@ type SaveDataV2 struct {
 	FerlotLot         *float64          `db:"ferlot_lot" json:"ferlot_lot,omitempty"`
 	FerlotMaxln       *float64          `db:"ferlot_maxln" json:"ferlot_maxln,omitempty"`
 	Firstboot         *string           `json:"firstboot,omitempty"`
+	GetMedaltower     *float64          `db:"get_medaltower" json:"get_medaltower,omitempty"`
 	HideRecord        *int              `db:"hide_record" json:"hide_record,omitempty"`
 	JackGet           *int64            `db:"jack_get" json:"jack_get,omitempty"`
 	JackStartmax      *int64            `db:"jack_startmax" json:"jack_startmax,omitempty"`

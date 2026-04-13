@@ -85,6 +85,7 @@ type SaveData struct {
 	BlackBoxShopUsed            int       `db:"bbox_shop"`
 	FerrettaLotteryMaxLines     int       `db:"ferlot_maxln"`
 	BlackBoxUsedFerrettaItem    int       `db:"bbox_used_ferlot"`
+	GetMedalTower               int       `db:"get_medaltower"`
 	TaskCompleteCount           int       `db:"task_cnt"`
 	TotemAltarUnlockCount       int       `db:"totem_altars"`
 	TotemAltarUnlockUsedCredits int64     `db:"totem_altars_credit"`
@@ -185,6 +186,7 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		BlackBoxShopUsed            *float64         `json:"bbox_shop"`
 		FerrettaLotteryMaxLines     *float64         `json:"ferlot_maxln"`
 		BlackBoxUsedFerrettaItem    *float64         `json:"bbox_used_ferlot"`
+		GetMedalTower               *float64         `json:"get_medaltower"`
 		TaskCompleteCount           *float64         `json:"task_cnt"`
 		DCMedalGet                  map[string]int   `json:"dc_medal_get"`
 		DCBallGet                   map[string]int64 `json:"dc_ball_get"`
@@ -291,6 +293,7 @@ func ParseSaveData(raw string) (*SaveData, error) {
 		BlackBoxShopUsed:            int(safeFloat64(m.BlackBoxShopUsed)),
 		FerrettaLotteryMaxLines:     int(safeFloat64(m.FerrettaLotteryMaxLines)),
 		BlackBoxUsedFerrettaItem:    int(safeFloat64(m.BlackBoxUsedFerrettaItem)),
+		GetMedalTower:               int(safeFloat64(m.GetMedalTower)),
 		TaskCompleteCount:           int(safeFloat64(m.TaskCompleteCount)),
 		DCMedalGet:                  m.DCMedalGet,
 		DCBallGet:                   m.DCBallGet,
@@ -420,6 +423,7 @@ func (sd *SaveData) ToModel() *models.SaveDataV2 {
 		bboxShop          = float64(sd.BlackBoxShopUsed)
 		ferlotMaxln       = float64(sd.FerrettaLotteryMaxLines)
 		bboxUsedFerlot    = float64(sd.BlackBoxUsedFerrettaItem)
+		getMedaltower     = float64(sd.GetMedalTower)
 		taskCnt           = float64(sd.TaskCompleteCount)
 		totemAltars       = sd.TotemAltarUnlockCount
 		totemAltarsCredit = sd.TotemAltarUnlockUsedCredits
@@ -494,6 +498,7 @@ func (sd *SaveData) ToModel() *models.SaveDataV2 {
 		BboxShop:          &bboxShop,
 		FerlotMaxln:       &ferlotMaxln,
 		BboxUsedFerlot:    &bboxUsedFerlot,
+		GetMedaltower:     &getMedaltower,
 		TaskCnt:           &taskCnt,
 		TotemAltars:       &totemAltars,
 		TotemAltarsCredit: &totemAltarsCredit,

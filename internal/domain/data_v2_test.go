@@ -9,7 +9,7 @@ import (
 )
 
 func TestParseSaveData_Base64AndUrlEncoded(t *testing.T) {
-	payload := `{"legacy":1,"version":4,"credit":"100","credit_all":200,"medal_in":3,"medal_get":4,"ball_get":5,"ball_chain":6,"sqr_get":"7","jack_get":8,"firstboot":12345,"lastsave":23456,"playtime":789,"jackfr_startmax":"1234","jackfr_totalmax":5678,"ferlot_lines":9.9,"bbox_shop":2.2,"ferlot_maxln":5.8,"bbox_used_ferlot":4.4,"task_cnt":3.9,"dc_bbox_shop":{"item-1":3},"dc_ferlot_item":{"item-2":4},"dc_ferlot_useitem":{"item-3":5},"l_achieve":["a",2],"l_perks":[1,2],"l_perks_credit":[10,20],"l_totems":[3],"l_totems_credit":[30],"l_totems_set":[2]}`
+	payload := `{"legacy":1,"version":4,"credit":"100","credit_all":200,"medal_in":3,"medal_get":4,"ball_get":5,"ball_chain":6,"sqr_get":"7","jack_get":8,"firstboot":12345,"lastsave":23456,"playtime":789,"jackfr_startmax":"1234","jackfr_totalmax":5678,"ferlot_lines":9.9,"bbox_shop":2.2,"ferlot_maxln":5.8,"bbox_used_ferlot":4.4,"get_medaltower":7.2,"task_cnt":3.9,"dc_bbox_shop":{"item-1":3},"dc_ferlot_item":{"item-2":4},"dc_ferlot_useitem":{"item-3":5},"l_achieve":["a",2],"l_perks":[1,2],"l_perks_credit":[10,20],"l_totems":[3],"l_totems_credit":[30],"l_totems_set":[2]}`
 	base64Payload := base64.RawURLEncoding.EncodeToString([]byte(payload))
 	urlPayload := url.QueryEscape(payload)
 
@@ -45,6 +45,9 @@ func TestParseSaveData_Base64AndUrlEncoded(t *testing.T) {
 		}
 		if sd.BlackBoxUsedFerrettaItem != 4 {
 			t.Fatalf("BlackBoxUsedFerrettaItem: got %d", sd.BlackBoxUsedFerrettaItem)
+		}
+		if sd.GetMedalTower != 7 {
+			t.Fatalf("GetMedalTower: got %d", sd.GetMedalTower)
 		}
 		if sd.DCBlackBoxShopUsed["item-1"] != 3 {
 			t.Fatalf("DCBlackBoxShopUsed: got %#v", sd.DCBlackBoxShopUsed)
