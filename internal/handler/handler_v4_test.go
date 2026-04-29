@@ -75,6 +75,9 @@ type stubRepo struct {
 
 	creditAllDistribution    *models.CreditAllDistributionResponse
 	creditAllDistributionErr error
+
+	bannedUsers map[string]bool
+	bannedErr   error
 }
 
 func (s *stubRepo) GetRankings(ctx context.Context, sortBy string, limit int) ([]models.GameData, error) {
@@ -115,6 +118,13 @@ func (s *stubRepo) GetCreditAllDistribution(ctx context.Context) (*models.Credit
 
 func (s *stubRepo) ExistsSameSave(ctx context.Context, userID string, playtime int64) (bool, error) {
 	return s.existsSameSave, s.existsErr
+}
+
+func (s *stubRepo) IsUserBanned(ctx context.Context, userID string) (bool, error) {
+	if s.bannedErr != nil {
+		return false, s.bannedErr
+	}
+	return s.bannedUsers[userID], nil
 }
 
 func (s *stubRepo) InsertSaveV4(ctx context.Context, sd *domain.SaveData) error {
@@ -200,6 +210,10 @@ func (r *flowRepo) GetSaveActivity(ctx context.Context, hours int) (*models.Save
 
 func (r *flowRepo) GetCreditAllDistribution(ctx context.Context) (*models.CreditAllDistributionResponse, error) {
 	return &models.CreditAllDistributionResponse{}, nil
+}
+
+func (r *flowRepo) IsUserBanned(ctx context.Context, userID string) (bool, error) {
+	return false, nil
 }
 
 func (r *flowRepo) ExistsSameSave(ctx context.Context, userID string, playtime int64) (bool, error) {

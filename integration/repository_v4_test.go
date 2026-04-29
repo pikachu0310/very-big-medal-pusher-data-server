@@ -92,6 +92,7 @@ func cleanupTables(t *testing.T, db *sqlx.DB) {
 		"v3_user_latest_save_data_achievements",
 		"v3_user_latest_save_data",
 		"v2_save_data",
+		"user_banned",
 	}
 
 	if _, err := db.Exec("SET FOREIGN_KEY_CHECKS=0"); err != nil {
@@ -395,6 +396,101 @@ func TestRepositoryV4_StatisticsAndAchievementRates(t *testing.T) {
 	rate := (*rates.AchievementRates)["ach-1"]
 	if rate.Count == nil || *rate.Count != 2 {
 		t.Fatalf("ach-1 count: got %#v", rate.Count)
+	}
+}
+
+func TestRepositoryV4_IsUserBanned(t *testing.T) {
+	db := setupDB(t)
+	repo := repository.New(db)
+
+	ctx := context.Background()
+	userID := "user-banned-1"
+
+	banned, err := repo.IsUserBanned(ctx, userID)
+	if err != nil {
+		t.Fatalf("is banned (none): %v", err)
+	}
+	if banned {
+		t.Fatalf("expected not banned for unknown user")
+	}
+
+	if _, err := db.Exec("INSERT INTO user_banned (user_id, note) VALUES (?, ?)", userID, "test"); err != nil {
+		t.Fatalf("insert ban: %v", err)
+	}
+	banned, err = repo.IsUserBanned(ctx, userID)
+	if err != nil {
+		t.Fatalf("is banned: %v", err)
+	}
+	if !banned {
+		t.Fatalf("expected banned after insert")
+	}
+
+	if _, err := db.Exec("UPDATE user_banned SET enabled = 0 WHERE user_id = ?", userID); err != nil {
+		t.Fatalf("disable ban: %v", err)
+	}
+	banned, err = repo.IsUserBanned(ctx, userID)
+	if err != nil {
+		t.Fatalf("is banned after disable: %v", err)
+	}
+	if banned {
+		t.Fatalf("expected not banned when enabled = 0")
+	}
+}
+
+func TestRepositoryV4_BannedUserForcesHideRecord(t *testing.T) {
+	db := setupDB(t)
+	repo := repository.New(db)
+
+	ctx := context.Background()
+	userID := "user-banned-save"
+
+	if _, err := db.Exec("INSERT INTO user_banned (user_id) VALUES (?)", userID); err != nil {
+		t.Fatalf("insert ban: %v", err)
+	}
+
+	sd := newSaveData(userID, 10, 100, []string{"ach-1"})
+	sd.HideRecord = 0 // クライアントが0を送ってきた想定
+
+	banned, err := repo.IsUserBanned(ctx, userID)
+	if err != nil {
+		t.Fatalf("is banned: %v", err)
+	}
+	if banned {
+		sd.HideRecord = 1
+	}
+	if err := repo.InsertSaveV4(ctx, sd); err != nil {
+		t.Fatalf("insert save: %v", err)
+	}
+
+	var hide int
+	if err := db.Get(&hide, "SELECT hide_record FROM v3_user_latest_save_data WHERE user_id = ?", userID); err != nil {
+		t.Fatalf("select hide_record: %v", err)
+	}
+	if hide != 1 {
+		t.Fatalf("hide_record after ban: got %d, want 1", hide)
+	}
+
+	// BAN無効化後の再セーブでhide_record=0が通ることを確認
+	if _, err := db.Exec("UPDATE user_banned SET enabled = 0 WHERE user_id = ?", userID); err != nil {
+		t.Fatalf("disable ban: %v", err)
+	}
+	sd2 := newSaveData(userID, 20, 200, []string{"ach-1"})
+	sd2.HideRecord = 0
+	banned, err = repo.IsUserBanned(ctx, userID)
+	if err != nil {
+		t.Fatalf("is banned after disable: %v", err)
+	}
+	if banned {
+		sd2.HideRecord = 1
+	}
+	if err := repo.InsertSaveV4(ctx, sd2); err != nil {
+		t.Fatalf("insert save2: %v", err)
+	}
+	if err := db.Get(&hide, "SELECT hide_record FROM v3_user_latest_save_data WHERE user_id = ?", userID); err != nil {
+		t.Fatalf("select hide_record after unban: %v", err)
+	}
+	if hide != 0 {
+		t.Fatalf("hide_record after unban: got %d, want 0", hide)
 	}
 }
 
