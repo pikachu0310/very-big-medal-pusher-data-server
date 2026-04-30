@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"runtime"
 
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/domain"
@@ -184,11 +183,9 @@ INSERT INTO v2_save_data (
 
 // GetLatestSave retrieves the latest SaveData for a user
 func (r *Repository) GetLatestSave(ctx context.Context, userID string) (*domain.SaveData, error) {
-	fmt.Printf("[REPO-DEBUG] GetLatestSave START - user_id=%s\n", userID)
 
 	var sd domain.SaveData
 	// 1) main row
-	fmt.Printf("[REPO-DEBUG] GetLatestSave FETCHING_MAIN_ROW - user_id=%s\n", userID)
 	err := r.db.GetContext(ctx, &sd, `
 SELECT * 
 FROM v2_save_data 
@@ -197,7 +194,6 @@ ORDER BY updated_at DESC
 LIMIT 1
 `, userID)
 	if err != nil {
-		fmt.Printf("[REPO-DEBUG] GetLatestSave MAIN_ROW_ERROR - user_id=%s, error=%v\n", userID, err)
 		return nil, err
 	}
 
@@ -542,8 +538,6 @@ ORDER BY placement_idx
 	if err := rows.Close(); err != nil {
 		return nil, err
 	}
-
-	fmt.Printf("[REPO-DEBUG] GetLatestSave SUCCESS - user_id=%s, achievements=%d, perks=%d, totems=%d\n", userID, len(sd.LAchieve), len(sd.LPerkLevels), len(sd.LTotemLevels))
 	return &sd, nil
 }
 
@@ -675,7 +669,6 @@ JOIN v2_save_data AS sd
 
 // GetStatisticsV3 returns the latest statistics for V3 (ランキング上限 500).
 func (r *Repository) GetStatisticsV3(ctx context.Context) (*models.StatisticsV3, error) {
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV3 START\n")
 	stats := &models.StatisticsV3{}
 
 	// ------ 共通ヘルパ (匿名関数) -----------------------------------------
@@ -702,7 +695,6 @@ func (r *Repository) GetStatisticsV3(ctx context.Context) (*models.StatisticsV3,
 	}
 
 	// 1) max_chain_orange (ball_id = '1')
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV3 CREATING_RANKING_1 - max_chain_orange\n")
 	if err := addRanking(&stats.MaxChainOrange, `
 SELECT
   ranked.user_id,
@@ -726,7 +718,6 @@ LIMIT 500
 	}
 
 	// 2) max_chain_rainbow (ball_id = '3')
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV3 CREATING_RANKING_2 - max_chain_rainbow\n")
 	if err := addRanking(&stats.MaxChainRainbow, `
 SELECT
   ranked.user_id,
@@ -838,11 +829,9 @@ LIMIT 500
 	}
 
 	// 中間地点でGCを促してメモリ使用量を安定化
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV3 MIDPOINT_GC_TRIGGER\n")
 	runtime.GC()
 
 	// 7) jacksp_startmax
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV3 CREATING_RANKING_7 - jacksp_startmax\n")
 	if err := addRanking(&stats.JackspStartmax, `
 SELECT
   ranked.user_id,
@@ -998,7 +987,6 @@ LIMIT 500
 	}
 
 	// 14) achievements_count
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV3 CREATING_RANKING_14 - achievements_count\n")
 	if err := addRanking(&stats.AchievementsCount, `
 SELECT
   sd.user_id,
@@ -1020,7 +1008,6 @@ LIMIT 500
 	}
 
 	// 最終段階でGCを促してメモリ使用量を安定化
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV3 FINAL_GC_TRIGGER\n")
 	runtime.GC()
 
 	// 15) total_medals（最新セーブの credit_all 合計）
@@ -1044,7 +1031,5 @@ JOIN v2_save_data AS sd
 		}
 		stats.TotalMedals = &totalMedals
 	}
-
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV3 SUCCESS - total_medals=%d\n", totalMedals)
 	return stats, nil
 }

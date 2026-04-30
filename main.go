@@ -4,11 +4,13 @@ import (
 	_ "embed"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	echolog "github.com/labstack/gommon/log"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/handler"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/migration"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/pkg/config"
@@ -49,6 +51,9 @@ const swaggerHTML = `<!doctype html>
 
 func main() {
 	e := echo.New()
+	e.Logger.SetOutput(os.Stdout)
+	e.Logger.SetLevel(echolog.INFO)
+	e.Logger.SetHeader("${time_rfc3339} ${level} ")
 
 	swagger, err := openapi.GetSwagger()
 	if err != nil {
@@ -60,16 +65,7 @@ func main() {
 
 	// middlewares
 	e.Use(middleware.Recover())
-	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
-		LogStatus:   true,
-		LogMethod:   true,
-		LogURI:      true,
-		LogRemoteIP: true,
-		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
-			c.Logger().Infof("status=%d method=%s uri=%s remote_ip=%s", v.Status, v.Method, v.URI, v.RemoteIP)
-			return nil
-		},
-	}))
+	e.Use(handler.RequestLogMiddleware(baseURL))
 	//e.Use(oapimiddleware.OapiRequestValidator(swagger))
 
 	// connect to database

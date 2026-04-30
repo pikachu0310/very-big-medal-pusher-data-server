@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"runtime"
 
 	"github.com/jmoiron/sqlx"
@@ -229,7 +228,6 @@ ON DUPLICATE KEY UPDATE
 
 // GetStatisticsV4 returns the latest statistics for V4 using v3_user_latest_save_data (ランキング上限 1000).
 func (r *Repository) GetStatisticsV4(ctx context.Context) (*models.StatisticsV4, error) {
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 START\n")
 	stats := &models.StatisticsV4{}
 
 	// ------ 共通ヘルパ (匿名関数) -----------------------------------------
@@ -256,7 +254,6 @@ func (r *Repository) GetStatisticsV4(ctx context.Context) (*models.StatisticsV4,
 	}
 
 	// 1) achievements_count
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_1 - achievements_count\n")
 	if err := addRanking(&stats.AchievementsCount, `
 SELECT
   user_id,
@@ -271,7 +268,6 @@ LIMIT 1000
 	}
 
 	// 2) jacksp_startmax
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_2 - jacksp_startmax\n")
 	if err := addRanking(&stats.JackspStartmax, `
 SELECT
   user_id,
@@ -286,7 +282,6 @@ LIMIT 1000
 	}
 
 	// 3) golden_palball_get
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_3 - golden_palball_get\n")
 	if err := addRanking(&stats.GoldenPalballGet, `
 SELECT
   user_id,
@@ -301,7 +296,6 @@ LIMIT 1000
 	}
 
 	// 4) jackfr_startmax
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_4 - jackfr_startmax\n")
 	if err := addRanking(&stats.JackfrStartmax, `
 SELECT
   user_id,
@@ -316,7 +310,6 @@ LIMIT 1000
 	}
 
 	// 5) jackfr_totalmax
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_5 - jackfr_totalmax\n")
 	if err := addRanking(&stats.JackfrTotalmax, `
 SELECT
   user_id,
@@ -331,7 +324,6 @@ LIMIT 1000
 	}
 
 	// 6) ferlot_lines
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_6 - ferlot_lines\n")
 	if err := addRanking(&stats.FerlotLines, `
 SELECT
   user_id,
@@ -346,7 +338,6 @@ LIMIT 1000
 	}
 
 	// 7) cpm_max
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_7 - cpm_max\n")
 	if err := addRanking(&stats.CpmMax, `
 SELECT
   user_id,
@@ -361,7 +352,6 @@ LIMIT 1000
 	}
 
 	// 8) max_chain_rainbow
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_8 - max_chain_rainbow\n")
 	if err := addRanking(&stats.MaxChainRainbow, `
 SELECT
   user_id,
@@ -376,7 +366,6 @@ LIMIT 1000
 	}
 
 	// 9) jack_totalmax_v2
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_9 - jack_totalmax_v2\n")
 	if err := addRanking(&stats.JackTotalmaxV2, `
 SELECT
   user_id,
@@ -391,7 +380,6 @@ LIMIT 1000
 	}
 
 	// 10) ult_combomax
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_10 - ult_combomax\n")
 	if err := addRanking(&stats.UltCombomax, `
 SELECT
   user_id,
@@ -406,7 +394,6 @@ LIMIT 1000
 	}
 
 	// 11) ult_totalmax_v2
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_11 - ult_totalmax_v2\n")
 	if err := addRanking(&stats.UltTotalmaxV2, `
 SELECT
   user_id,
@@ -421,7 +408,6 @@ LIMIT 1000
 	}
 
 	// 12) blackbox_total
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_12 - blackbox_total\n")
 	if err := addRanking(&stats.BlackboxTotal, `
 SELECT
   user_id,
@@ -436,7 +422,6 @@ LIMIT 1000
 	}
 
 	// 13) sp_use
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CREATING_RANKING_13 - sp_use\n")
 	if err := addRanking(&stats.SpUse, `
 SELECT
   user_id,
@@ -451,7 +436,6 @@ LIMIT 1000
 	}
 
 	// 10) total_medals（全ユーザーの合計）
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 CALCULATING_TOTAL_MEDALS\n")
 	var totalMedals int
 	{
 		q := `
@@ -467,10 +451,7 @@ WHERE hide_record = 0
 	}
 
 	// 最終段階でGCを促してメモリ使用量を安定化
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 FINAL_GC_TRIGGER\n")
 	runtime.GC()
-
-	fmt.Printf("[REPO-DEBUG] GetStatisticsV4 SUCCESS - total_medals=%d\n", totalMedals)
 	return stats, nil
 }
 

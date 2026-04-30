@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
-	"log"
 	"time"
 )
 
@@ -130,9 +129,6 @@ func (r *Repository) GetUserGameData(ctx context.Context, userId string) (*model
 }
 
 func (r *Repository) ExistsSameGameData(ctx context.Context, userId string, totalPlayTime int) (bool, error) {
-	// デバッグ用ログ
-	log.Printf("ExistsSameGameData: userId=%q, totalPlayTime=%d", userId, totalPlayTime)
-
 	// MySQL の EXISTS は 0 or 1 を返します
 	const q = `
       SELECT EXISTS(
