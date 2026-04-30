@@ -27,7 +27,7 @@ SELECT
   created_at,
   updated_at
 FROM v2_save_data
-WHERE user_id = ?
+WHERE user_id = ? AND disabled = 0
 `
 	args := []any{userID}
 	if before != nil {
@@ -100,7 +100,7 @@ func (r *Repository) GetAchievementUnlockHistory(ctx context.Context, userID str
 SELECT COUNT(*) 
 FROM v2_save_data_achievements a
 JOIN v2_save_data s ON a.save_id = s.id
-WHERE s.user_id = ?
+WHERE s.user_id = ? AND s.disabled = 0
 `
 	var total int
 	if err := r.db.GetContext(ctx, &total, totalQuery, userID); err != nil {
@@ -115,7 +115,7 @@ SELECT
   a.save_id
 FROM v2_save_data_achievements a
 JOIN v2_save_data s ON a.save_id = s.id
-WHERE s.user_id = ?
+WHERE s.user_id = ? AND s.disabled = 0
 ORDER BY s.updated_at ASC
 LIMIT ?
 `
@@ -157,6 +157,7 @@ WITH latest_per_user_day AS (
     MAX(updated_at) AS latest_updated_at
   FROM v2_save_data
   WHERE updated_at >= DATE_SUB(CURRENT_DATE, INTERVAL ? DAY)
+    AND disabled = 0
   GROUP BY user_id, DATE(updated_at)
 )
 SELECT
@@ -213,6 +214,7 @@ SELECT
   COUNT(DISTINCT user_id) AS unique_users
 FROM v2_save_data
 WHERE updated_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL ? HOUR)
+  AND disabled = 0
 GROUP BY hour_start
 ORDER BY hour_start ASC
 `
