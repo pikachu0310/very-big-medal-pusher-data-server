@@ -9,14 +9,17 @@ import (
 )
 
 func RequestLogMiddleware(baseURL string) echo.MiddlewareFunc {
-	statisticsPath := strings.TrimRight(baseURL, "/") + "/v4/statistics"
+	skippedPaths := map[string]struct{}{
+		strings.TrimRight(baseURL, "/") + "/ping":          {},
+		strings.TrimRight(baseURL, "/") + "/v4/statistics": {},
+	}
 
 	return middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogStatus:    true,
 		LogRemoteIP:  true,
 		LogUserAgent: true,
 		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
-			if c.Request().URL.Path == statisticsPath || c.Path() == statisticsPath {
+			if shouldSkipRequestLog(c, skippedPaths) {
 				return nil
 			}
 
@@ -35,6 +38,16 @@ func RequestLogMiddleware(baseURL string) echo.MiddlewareFunc {
 			return nil
 		},
 	})
+}
+
+func shouldSkipRequestLog(c echo.Context, skippedPaths map[string]struct{}) bool {
+	if _, ok := skippedPaths[c.Request().URL.Path]; ok {
+		return true
+	}
+	if _, ok := skippedPaths[c.Path()]; ok {
+		return true
+	}
+	return false
 }
 
 func formatAPIPath(baseURL string, c echo.Context) string {

@@ -59,3 +59,24 @@ func TestRequestLogMiddlewareSkipsV4Statistics(t *testing.T) {
 		t.Fatalf("expected no log output for /v4/statistics, got: %s", logs.String())
 	}
 }
+
+func TestRequestLogMiddlewareSkipsPing(t *testing.T) {
+	var logs bytes.Buffer
+	e := echo.New()
+	e.Logger.SetOutput(&logs)
+	e.Logger.SetLevel(echolog.INFO)
+	e.Logger.SetHeader("")
+	e.Use(RequestLogMiddleware("/api"))
+	e.GET("/api/ping", func(c echo.Context) error {
+		return c.String(http.StatusOK, "pong")
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/ping", nil)
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+
+	if logs.String() != "" {
+		t.Fatalf("expected no log output for /ping, got: %s", logs.String())
+	}
+}
