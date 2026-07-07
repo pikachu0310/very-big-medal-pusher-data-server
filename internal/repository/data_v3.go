@@ -2,12 +2,16 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"runtime"
 
+	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/domain"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
 )
+
+var ErrDuplicateSave = errors.New("duplicate save data")
 
 // InsertSaveV4 persists a SaveData and its child tables, and updates v3_user_latest_save_data
 func (r *Repository) InsertSaveV4(ctx context.Context, sd *domain.SaveData) error {
@@ -71,6 +75,10 @@ INSERT INTO v2_save_data (
 		sd.FirstBoot, sd.LastSave, sd.Playtime,
 	)
 	if err != nil {
+		var mysqlErr *mysql.MySQLError
+		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
+			return ErrDuplicateSave
+		}
 		return err
 	}
 	saveID, err := res.LastInsertId()

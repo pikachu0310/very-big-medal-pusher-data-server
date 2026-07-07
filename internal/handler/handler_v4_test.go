@@ -17,6 +17,7 @@ import (
 	"github.com/labstack/echo/v4"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/domain"
+	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/repository"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
 )
@@ -329,6 +330,32 @@ func TestGetV4Data_Duplicate(t *testing.T) {
 	}
 	if repo.insertedSave != nil {
 		t.Fatalf("InsertSaveV4 should not be called on duplicate")
+	}
+}
+
+func TestGetV4Data_DuplicateFromInsert(t *testing.T) {
+	setTestSecrets(t)
+	repo := &stubRepo{insertErr: repository.ErrDuplicateSave}
+	e := newTestServer(t, repo)
+
+	userID := "user-1"
+	payload := `{"playtime":100}`
+	data := base64.RawURLEncoding.EncodeToString([]byte(payload))
+	sig := makeV4SaveSig(userID, userID, data)
+
+	q := url.Values{}
+	q.Set("data", data)
+	q.Set("user_id", userID)
+	q.Set("sig", sig)
+	req := httptest.NewRequest(http.MethodGet, "/v4/data?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusConflict {
+		t.Fatalf("status: got %d body=%s", rec.Code, rec.Body.String())
+	}
+	if repo.insertedSave == nil {
+		t.Fatalf("InsertSaveV4 should have been called")
 	}
 }
 

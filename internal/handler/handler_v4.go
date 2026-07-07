@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/domain"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/pkg/config"
+	"github.com/pikachu0310/very-big-medal-pusher-data-server/internal/repository"
 	"github.com/pikachu0310/very-big-medal-pusher-data-server/openapi/models"
 )
 
@@ -62,6 +63,9 @@ func (h *Handler) GetV4Data(ctx echo.Context, params models.GetV4DataParams) err
 	// 保存（v2_save_data に保存し、v3_user_latest_save_data を更新）
 	sd.UserId = userID
 	if err := h.repo.InsertSaveV4(ctx.Request().Context(), sd); err != nil {
+		if errors.Is(err, repository.ErrDuplicateSave) {
+			return ctx.String(http.StatusConflict, "duplicate save data")
+		}
 		return ctx.String(http.StatusInternalServerError, err.Error())
 	}
 
