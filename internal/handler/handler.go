@@ -51,6 +51,7 @@ type Repository interface {
 	GetCreditAllDistribution(ctx context.Context) (*models.CreditAllDistributionResponse, error)
 
 	ExistsSameSave(ctx context.Context, userID string, playtime int64) (bool, error)
+	IsUserBanned(ctx context.Context, userID string) (bool, error)
 	InsertSaveV4(ctx context.Context, sd *domain.SaveData) error
 	GetLatestSave(ctx context.Context, userID string) (*domain.SaveData, error)
 	GetSaveHistory(ctx context.Context, userID string, limit int, before *time.Time) ([]models.SaveHistoryEntry, bool, error)

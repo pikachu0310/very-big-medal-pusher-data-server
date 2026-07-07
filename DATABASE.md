@@ -64,6 +64,7 @@ docker exec myapp_db mariadb -u root -ppass -e "SHOW DATABASES;"
 | `v2_save_data_*` | v2 セーブデータの詳細 (実績/各種詳細カウンタ等) | すべて `v2_save_data.id` に FK |
 | `v3_user_latest_save_data` | 最新セーブのサマリ | v3/v4 API のランキング高速化 |
 | `v3_user_latest_save_data_achievements` | 最新セーブの実績一覧 | v3 用キャッシュ |
+| `user_banned` | ランキング除外Userテーブル |
 
 ### 3.2 テーブルサイズ（`SHOW TABLE STATUS` 抜粋）
 
@@ -515,6 +516,20 @@ CREATE TABLE `v2_save_data_ferlot_useitem` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 ```
 
+### 5.20 user_banned
+
+```sql
+CREATE TABLE `user_banned` (
+  `user_id` varchar(255) NOT NULL,
+  `enabled` tinyint(1) NOT NULL DEFAULT 1,
+  `note` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`user_id`),
+  KEY `idx_user_banned_enabled` (`enabled`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
 ---
 
 ## 6. よく使うクエリ
@@ -536,6 +551,13 @@ SELECT * FROM v3_user_latest_save_data ORDER BY created_at DESC LIMIT 10;
 -- マイグレーション確認
 SELECT * FROM goose_db_version ORDER BY version_id;
 SELECT MAX(version_id) AS latest_version FROM goose_db_version;
+
+-- シャドウBAN管理
+INSERT INTO user_banned (user_id, note) VALUES ('xxxxxxxx', 'reason memo');
+UPDATE user_banned SET enabled = 0 WHERE user_id = 'xxxxxxxx';   -- 無効化
+UPDATE user_banned SET enabled = 1 WHERE user_id = 'xxxxxxxx';   -- 有効化
+DELETE FROM user_banned WHERE user_id = 'xxxxxxxx';              -- 削除
+SELECT * FROM user_banned WHERE enabled = 1;                     -- BANユーザーの一覧
 ```
 
 ---
