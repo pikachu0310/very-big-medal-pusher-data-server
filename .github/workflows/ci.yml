@@ -11,7 +11,7 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v6
         with:
           go-version-file: ./go.mod
@@ -24,7 +24,7 @@ jobs:
     needs:
       - build
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v6
         with:
           go-version-file: ./go.mod
@@ -39,7 +39,7 @@ jobs:
     needs:
       - build
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v6
         with:
           go-version-file: ./go.mod
@@ -76,7 +76,7 @@ jobs:
       DB_NAME: app_test
       DB_NET: tcp
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v6
         with:
           go-version-file: ./go.mod
@@ -98,7 +98,7 @@ jobs:
       - name: Dependabot metadata
         uses: dependabot/fetch-metadata@v2
         id: metadata
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Enable automerge
         if: |
           steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
