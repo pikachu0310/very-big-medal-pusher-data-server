@@ -189,7 +189,7 @@ func (r *Repository) GetLatestSave(ctx context.Context, userID string) (*domain.
 	err := r.db.GetContext(ctx, &sd, `
 SELECT * 
 FROM v2_save_data 
-WHERE user_id = ? 
+WHERE user_id = ? AND disabled = 0 
 ORDER BY updated_at DESC 
 LIMIT 1
 `, userID)

@@ -201,6 +201,7 @@ CREATE TABLE `v2_save_data` (
   `blackbox_total` bigint(20) NOT NULL DEFAULT 0,
   `sp_use` bigint(20) NOT NULL DEFAULT 0,
   `hide_record` int(11) NOT NULL DEFAULT 0,
+  `disabled` tinyint(4) NOT NULL DEFAULT 0,
   `cpm_max` double NOT NULL DEFAULT 0,
   `palball_get` int(11) NOT NULL DEFAULT 0,
   `pallot_lot_t0` int(11) NOT NULL DEFAULT 0,
@@ -561,7 +562,28 @@ SELECT MAX(version_id) AS latest_version FROM goose_db_version;
 
 ---
 
-## 8. メモ
+## 8. 不正データ対応手順
+
+`v2_save_data.disabled`フラグは、不正データをDELETEせずランキング・ロード・統計から除外する
+
+### 手順
+
+1. 該当セーブを無効化(例; 総獲得がおかしいデータを無効化)
+
+   ```sql
+   UPDATE v2_save_data SET disabled = 1 WHERE UserId = ? AND credit_all > 100000000000000000;
+   ```
+
+2. v3 ランキング/統計キャッシュから当該ユーザーの行を削除
+
+   ```sql
+   DELETE FROM v3_user_latest_save_data WHERE user_id = ?;
+   DELETE FROM v3_user_latest_save_data_achievements WHERE user_id = ?;
+   ```
+
+---
+
+## 9. メモ
 - メイン API は v2 以降を参照する想定で、`v1_game_data` は互換維持のみ。
 - `v3_user_latest_*` は集計結果のキャッシュであり、バックフィルが必要な場合はマイグレーション 16〜21 を参照。
 - すべて InnoDB かつ utf8mb4 系文字セットで統一。新規テーブルも同方針で作成する。

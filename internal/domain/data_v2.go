@@ -50,6 +50,7 @@ type SaveData struct {
 	BlackBoxTotal               int64     `db:"blackbox_total"`
 	SpUse                       int64     `db:"sp_use"`
 	HideRecord                  int       `db:"hide_record"`
+	Disabled                    int       `db:"disabled"`
 	CpMMax                      float64   `db:"cpm_max"`
 	JackTotalMaxV2              int64     `db:"jack_totalmax_v2"`
 	UltimateTotalMaxV2          int64     `db:"ult_totalmax_v2"`
