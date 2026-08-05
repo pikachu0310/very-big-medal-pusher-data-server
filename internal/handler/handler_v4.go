@@ -61,6 +61,16 @@ func (h *Handler) GetV4Data(ctx echo.Context, params models.GetV4DataParams) err
 
 	// 保存（v2_save_data に保存し、v3_user_latest_save_data を更新）
 	sd.UserId = userID
+
+	// シャドウバン (BANリストにヒットしたuser_idはhide_recordを1に強制)
+	banned, err := h.repo.IsUserBanned(ctx.Request().Context(), userID)
+	if err != nil {
+		return ctx.String(http.StatusInternalServerError, err.Error())
+	}
+	if banned {
+		sd.HideRecord = 1
+	}
+
 	if err := h.repo.InsertSaveV4(ctx.Request().Context(), sd); err != nil {
 		return ctx.String(http.StatusInternalServerError, err.Error())
 	}
